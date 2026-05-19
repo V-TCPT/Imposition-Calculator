@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TEAM Imposition Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #1a1612;
+    --paper:      #f4efe6;
+    --paper-2:    #ebe4d6;
+    --rule:       #1a161226;
+    --rule-bold:  #1a1612;
+    --accent:     #c8472e;   /* press red */
+    --accent-2:   #2e5d8b;   /* press blue */
+    --good:       #3d7a4a;
+    --warn:       #b8761c;
+    --sheet-fill: #ffffff;
+    --doc-fill:   #2e5d8b1a;
+    --doc-stroke: #2e5d8b;
+    --waste-fill: #c8472e0d;
+    --grain-color:#1a161266;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 14px;
+    line-height: 1.45;
+    overflow: hidden;
+  }
+  @media (max-width: 860px) {
+    html, body { overflow: auto; }
+  }
+
+  /* paper grain texture */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 20% 30%, #00000008 0, transparent 50%),
+      radial-gradient(circle at 80% 70%, #00000008 0, transparent 50%);
+    z-index: 0;
+  }
+
+  html, body { height: 100%; }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 16px 20px 16px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ---------- HEADER ---------- */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .logo-frame {
+    display: flex;
+    align-items: center;
+    line-height: 0;
+  }
+  .logo-frame img {
+    display: block;
+    height: 48px;
+    width: auto;
+  }
+  @media (max-width: 520px) {
+    .logo-frame img { height: 40px; }
+  }
+  .title-block h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(22px, 3.2vw, 34px);
+    line-height: 0.95;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .title-block h1 em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .subtitle {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .contact {
+    text-align: right;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    line-height: 1.45;
+  }
+  .contact a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color 0.12s ease, color 0.12s ease;
+  }
+  .contact a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  @media (max-width: 640px) {
+    .contact { text-align: left; }
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 18px;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  aside {
+    overflow: auto;
+    min-height: 0;
+  }
+
+  /* ---------- CONTROLS ---------- */
+  .panel {
+    background: var(--paper-2);
+    border: 1px solid var(--rule-bold);
+    padding: 14px 14px 12px;
+    position: relative;
+  }
+  .panel::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -9px;
+    left: 14px;
+    background: var(--paper);
+    padding: 0 8px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .field { margin-bottom: 10px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .row .x {
+    text-align: center;
+    opacity: 0.4;
+    font-size: 12px;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    padding: 6px 8px;
+    background: var(--sheet-fill);
+    border: 1px solid var(--rule-bold);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    border-radius: 0;
+    -moz-appearance: textfield;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  select {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%231a1612' d='M0 0h10L5 6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+  input:focus, select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .preset-row {
+    /* preset chips removed — left blank for any future use */
+    display: none;
+  }
+
+  /* grain direction toggle */
+  .grain-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--rule-bold);
+  }
+  .grain-toggle label {
+    margin: 0;
+    padding: 8px 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    background: var(--sheet-fill);
+    border-right: 1px solid var(--rule-bold);
+    transition: all 0.12s ease;
+  }
+  .grain-toggle label:last-child { border-right: none; }
+  .grain-toggle input { display: none; }
+  .grain-toggle input:checked + label {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* layout mode pills */
+  .mode-pills {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--rule-bold);
+  }
+  .mode-pills label {
+    margin: 0;
+    padding: 9px 6px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--sheet-fill);
+    border-right: 1px solid var(--rule-bold);
+    transition: all 0.12s ease;
+  }
+  .mode-pills label:last-child { border-right: none; }
+  .mode-pills input { display: none; }
+  .mode-pills input:checked + label {
+    background: var(--accent);
+    color: var(--paper);
+  }
+
+  /* ---------- RESULTS ---------- */
+  .results {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--rule-bold);
+    margin-bottom: 14px;
+    background: var(--paper-2);
+    flex-shrink: 0;
+  }
+  @media (max-width: 640px) {
+    .results { grid-template-columns: repeat(2, 1fr); }
+  }
+  .stat {
+    padding: 10px 14px;
+    border-right: 1px solid var(--rule-bold);
+    position: relative;
+  }
+  .stat:last-child { border-right: none; }
+  @media (max-width: 640px) {
+    .stat:nth-child(2) { border-right: none; }
+    .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--rule-bold); }
+  }
+  .stat .lbl {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 2px;
+  }
+  .stat .val {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1;
+  }
+  .stat .val .unit {
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    font-size: 12px;
+    opacity: 0.55;
+    margin-left: 4px;
+  }
+  .stat.featured .val { color: var(--accent); }
+  .stat .sub {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-top: 2px;
+  }
+
+  /* ---------- VISUALIZER ---------- */
+  .viz-wrap {
+    background: var(--paper-2);
+    border: 1px solid var(--rule-bold);
+    padding: 14px 18px 16px;
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .viz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .viz-title {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .viz-controls {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .viz-wrap .mode-pills {
+    border: 1px solid var(--rule-bold);
+  }
+  .viz-wrap .mode-pills label {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--rule-bold);
+  }
+  .legend-swatch.doc { background: var(--doc-fill); border-color: var(--doc-stroke); }
+  .legend-swatch.waste { background: var(--waste-fill); border-color: var(--accent); }
+  .legend-swatch.grain {
+    background: repeating-linear-gradient(
+      90deg, var(--grain-color) 0 1px, transparent 1px 4px
+    );
+  }
+
+  .canvas-box {
+    background: var(--paper);
+    border: 1px dashed var(--rule-bold);
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  svg.layout {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* alternate-layout callout */
+  .alt-note {
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: var(--paper);
+    border-left: 3px solid var(--accent);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .alt-note b { color: var(--accent); }
+  .alt-note .hint {
+    opacity: 0.7;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* footer note */
+  .footer-note {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule);
+    font-size: 10px;
+    opacity: 0.5;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+
+  /* helpers */
+  .inline-help {
+    font-size: 10px;
+    opacity: 0.55;
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo-frame">
+        <img src="data:image/png;base64,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" alt="TEAM Concept Printing" />
+      </div>
+      <div class="title-block">
+        <h1>Imposition <em>Calculator</em></h1>
+      </div>
+    </div>
+    <div class="contact">
+      <a href="https://www.teamconceptprinting.com" target="_blank" rel="noopener">www.teamconceptprinting.com</a>
+      <div>540 Tower Boulevard</div>
+      <div>Carol Stream, Illinois 60188</div>
+      <div>630-653-8326</div>
+      <a href="mailto:sales@teamconceptprinting.com">sales@teamconceptprinting.com</a>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ============ CONTROLS ============ -->
+    <aside>
+      <div class="panel" data-label="Sheet">
+        <div class="field">
+          <label>Press sheet (W × H)</label>
+          <div class="row">
+            <input type="number" id="sheetW" value="19" min="0.1" step="0.125" />
+            <span class="x">×</span>
+            <input type="number" id="sheetH" value="13" min="0.1" step="0.125" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Grain direction</label>
+          <div class="grain-toggle">
+            <input type="radio" name="grain" id="grainLong" value="long" checked />
+            <label for="grainLong">↔ Long (W)</label>
+            <input type="radio" name="grain" id="grainShort" value="short" />
+            <label for="grainShort">↕ Short (H)</label>
+          </div>
+          <div class="inline-help">Grain runs parallel to this dimension.</div>
+        </div>
+        <div class="field">
+          <label>Gripper margin</label>
+          <input type="number" id="margin" value="0.25" min="0" step="0.0625" />
+          <div class="inline-help">Top &amp; bottom edge of sheet reserved for press grip / trim.</div>
+        </div>
+        <div class="field">
+          <label>Side guide</label>
+          <input type="number" id="sideGuide" value="0.25" min="0" step="0.0625" />
+          <div class="inline-help">Left &amp; right edge of sheet reserved for side-guide registration.</div>
+        </div>
+      </div>
+
+      <div style="height: 14px"></div>
+
+      <div class="panel" data-label="Document">
+        <div class="field">
+          <label>Finished piece (W × H)</label>
+          <div class="row">
+            <input type="number" id="docW" value="8.5" min="0.1" step="0.125" />
+            <span class="x">×</span>
+            <input type="number" id="docH" value="5.5" min="0.1" step="0.125" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Gutter / bleed</label>
+          <input type="number" id="gutter" value="0.125" min="0" step="0.0625" />
+          <div class="inline-help">Space between pieces (allows for bleed &amp; trim).</div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ============ OUTPUT ============ -->
+    <main style="display: flex; flex-direction: column; min-height: 0;">
+      <div class="results">
+        <div class="stat featured">
+          <div class="lbl">N-Up</div>
+          <div class="val" id="r-nup">—</div>
+          <div class="sub" id="r-nup-sub">pieces per sheet</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Yield</div>
+          <div class="val" id="r-yield">—<span class="unit">%</span></div>
+          <div class="sub">sheet utilization</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Waste</div>
+          <div class="val" id="r-waste">—<span class="unit">%</span></div>
+          <div class="sub" id="r-waste-sub">unused area</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Grain</div>
+          <div class="val" id="r-grain" style="font-size: 18px; padding-top: 6px;">—</div>
+          <div class="sub" id="r-grain-sub">on finished piece</div>
+        </div>
+      </div>
+
+      <div class="viz-wrap">
+        <div class="viz-header">
+          <div class="viz-title">Sheet Visualizer</div>
+          <div class="viz-controls">
+            <div class="mode-pills" title="Layout orientation">
+              <input type="radio" name="mode" id="modeBest" value="best" checked />
+              <label for="modeBest">Best fit</label>
+              <input type="radio" name="mode" id="modeStraight" value="straight" />
+              <label for="modeStraight">Straight</label>
+              <input type="radio" name="mode" id="modeDutch" value="dutch" />
+              <label for="modeDutch">Dutch cut</label>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-swatch doc"></div>Piece</div>
+              <div class="legend-item"><div class="legend-swatch waste"></div>Waste</div>
+              <div class="legend-item"><div class="legend-swatch grain"></div>Grain</div>
+            </div>
+          </div>
+        </div>
+        <div class="canvas-box">
+          <svg class="layout" id="svg" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div class="alt-note" id="alt-note" style="display: none;"></div>
+      </div>
+
+      <div class="footer-note">
+        All dimensions in inches. <b>Best fit</b> auto-selects the higher-yield layout. <b>Straight</b> keeps all pieces in one orientation. <b>Dutch cut</b> mixes orientations to fill leftover space — verify grain-critical jobs before running.
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<script>
+  // ============ DOM ============
+  const $ = (id) => document.getElementById(id);
+  const sheetW = $('sheetW'), sheetH = $('sheetH');
+  const docW = $('docW'), docH = $('docH');
+  const gutter = $('gutter'), margin = $('margin'), sideGuide = $('sideGuide');
+  const svg = $('svg');
+
+  // ============ CORE MATH ============
+  // Given a usable area (uw × uh), piece (pw × ph), and gutter g,
+  // return how many fit in a grid + the total area used.
+  function gridFit(uw, uh, pw, ph, g) {
+    if (pw <= 0 || ph <= 0) return { count: 0, cols: 0, rows: 0, blockW: 0, blockH: 0 };
+    // n pieces take: n*p + (n-1)*g  ≤ u   →   n ≤ (u + g) / (p + g)
+    const cols = Math.max(0, Math.floor((uw + g) / (pw + g)));
+    const rows = Math.max(0, Math.floor((uh + g) / (ph + g)));
+    const count = cols * rows;
+    const blockW = cols > 0 ? cols * pw + (cols - 1) * g : 0;
+    const blockH = rows > 0 ? rows * ph + (rows - 1) * g : 0;
+    return { count, cols, rows, blockW, blockH };
+  }
+
+  // Straight layouts: try both orientations of the piece, pick higher count.
+  function straightLayout(uw, uh, pw, ph, g) {
+    const a = gridFit(uw, uh, pw, ph, g);
+    const b = gridFit(uw, uh, ph, pw, g);
+    const aChosen = a.count >= b.count;
+    const chosen = aChosen ? a : b;
+    return {
+      count: chosen.count,
+      blocks: chosen.count > 0 ? [{
+        x: 0, y: 0,
+        cols: chosen.cols, rows: chosen.rows,
+        pw: aChosen ? pw : ph,
+        ph: aChosen ? ph : pw,
+        rotated: !aChosen,
+        blockW: chosen.blockW,
+        blockH: chosen.blockH,
+      }] : []
+    };
+  }
+
+  // Dutch-cut: place a primary block in one orientation, then try to fill
+  // the leftover strip (right of block, and below block) with pieces in
+  // the OTHER orientation. Recurse one level so we can also fill the
+  // remaining corner. Try all four arrangements and pick best.
+  function dutchLayout(uw, uh, pw, ph, g) {
+    const arrangements = [];
+
+    // Try each primary orientation
+    for (const primary of [[pw, ph, false], [ph, pw, true]]) {
+      const [ppw, pph, pRot] = primary;
+      const main = gridFit(uw, uh, ppw, pph, g);
+      if (main.count === 0) continue;
+
+      const secondary = [primary[2] ? [pw, ph, false] : [ph, pw, true]][0];
+      const [spw, sph, sRot] = secondary;
+
+      // Strip to the RIGHT of main block
+      const rightX  = main.blockW + g;
+      const rightW  = uw - rightX;
+      const rightH  = uh;
+      let right = { count: 0 };
+      if (rightW > 0) right = gridFit(rightW, rightH, spw, sph, g);
+
+      // Strip BELOW main block (only the width of main block, since right strip handled)
+      const belowX  = 0;
+      const belowY  = main.blockH + g;
+      const belowW  = main.blockW;
+      const belowH  = uh - belowY;
+      let below = { count: 0 };
+      if (belowH > 0) below = gridFit(belowW, belowH, spw, sph, g);
+
+      const total = main.count + right.count + below.count;
+      const blocks = [{
+        x: 0, y: 0,
+        cols: main.cols, rows: main.rows,
+        pw: ppw, ph: pph,
+        rotated: pRot,
+        blockW: main.blockW, blockH: main.blockH,
+      }];
+      if (right.count > 0) {
+        blocks.push({
+          x: rightX, y: 0,
+          cols: right.cols, rows: right.rows,
+          pw: spw, ph: sph,
+          rotated: sRot,
+          blockW: right.blockW, blockH: right.blockH,
+        });
+      }
+      if (below.count > 0) {
+        blocks.push({
+          x: belowX, y: belowY,
+          cols: below.cols, rows: below.rows,
+          pw: spw, ph: sph,
+          rotated: sRot,
+          blockW: below.blockW, blockH: below.blockH,
+        });
+      }
+      arrangements.push({ count: total, blocks });
+    }
+
+    if (arrangements.length === 0) return { count: 0, blocks: [] };
+    arrangements.sort((a, b) => b.count - a.count);
+    return arrangements[0];
+  }
+
+  // ============ COMPUTE ============
+  function compute() {
+    const SW = +sheetW.value || 0;
+    const SH = +sheetH.value || 0;
+    const PW = +docW.value || 0;
+    const PH = +docH.value || 0;
+    const G  = Math.max(0, +gutter.value || 0);
+    const M  = Math.max(0, +margin.value || 0);     // gripper, top + bottom
+    const SG = Math.max(0, +sideGuide.value || 0);  // side guide, left + right
+    const grain = document.querySelector('input[name="grain"]:checked').value;
+    const mode  = document.querySelector('input[name="mode"]:checked').value;
+
+    const uw = Math.max(0, SW - 2 * SG);
+    const uh = Math.max(0, SH - 2 * M);
+
+    let chosen;
+    let altInfo = null;
+
+    if (mode === 'straight') {
+      chosen = straightLayout(uw, uh, PW, PH, G);
+    } else if (mode === 'dutch') {
+      chosen = dutchLayout(uw, uh, PW, PH, G);
+    } else {
+      // best fit: compare straight vs dutch, pick winner; report the other
+      const s = straightLayout(uw, uh, PW, PH, G);
+      const d = dutchLayout(uw, uh, PW, PH, G);
+      if (d.count > s.count) {
+        chosen = d;
+        altInfo = { type: 'dutch-wins', diff: d.count - s.count, straight: s.count };
+      } else {
+        chosen = s;
+        if (d.count === s.count && d.blocks.length > 1) {
+          altInfo = { type: 'tie', count: s.count };
+        }
+      }
+    }
+
+    // ----- update results -----
+    $('r-nup').textContent = chosen.count;
+    $('r-nup-sub').textContent = chosen.count === 1 ? 'piece per sheet' : 'pieces per sheet';
+
+    const sheetArea = SW * SH;
+    const usedArea  = chosen.count * PW * PH;
+    const yield_    = sheetArea > 0 ? (usedArea / sheetArea) * 100 : 0;
+    const wasteArea = Math.max(0, sheetArea - usedArea);
+    const wastePct  = sheetArea > 0 ? (wasteArea / sheetArea) * 100 : 0;
+
+    $('r-yield').innerHTML = yield_.toFixed(1) + '<span class="unit">%</span>';
+    $('r-waste').innerHTML = wastePct.toFixed(1) + '<span class="unit">%</span>';
+    $('r-waste-sub').textContent = 'unused area';
+
+    // grain analysis: grain runs along sheet's W (long) or H (short)
+    // for each block, the piece's "actual" W and H on sheet:
+    //   block.pw = piece dim along sheet-W,  block.ph = piece dim along sheet-H
+    // grain runs along sheet-W if grain==='long', else along sheet-H
+    // a piece's "long edge" is max(PW, PH). cross-grain = grain perpendicular to long edge.
+    if (chosen.blocks.length === 0) {
+      $('r-grain').textContent = '—';
+      $('r-grain-sub').textContent = 'no pieces fit';
+    } else {
+      let withGrain = 0, crossGrain = 0;
+      for (const b of chosen.blocks) {
+        // direction the piece's "natural long edge" points on the sheet:
+        const longEdgeAlongSheetW = b.pw >= b.ph;
+        const grainAlongSheetW = grain === 'long';
+        const inGrain = (longEdgeAlongSheetW === grainAlongSheetW);
+        const pieces = b.cols * b.rows;
+        if (inGrain) withGrain += pieces;
+        else crossGrain += pieces;
+      }
+      if (crossGrain === 0) {
+        $('r-grain').textContent = 'With grain';
+        $('r-grain-sub').textContent = `${withGrain} pcs aligned`;
+      } else if (withGrain === 0) {
+        $('r-grain').textContent = 'Cross grain';
+        $('r-grain-sub').textContent = `${crossGrain} pcs across grain`;
+      } else {
+        $('r-grain').textContent = 'Mixed';
+        $('r-grain-sub').textContent = `${withGrain} with · ${crossGrain} cross`;
+      }
+    }
+
+    // ----- alt-layout note -----
+    const note = $('alt-note');
+    if (altInfo && altInfo.type === 'dutch-wins') {
+      note.style.display = 'block';
+      note.innerHTML = `<b>Dutch cut yields +${altInfo.diff} piece${altInfo.diff > 1 ? 's' : ''}</b> over a straight layout (${altInfo.straight} → ${chosen.count}).<div class="hint">Cross-grain pieces shown rotated. Confirm grain isn't critical for this job before approving.</div>`;
+    } else if (mode === 'best' && chosen.blocks.length > 1) {
+      note.style.display = 'block';
+      note.innerHTML = `<b>Dutch-cut layout in use.</b><div class="hint">Mixed orientation — some pieces will be cross-grain.</div>`;
+    } else {
+      note.style.display = 'none';
+    }
+
+    // ----- render SVG -----
+    render(SW, SH, M, SG, G, chosen.blocks, grain);
+  }
+
+  // ============ RENDER ============
+  function render(SW, SH, M, SG, G, blocks, grain) {
+    if (SW <= 0 || SH <= 0) {
+      svg.innerHTML = '';
+      return;
+    }
+    // viewbox padding
+    const pad = Math.max(SW, SH) * 0.04;
+    const vbW = SW + pad * 2;
+    const vbH = SH + pad * 2;
+    svg.setAttribute('viewBox', `0 0 ${vbW} ${vbH}`);
+
+    const stroke = Math.max(SW, SH) * 0.004;
+    const tinyStroke = stroke * 0.7;
+
+    let out = '';
+
+    // shadow
+    out += `<rect x="${pad + SW * 0.005}" y="${pad + SW * 0.005}" width="${SW}" height="${SH}" fill="#1a161220" />`;
+
+    // sheet
+    out += `<rect x="${pad}" y="${pad}" width="${SW}" height="${SH}" fill="var(--sheet-fill)" stroke="var(--rule-bold)" stroke-width="${stroke}" />`;
+
+    // grain pattern across the WHOLE sheet
+    const grainStep = Math.max(SW, SH) * 0.025;
+    const grainStroke = tinyStroke * 0.8;
+    if (grain === 'long') {
+      for (let y = pad + grainStep; y < pad + SH; y += grainStep) {
+        out += `<line x1="${pad}" y1="${y}" x2="${pad + SW}" y2="${y}" stroke="var(--grain-color)" stroke-width="${grainStroke}" stroke-dasharray="${grainStep * 0.2} ${grainStep * 0.15}" opacity="0.35" />`;
+      }
+    } else {
+      for (let x = pad + grainStep; x < pad + SW; x += grainStep) {
+        out += `<line x1="${x}" y1="${pad}" x2="${x}" y2="${pad + SH}" stroke="var(--grain-color)" stroke-width="${grainStroke}" stroke-dasharray="${grainStep * 0.2} ${grainStep * 0.15}" opacity="0.35" />`;
+      }
+    }
+
+    // usable area outline (gripper top/bottom, side-guide left/right)
+    const uw = Math.max(0, SW - 2 * SG);
+    const uh = Math.max(0, SH - 2 * M);
+    if ((M > 0 || SG > 0) && uw > 0 && uh > 0) {
+      out += `<rect x="${pad + SG}" y="${pad + M}" width="${uw}" height="${uh}" fill="none" stroke="var(--rule-bold)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 2}" opacity="0.35" />`;
+    }
+
+    // compute bounding box of the entire layout (in usable-area coords)
+    // so we can center it within the usable area
+    let bbMinX = Infinity, bbMinY = Infinity, bbMaxX = -Infinity, bbMaxY = -Infinity;
+    for (const b of blocks) {
+      if (b.cols === 0 || b.rows === 0) continue;
+      const bx0 = b.x;
+      const by0 = b.y;
+      const bx1 = b.x + b.cols * b.pw + (b.cols - 1) * G;
+      const by1 = b.y + b.rows * b.ph + (b.rows - 1) * G;
+      if (bx0 < bbMinX) bbMinX = bx0;
+      if (by0 < bbMinY) bbMinY = by0;
+      if (bx1 > bbMaxX) bbMaxX = bx1;
+      if (by1 > bbMaxY) bbMaxY = by1;
+    }
+    let offsetX = 0, offsetY = 0;
+    if (isFinite(bbMinX)) {
+      const layoutW = bbMaxX - bbMinX;
+      const layoutH = bbMaxY - bbMinY;
+      offsetX = (uw - layoutW) / 2 - bbMinX;
+      offsetY = (uh - layoutH) / 2 - bbMinY;
+    }
+
+    // draw pieces (centered within usable area)
+    for (const b of blocks) {
+      for (let c = 0; c < b.cols; c++) {
+        for (let r = 0; r < b.rows; r++) {
+          const px = pad + SG + offsetX + b.x + c * (b.pw + G);
+          const py = pad + M  + offsetY + b.y + r * (b.ph + G);
+          out += `<rect x="${px}" y="${py}" width="${b.pw}" height="${b.ph}" fill="var(--doc-fill)" stroke="var(--doc-stroke)" stroke-width="${tinyStroke * 1.4}" />`;
+
+          // grain arrow on each piece
+          const cx = px + b.pw / 2;
+          const cy = py + b.ph / 2;
+          const arrowLen = Math.min(b.pw, b.ph) * 0.35;
+          if (grain === 'long') {
+            out += `<line x1="${cx - arrowLen/2}" y1="${cy}" x2="${cx + arrowLen/2}" y2="${cy}" stroke="var(--doc-stroke)" stroke-width="${tinyStroke}" opacity="0.5" />`;
+            out += `<polygon points="${cx + arrowLen/2},${cy} ${cx + arrowLen/2 - arrowLen*0.15},${cy - arrowLen*0.1} ${cx + arrowLen/2 - arrowLen*0.15},${cy + arrowLen*0.1}" fill="var(--doc-stroke)" opacity="0.5" />`;
+          } else {
+            out += `<line x1="${cx}" y1="${cy - arrowLen/2}" x2="${cx}" y2="${cy + arrowLen/2}" stroke="var(--doc-stroke)" stroke-width="${tinyStroke}" opacity="0.5" />`;
+            out += `<polygon points="${cx},${cy + arrowLen/2} ${cx - arrowLen*0.1},${cy + arrowLen/2 - arrowLen*0.15} ${cx + arrowLen*0.1},${cy + arrowLen/2 - arrowLen*0.15}" fill="var(--doc-stroke)" opacity="0.5" />`;
+          }
+        }
+      }
+    }
+
+    // dimension labels (sheet)
+    const fontSize = Math.max(SW, SH) * 0.025;
+    out += `<text x="${pad + SW / 2}" y="${pad - pad * 0.3}" font-family="DM Mono, monospace" font-size="${fontSize}" text-anchor="middle" fill="var(--ink)" opacity="0.7">${SW}"</text>`;
+    out += `<text x="${pad - pad * 0.3}" y="${pad + SH / 2}" font-family="DM Mono, monospace" font-size="${fontSize}" text-anchor="middle" fill="var(--ink)" opacity="0.7" transform="rotate(-90 ${pad - pad * 0.3} ${pad + SH / 2})">${SH}"</text>`;
+
+    svg.innerHTML = out;
+  }
+
+  // ============ WIRE UP ============
+  document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', compute);
+    el.addEventListener('change', compute);
+  });
+  compute();
+</script>
+</body>
+</html>
