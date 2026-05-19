@@ -569,9 +569,9 @@
         <div class="field">
           <label>Press sheet (W × H)</label>
           <div class="row">
-            <input type="number" id="sheetW" value="19" min="0.1" step="0.125" />
+            <input type="number" id="sheetW" value="40" min="0.1" step="0.125" />
             <span class="x">×</span>
-            <input type="number" id="sheetH" value="13" min="0.1" step="0.125" />
+            <input type="number" id="sheetH" value="28" min="0.1" step="0.125" />
           </div>
         </div>
         <div class="field">
@@ -586,13 +586,13 @@
         </div>
         <div class="field">
           <label>Gripper margin</label>
-          <input type="number" id="margin" value="0.25" min="0" step="0.0625" />
-          <div class="inline-help">Top &amp; bottom edge of sheet reserved for press grip / trim.</div>
+          <input type="number" id="margin" value="0.75" min="0" step="0.0625" />
+          <div class="inline-help">Leading edge of sheet reserved for press grip.</div>
         </div>
         <div class="field">
           <label>Side guide</label>
-          <input type="number" id="sideGuide" value="0.25" min="0" step="0.0625" />
-          <div class="inline-help">Left &amp; right edge of sheet reserved for side-guide registration.</div>
+          <input type="number" id="sideGuide" value="0.375" min="0" step="0.0625" />
+          <div class="inline-help">Side edge of sheet reserved for side-guide registration.</div>
         </div>
       </div>
 
@@ -604,12 +604,12 @@
           <div class="row">
             <input type="number" id="docW" value="8.5" min="0.1" step="0.125" />
             <span class="x">×</span>
-            <input type="number" id="docH" value="5.5" min="0.1" step="0.125" />
+            <input type="number" id="docH" value="11" min="0.1" step="0.125" />
           </div>
         </div>
         <div class="field">
           <label>Gutter / bleed</label>
-          <input type="number" id="gutter" value="0.125" min="0" step="0.0625" />
+          <input type="number" id="gutter" value="0.25" min="0" step="0.0625" />
           <div class="inline-help">Space between pieces (allows for bleed &amp; trim).</div>
         </div>
       </div>
@@ -625,9 +625,9 @@
           <div class="sub" id="r-nup-sub">pieces per sheet</div>
         </div>
         <div class="stat">
-          <div class="lbl">Yield</div>
-          <div class="val" id="r-yield">—<span class="unit">%</span></div>
-          <div class="sub">sheet utilization</div>
+          <div class="lbl">Cuts</div>
+          <div class="val" id="r-cuts">—</div>
+          <div class="sub" id="r-cuts-sub">guillotine passes</div>
         </div>
         <div class="stat">
           <div class="lbl">Waste</div>
@@ -646,9 +646,9 @@
           <div class="viz-title">Sheet Visualizer</div>
           <div class="viz-controls">
             <div class="mode-pills" title="Layout orientation">
-              <input type="radio" name="mode" id="modeBest" value="best" checked />
+              <input type="radio" name="mode" id="modeBest" value="best" />
               <label for="modeBest">Best fit</label>
-              <input type="radio" name="mode" id="modeStraight" value="straight" />
+              <input type="radio" name="mode" id="modeStraight" value="straight" checked />
               <label for="modeStraight">Straight</label>
               <input type="radio" name="mode" id="modeDutch" value="dutch" />
               <label for="modeDutch">Dutch cut</label>
@@ -788,13 +788,13 @@
     const PW = +docW.value || 0;
     const PH = +docH.value || 0;
     const G  = Math.max(0, +gutter.value || 0);
-    const M  = Math.max(0, +margin.value || 0);     // gripper, top + bottom
-    const SG = Math.max(0, +sideGuide.value || 0);  // side guide, left + right
+    const M  = Math.max(0, +margin.value || 0);     // gripper, single edge of W
+    const SG = Math.max(0, +sideGuide.value || 0);  // side guide, single edge of H
     const grain = document.querySelector('input[name="grain"]:checked').value;
     const mode  = document.querySelector('input[name="mode"]:checked').value;
 
-    const uw = Math.max(0, SW - 2 * SG);
-    const uh = Math.max(0, SH - 2 * M);
+    const uw = Math.max(0, SW - M);
+    const uh = Math.max(0, SH - SG);
 
     let chosen;
     let altInfo = null;
@@ -820,15 +820,58 @@
 
     // ----- update results -----
     $('r-nup').textContent = chosen.count;
-    $('r-nup-sub').textContent = chosen.count === 1 ? 'piece per sheet' : 'pieces per sheet';
+    if (chosen.count === 0) {
+      $('r-nup-sub').textContent = 'piece does not fit';
+    } else if (chosen.blocks.length === 1) {
+      const b = chosen.blocks[0];
+      $('r-nup-sub').textContent = `${b.cols} across × ${b.rows} down`;
+    } else {
+      // Dutch cut: describe the composite as a sum of blocks
+      const parts = chosen.blocks.map(b => `${b.cols}×${b.rows}`).join(' + ');
+      $('r-nup-sub').textContent = parts;
+    }
 
     const sheetArea = SW * SH;
     const usedArea  = chosen.count * PW * PH;
-    const yield_    = sheetArea > 0 ? (usedArea / sheetArea) * 100 : 0;
     const wasteArea = Math.max(0, sheetArea - usedArea);
     const wastePct  = sheetArea > 0 ? (wasteArea / sheetArea) * 100 : 0;
 
-    $('r-yield').innerHTML = yield_.toFixed(1) + '<span class="unit">%</span>';
+    // count guillotine cuts:
+    // No bleed (gutter = 0): pieces share edges, so dividers are single cuts.
+    //   Total = (cols - 1) + (rows - 1) + 4 trims = cols + rows + 2
+    // With bleed (gutter > 0): each gutter is removed as a waste strip,
+    //   requiring TWO cuts per internal divider (one on each side of the strip).
+    //   Total = 2(cols - 1) + 2(rows - 1) + 4 trims = 2*cols + 2*rows
+    const hasBleed = G > 0;
+    let cuts = 0;
+    if (chosen.blocks.length === 1) {
+      const b = chosen.blocks[0];
+      if (hasBleed) {
+        cuts = 2 * b.cols + 2 * b.rows;
+      } else {
+        cuts = b.cols + b.rows + 2;
+      }
+    } else if (chosen.blocks.length > 1) {
+      // Dutch cut: sum cuts per block, then subtract one shared edge per
+      // additional block (the boundary between primary and secondary blocks).
+      for (const b of chosen.blocks) {
+        if (hasBleed) {
+          cuts += 2 * b.cols + 2 * b.rows;
+        } else {
+          cuts += b.cols + b.rows + 2;
+        }
+      }
+      cuts -= (chosen.blocks.length - 1);
+    }
+
+    $('r-cuts').textContent = cuts;
+    let cutsSub;
+    if (chosen.blocks.length > 1) {
+      cutsSub = `${chosen.blocks.length}-block · ${hasBleed ? 'with' : 'no'} bleed`;
+    } else {
+      cutsSub = hasBleed ? 'with bleed' : 'no bleed';
+    }
+    $('r-cuts-sub').textContent = cutsSub;
     $('r-waste').innerHTML = wastePct.toFixed(1) + '<span class="unit">%</span>';
     $('r-waste-sub').textContent = 'unused area';
 
@@ -915,11 +958,11 @@
       }
     }
 
-    // usable area outline (gripper top/bottom, side-guide left/right)
-    const uw = Math.max(0, SW - 2 * SG);
-    const uh = Math.max(0, SH - 2 * M);
+    // usable area outline (gripper on one W edge, side-guide on one H edge)
+    const uw = Math.max(0, SW - M);
+    const uh = Math.max(0, SH - SG);
     if ((M > 0 || SG > 0) && uw > 0 && uh > 0) {
-      out += `<rect x="${pad + SG}" y="${pad + M}" width="${uw}" height="${uh}" fill="none" stroke="var(--rule-bold)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 2}" opacity="0.35" />`;
+      out += `<rect x="${pad + M}" y="${pad + SG}" width="${uw}" height="${uh}" fill="none" stroke="var(--rule-bold)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 2}" opacity="0.35" />`;
     }
 
     // compute bounding box of the entire layout (in usable-area coords)
@@ -948,8 +991,8 @@
     for (const b of blocks) {
       for (let c = 0; c < b.cols; c++) {
         for (let r = 0; r < b.rows; r++) {
-          const px = pad + SG + offsetX + b.x + c * (b.pw + G);
-          const py = pad + M  + offsetY + b.y + r * (b.ph + G);
+          const px = pad + M  + offsetX + b.x + c * (b.pw + G);
+          const py = pad + SG + offsetY + b.y + r * (b.ph + G);
           out += `<rect x="${px}" y="${py}" width="${b.pw}" height="${b.ph}" fill="var(--doc-fill)" stroke="var(--doc-stroke)" stroke-width="${tinyStroke * 1.4}" />`;
 
           // grain arrow on each piece
