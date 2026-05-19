@@ -159,20 +159,19 @@
   .panel {
     background: var(--paper-2);
     border: 1px solid var(--rule-bold);
-    padding: 14px 14px 12px;
+    padding: 22px 14px 12px;
     position: relative;
   }
   .panel::before {
     content: attr(data-label);
     position: absolute;
-    top: -9px;
+    top: 7px;
     left: 14px;
-    background: var(--paper);
-    padding: 0 8px;
     font-size: 10px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     font-weight: 500;
+    opacity: 0.55;
   }
 
   .field { margin-bottom: 10px; }
