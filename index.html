@@ -723,23 +723,20 @@
   function dutchLayout(uw, uh, pw, ph, g) {
     const arrangements = [];
 
-    // Try each primary orientation
+    // -------- PATTERN 1: L-shape (main + right strip + bottom strip) --------
     for (const primary of [[pw, ph, false], [ph, pw, true]]) {
       const [ppw, pph, pRot] = primary;
       const main = gridFit(uw, uh, ppw, pph, g);
       if (main.count === 0) continue;
 
-      const secondary = [primary[2] ? [pw, ph, false] : [ph, pw, true]][0];
-      const [spw, sph, sRot] = secondary;
+      const [spw, sph, sRot] = pRot ? [pw, ph, false] : [ph, pw, true];
 
-      // Strip to the RIGHT of main block
       const rightX  = main.blockW + g;
       const rightW  = uw - rightX;
       const rightH  = uh;
       let right = { count: 0 };
       if (rightW > 0) right = gridFit(rightW, rightH, spw, sph, g);
 
-      // Strip BELOW main block (only the width of main block, since right strip handled)
       const belowX  = 0;
       const belowY  = main.blockH + g;
       const belowW  = main.blockW;
@@ -751,29 +748,115 @@
       const blocks = [{
         x: 0, y: 0,
         cols: main.cols, rows: main.rows,
-        pw: ppw, ph: pph,
-        rotated: pRot,
+        pw: ppw, ph: pph, rotated: pRot,
         blockW: main.blockW, blockH: main.blockH,
       }];
-      if (right.count > 0) {
-        blocks.push({
-          x: rightX, y: 0,
-          cols: right.cols, rows: right.rows,
-          pw: spw, ph: sph,
-          rotated: sRot,
-          blockW: right.blockW, blockH: right.blockH,
-        });
-      }
-      if (below.count > 0) {
-        blocks.push({
-          x: belowX, y: belowY,
-          cols: below.cols, rows: below.rows,
-          pw: spw, ph: sph,
-          rotated: sRot,
-          blockW: below.blockW, blockH: below.blockH,
-        });
-      }
+      if (right.count > 0) blocks.push({
+        x: rightX, y: 0,
+        cols: right.cols, rows: right.rows,
+        pw: spw, ph: sph, rotated: sRot,
+        blockW: right.blockW, blockH: right.blockH,
+      });
+      if (below.count > 0) blocks.push({
+        x: belowX, y: belowY,
+        cols: below.cols, rows: below.rows,
+        pw: spw, ph: sph, rotated: sRot,
+        blockW: below.blockW, blockH: below.blockH,
+      });
       arrangements.push({ count: total, blocks });
+    }
+
+    // -------- PATTERN 2: 3 vertical bands (LEFT | MIDDLE | RIGHT) --------
+    // Side bands use one orientation, middle band uses the other.
+    // This finds layouts like "portrait columns flanking a landscape grid."
+    const orientations = [[pw, ph, false], [ph, pw, true]];
+    for (const sideOri of orientations) {
+      for (const midOri of orientations) {
+        const [sw, sh, sRot] = sideOri;
+        const [mw, mh, mRot] = midOri;
+        // Try each possible width for the side bands: 1, 2, ... pieces wide
+        for (let sideCols = 1; sideCols * sw + (sideCols - 1) * g <= uw / 2; sideCols++) {
+          const sideBandW = sideCols * sw + (sideCols - 1) * g;
+          // Need room for: leftBand + g + middleBand + g + rightBand
+          const middleW = uw - 2 * sideBandW - 2 * g;
+          if (middleW <= 0) break;
+          const middle = gridFit(middleW, uh, mw, mh, g);
+          if (middle.count === 0) continue;
+          const sideRows = Math.max(0, Math.floor((uh + g) / (sh + g)));
+          if (sideRows === 0) continue;
+          const sideCount = sideCols * sideRows;
+          const total = 2 * sideCount + middle.count;
+          const sideBandH = sideRows * sh + (sideRows - 1) * g;
+          const middleX = sideBandW + g;
+          arrangements.push({
+            count: total,
+            blocks: [
+              { // left band
+                x: 0, y: 0,
+                cols: sideCols, rows: sideRows,
+                pw: sw, ph: sh, rotated: sRot,
+                blockW: sideBandW, blockH: sideBandH,
+              },
+              { // middle band
+                x: middleX, y: 0,
+                cols: middle.cols, rows: middle.rows,
+                pw: mw, ph: mh, rotated: mRot,
+                blockW: middle.blockW, blockH: middle.blockH,
+              },
+              { // right band
+                x: middleX + middleW + g, y: 0,
+                cols: sideCols, rows: sideRows,
+                pw: sw, ph: sh, rotated: sRot,
+                blockW: sideBandW, blockH: sideBandH,
+              },
+            ]
+          });
+        }
+      }
+    }
+
+    // -------- PATTERN 3: 3 horizontal bands (TOP / MIDDLE / BOTTOM) --------
+    for (const sideOri of orientations) {
+      for (const midOri of orientations) {
+        const [sw, sh, sRot] = sideOri;
+        const [mw, mh, mRot] = midOri;
+        for (let sideRows = 1; sideRows * sh + (sideRows - 1) * g <= uh / 2; sideRows++) {
+          const sideBandH = sideRows * sh + (sideRows - 1) * g;
+          const middleH = uh - 2 * sideBandH - 2 * g;
+          if (middleH <= 0) break;
+          const middle = gridFit(uw, middleH, mw, mh, g);
+          if (middle.count === 0) continue;
+          const sideCols = Math.max(0, Math.floor((uw + g) / (sw + g)));
+          if (sideCols === 0) continue;
+          const sideCount = sideCols * sideRows;
+          const total = 2 * sideCount + middle.count;
+          const sideBandW = sideCols * sw + (sideCols - 1) * g;
+          const middleY = sideBandH + g;
+          arrangements.push({
+            count: total,
+            blocks: [
+              { // top band
+                x: 0, y: 0,
+                cols: sideCols, rows: sideRows,
+                pw: sw, ph: sh, rotated: sRot,
+                blockW: sideBandW, blockH: sideBandH,
+              },
+              { // middle band
+                x: 0, y: middleY,
+                cols: middle.cols, rows: middle.rows,
+                pw: mw, ph: mh, rotated: mRot,
+                blockW: middle.blockW, blockH: middle.blockH,
+              },
+              { // bottom band
+                x: 0, y: middleY + middleH + g,
+                cols: sideCols, rows: sideRows,
+                pw: sw, ph: sh, rotated: sRot,
+                blockW: sideBandW, blockH: sideBandH,
+              },
+            ]
+          });
+        }
+      }
     }
 
     if (arrangements.length === 0) return { count: 0, blocks: [] };
@@ -852,8 +935,10 @@
         cuts = b.cols + b.rows + 2;
       }
     } else if (chosen.blocks.length > 1) {
-      // Dutch cut: sum cuts per block, then subtract one shared edge per
-      // additional block (the boundary between primary and secondary blocks).
+      // Multi-block layout: sum cuts per block.
+      // With bleed, blocks are separated by gutters (not shared edges) so
+      // each block keeps its own trim cuts on shared sides.
+      // Without bleed, adjacent blocks share an edge — deduct one cut per pair.
       for (const b of chosen.blocks) {
         if (hasBleed) {
           cuts += 2 * b.cols + 2 * b.rows;
@@ -861,7 +946,9 @@
           cuts += b.cols + b.rows + 2;
         }
       }
-      cuts -= (chosen.blocks.length - 1);
+      if (!hasBleed) {
+        cuts -= (chosen.blocks.length - 1);
+      }
     }
 
     $('r-cuts').textContent = cuts;
