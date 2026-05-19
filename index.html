@@ -569,9 +569,9 @@
         <div class="field">
           <label>Press sheet (W × H)</label>
           <div class="row">
-            <input type="number" id="sheetW" value="40" min="0.1" step="0.125" />
+            <input type="number" id="sheetW" value="28" min="0.1" step="0.125" />
             <span class="x">×</span>
-            <input type="number" id="sheetH" value="28" min="0.1" step="0.125" />
+            <input type="number" id="sheetH" value="40" min="0.1" step="0.125" />
           </div>
         </div>
         <div class="field">
@@ -866,8 +866,11 @@
 
   // ============ COMPUTE ============
   function compute() {
-    const SW = +sheetW.value || 0;
-    const SH = +sheetH.value || 0;
+    let SW = +sheetW.value || 0;
+    let SH = +sheetH.value || 0;
+    // Always treat the longer dimension as W (the gripper edge).
+    // Users can enter dimensions in either order; the engine normalizes.
+    if (SH > SW) { const tmp = SW; SW = SH; SH = tmp; }
     const PW = +docW.value || 0;
     const PH = +docH.value || 0;
     const G  = Math.max(0, +gutter.value || 0);
