@@ -3,7 +3,56 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TEAM Imposition Calculator</title>
+<title>TEAM Imposition Calculator | N-Up Layout & Press Sheet Planner</title>
+<meta name="description" content="Free online imposition calculator for commercial printing. Calculate N-up layouts, sheet yield, waste, cuts, and grain direction for press sheets. Built by TEAM Concept Printing." />
+<meta name="keywords" content="imposition calculator, N-up calculator, print layout, press sheet calculator, printing imposition, sheet yield, dutch cut, commercial printing, TEAM Concept Printing" />
+<meta name="author" content="TEAM Concept Printing" />
+<link rel="canonical" href="https://v-tcpt.github.io/Imposition-Calculator/" />
+
+<!-- Open Graph (for social sharing) -->
+<meta property="og:title" content="TEAM Imposition Calculator" />
+<meta property="og:description" content="Free online imposition calculator. Calculate N-up layouts, yield, waste, and cuts for commercial printing." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://v-tcpt.github.io/Imposition-Calculator/" />
+<meta property="og:site_name" content="TEAM Concept Printing" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="TEAM Imposition Calculator" />
+<meta name="twitter:description" content="Free online imposition calculator for commercial printing." />
+
+<!-- Structured data for Google -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "TEAM Imposition Calculator",
+  "url": "https://v-tcpt.github.io/Imposition-Calculator/",
+  "description": "Free online imposition calculator for commercial printing. Calculate N-up layouts, sheet yield, waste, cuts, and grain direction.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any (web-based)",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TEAM Concept Printing",
+    "url": "https://www.teamconceptprinting.com",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "540 Tower Boulevard",
+      "addressLocality": "Carol Stream",
+      "addressRegion": "IL",
+      "postalCode": "60188",
+      "addressCountry": "US"
+    },
+    "telephone": "+1-630-653-8326",
+    "email": "sales@teamconceptprinting.com"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&display=swap" rel="stylesheet">
@@ -216,6 +265,122 @@
     outline-offset: -2px;
   }
 
+  /* doc mode toggle (Single / Multi) */
+  .doc-mode-pills {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--rule-bold);
+  }
+  .doc-mode-pills label {
+    margin: 0;
+    padding: 7px 4px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--sheet-fill);
+    border-right: 1px solid var(--rule-bold);
+    transition: all 0.12s ease;
+  }
+  .doc-mode-pills label:last-child { border-right: none; }
+  .doc-mode-pills input { display: none; }
+  .doc-mode-pills input:checked + label {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* multi-piece list */
+  #piece-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .piece-row {
+    display: grid;
+    grid-template-columns: 1fr 70px auto;
+    grid-template-rows: auto auto;
+    gap: 4px 6px;
+    align-items: center;
+    padding: 6px;
+    background: var(--sheet-fill);
+    border: 1px solid var(--rule-bold);
+  }
+  .piece-row input[type="number"] {
+    padding: 4px 6px;
+    font-size: 12px;
+    width: 100%;
+  }
+  .piece-row .x-label {
+    grid-column: 1 / -1;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    font-weight: 500;
+  }
+  .piece-row .dim-inputs {
+    grid-column: 1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 3px;
+    align-items: center;
+  }
+  .piece-row .dim-inputs .x {
+    font-size: 11px;
+    opacity: 0.4;
+    text-align: center;
+  }
+  .piece-row .qty-input {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: right;
+  }
+  .piece-row .qty-input::before {
+    content: 'QTY';
+  }
+  .piece-row .remove-btn {
+    grid-column: 3;
+    grid-row: 2;
+    background: transparent;
+    border: 1px solid var(--rule-bold);
+    color: var(--ink);
+    cursor: pointer;
+    padding: 4px 7px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1;
+    transition: all 0.12s ease;
+  }
+  .piece-row .remove-btn:hover {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+  .btn-add {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--rule-bold);
+    color: var(--ink);
+    cursor: pointer;
+    padding: 7px;
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.12s ease;
+  }
+  .btn-add:hover {
+    background: var(--ink);
+    color: var(--paper);
+    border-style: solid;
+  }
+
+  /* doc mode toggle (Single / Multi) end */
+
   .preset-row {
     /* preset chips removed — left blank for any future use */
     display: none;
@@ -275,7 +440,7 @@
   /* ---------- RESULTS ---------- */
   .results {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 0;
     border: 1px solid var(--rule-bold);
     margin-bottom: 14px;
@@ -305,7 +470,7 @@
   .stat .val {
     font-family: 'Fraunces', serif;
     font-weight: 700;
-    font-size: 24px;
+    font-size: 22px;
     line-height: 1;
   }
   .stat .val .unit {
@@ -360,6 +525,35 @@
   .viz-wrap .mode-pills label {
     padding: 6px 10px;
     font-size: 10px;
+  }
+  .flip-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border: 1px solid var(--rule-bold);
+    background: var(--sheet-fill);
+    cursor: pointer;
+    transition: all 0.12s ease;
+    user-select: none;
+  }
+  .flip-toggle input[type="checkbox"] {
+    margin: 0;
+    accent-color: var(--ink);
+    cursor: pointer;
+  }
+  .flip-toggle:hover {
+    background: var(--paper);
+  }
+  .flip-toggle:has(input:checked) {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .flip-toggle:has(input:checked) input {
+    accent-color: var(--paper);
   }
   .legend {
     display: flex;
@@ -487,12 +681,12 @@
       margin-bottom: 0;
     }
     .stat { padding: 10px 12px; }
-    .stat .val { font-size: 22px; }
-    .stat:nth-child(1), .stat:nth-child(2) {
-      border-bottom: 1px solid var(--rule-bold);
-    }
-    .stat:nth-child(2) { border-right: none; }
-    .stat:nth-child(3) { border-right: 1px solid var(--rule-bold); }
+    .stat .val { font-size: 20px; }
+    /* mobile: 5 cards stack as 2-2-1 grid; need correct borders */
+    .stat:nth-child(odd) { border-right: 1px solid var(--rule-bold); }
+    .stat:nth-child(even) { border-right: none; }
+    .stat:nth-child(-n+4) { border-bottom: 1px solid var(--rule-bold); }
+    .stat:last-child { border-right: none; grid-column: 1 / -1; }
     .viz-wrap {
       flex: none;
       min-height: 0;
@@ -572,33 +766,64 @@
           </div>
           <div class="inline-help">Grain runs parallel to this dimension.</div>
         </div>
-        <div class="field">
-          <label>Gripper margin</label>
-          <input type="number" id="margin" value="0.75" min="0" step="0.0625" />
-          <div class="inline-help">Leading edge of sheet reserved for press grip.</div>
-        </div>
-        <div class="field">
-          <label>Side guide</label>
-          <input type="number" id="sideGuide" value="0.375" min="0" step="0.0625" />
-          <div class="inline-help">Side edge of sheet reserved for side-guide registration.</div>
-        </div>
       </div>
 
       <div style="height: 14px"></div>
 
       <div class="panel" data-label="Document">
         <div class="field">
-          <label>Finished piece (W × H)</label>
-          <div class="row">
-            <input type="number" id="docW" value="8.5" min="0.1" step="0.125" />
-            <span class="x">×</span>
-            <input type="number" id="docH" value="11" min="0.1" step="0.125" />
+          <div class="doc-mode-pills">
+            <input type="radio" name="docMode" id="docModeSingle" value="single" checked />
+            <label for="docModeSingle">Single piece</label>
+            <input type="radio" name="docMode" id="docModeMulti" value="multi" />
+            <label for="docModeMulti">Multi-piece nesting</label>
           </div>
         </div>
+
+        <!-- SINGLE PIECE -->
+        <div id="single-fields">
+          <div class="field">
+            <label>Finished piece (W × H)</label>
+            <div class="row">
+              <input type="number" id="docW" value="8.5" min="0.1" step="0.125" />
+              <span class="x">×</span>
+              <input type="number" id="docH" value="11" min="0.1" step="0.125" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Quantity needed</label>
+            <input type="number" id="docQty" value="1000" min="0" step="100" />
+            <div class="inline-help">Total finished pieces required.</div>
+          </div>
+        </div>
+
+        <!-- MULTI PIECE -->
+        <div id="multi-fields" style="display: none;">
+          <div class="field">
+            <label>Pieces to nest</label>
+            <div id="piece-list"></div>
+            <button type="button" id="add-piece" class="btn-add">+ Add piece</button>
+          </div>
+        </div>
+
         <div class="field">
-          <label>Gutter / bleed</label>
-          <input type="number" id="gutter" value="0.25" min="0" step="0.0625" />
-          <div class="inline-help">Space between pieces (allows for bleed &amp; trim).</div>
+          <label>Bleed (horizontal × vertical)</label>
+          <div class="row">
+            <input type="number" id="gutter" value="0.125" min="0" step="0.0625" />
+            <span class="x">×</span>
+            <input type="number" id="gutterV" value="0.125" min="0" step="0.0625" />
+          </div>
+          <div class="inline-help">Horizontal: between columns. Vertical: between rows.</div>
+        </div>
+        <div class="field">
+          <label>Gripper margin</label>
+          <input type="number" id="margin" value="0.75" min="0" step="0.0625" />
+          <div class="inline-help">Leading edge of sheet reserved for press grip. <b>0.5"</b> is included for color bar.</div>
+        </div>
+        <div class="field">
+          <label>Side guide</label>
+          <input type="number" id="sideGuide" value="0.375" min="0" step="0.0625" />
+          <div class="inline-help">Side edge of sheet reserved for side-guide registration.</div>
         </div>
       </div>
 
@@ -611,6 +836,11 @@
           <div class="lbl">N-Up</div>
           <div class="val" id="r-nup">—</div>
           <div class="sub" id="r-nup-sub">pieces per sheet</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Sheets</div>
+          <div class="val" id="r-sheets">—</div>
+          <div class="sub" id="r-sheets-sub">to run job</div>
         </div>
         <div class="stat">
           <div class="lbl">Cuts</div>
@@ -641,6 +871,10 @@
               <input type="radio" name="mode" id="modeDutch" value="dutch" />
               <label for="modeDutch">Dutch cut</label>
             </div>
+            <label class="flip-toggle" title="Swap finished piece W ↔ H to force the alternate orientation">
+              <input type="checkbox" id="flipPiece" />
+              <span>Flip piece</span>
+            </label>
             <div class="legend">
               <div class="legend-item"><div class="legend-swatch doc"></div>Piece</div>
               <div class="legend-item"><div class="legend-swatch waste"></div>Waste</div>
@@ -667,31 +901,38 @@
   const $ = (id) => document.getElementById(id);
   const sheetW = $('sheetW'), sheetH = $('sheetH');
   const docW = $('docW'), docH = $('docH');
-  const gutter = $('gutter'), margin = $('margin'), sideGuide = $('sideGuide');
+  const gutter = $('gutter'), gutterV = $('gutterV'), margin = $('margin'), sideGuide = $('sideGuide');
   const svg = $('svg');
 
   // ============ CORE MATH ============
   // Given a usable area (uw × uh), piece (pw × ph), and gutter g,
   // return how many fit in a grid + the total area used.
-  function gridFit(uw, uh, pw, ph, g) {
+  function gridFit(uw, uh, pw, ph, gH, gV) {
     if (pw <= 0 || ph <= 0) return { count: 0, cols: 0, rows: 0, blockW: 0, blockH: 0 };
     // n pieces take: n*p + (n-1)*g  ≤ u   →   n ≤ (u + g) / (p + g)
-    const cols = Math.max(0, Math.floor((uw + g) / (pw + g)));
-    const rows = Math.max(0, Math.floor((uh + g) / (ph + g)));
+    const cols = Math.max(0, Math.floor((uw + gH) / (pw + gH)));
+    const rows = Math.max(0, Math.floor((uh + gV) / (ph + gV)));
     const count = cols * rows;
-    const blockW = cols > 0 ? cols * pw + (cols - 1) * g : 0;
-    const blockH = rows > 0 ? rows * ph + (rows - 1) * g : 0;
+    const blockW = cols > 0 ? cols * pw + (cols - 1) * gH : 0;
+    const blockH = rows > 0 ? rows * ph + (rows - 1) * gV : 0;
     return { count, cols, rows, blockW, blockH };
   }
 
   // Straight layouts: try both orientations of the piece, pick higher count.
-  function straightLayout(uw, uh, pw, ph, g) {
-    const a = gridFit(uw, uh, pw, ph, g);
-    const b = gridFit(uw, uh, ph, pw, g);
-    const aChosen = a.count >= b.count;
+  function straightLayout(uw, uh, pw, ph, gH, gV, flipAlt) {
+    const a = gridFit(uw, uh, pw, ph, gH, gV);
+    const b = gridFit(uw, uh, ph, pw, gH, gV);
+    // Normal: pick higher count. Flip: pick the OTHER orientation (alternate).
+    // If both yield the same count, flip still toggles which gets picked.
+    let aChosen;
+    if (flipAlt) {
+      aChosen = a.count < b.count;
+    } else {
+      aChosen = a.count >= b.count;
+    }
     const chosen = aChosen ? a : b;
     return {
-      count: chosen.count,
+      count: Math.max(0, chosen.count),
       blocks: chosen.count > 0 ? [{
         x: 0, y: 0,
         cols: chosen.cols, rows: chosen.rows,
@@ -708,29 +949,29 @@
   // the leftover strip (right of block, and below block) with pieces in
   // the OTHER orientation. Recurse one level so we can also fill the
   // remaining corner. Try all four arrangements and pick best.
-  function dutchLayout(uw, uh, pw, ph, g) {
+  function dutchLayout(uw, uh, pw, ph, gH, gV) {
     const arrangements = [];
 
     // -------- PATTERN 1: L-shape (main + right strip + bottom strip) --------
     for (const primary of [[pw, ph, false], [ph, pw, true]]) {
       const [ppw, pph, pRot] = primary;
-      const main = gridFit(uw, uh, ppw, pph, g);
+      const main = gridFit(uw, uh, ppw, pph, gH, gV);
       if (main.count === 0) continue;
 
       const [spw, sph, sRot] = pRot ? [pw, ph, false] : [ph, pw, true];
 
-      const rightX  = main.blockW + g;
+      const rightX  = main.blockW + gH;
       const rightW  = uw - rightX;
       const rightH  = uh;
       let right = { count: 0 };
-      if (rightW > 0) right = gridFit(rightW, rightH, spw, sph, g);
+      if (rightW > 0) right = gridFit(rightW, rightH, spw, sph, gH, gV);
 
       const belowX  = 0;
-      const belowY  = main.blockH + g;
+      const belowY  = main.blockH + gV;
       const belowW  = main.blockW;
       const belowH  = uh - belowY;
       let below = { count: 0 };
-      if (belowH > 0) below = gridFit(belowW, belowH, spw, sph, g);
+      if (belowH > 0) below = gridFit(belowW, belowH, spw, sph, gH, gV);
 
       const total = main.count + right.count + below.count;
       const blocks = [{
@@ -755,48 +996,38 @@
     }
 
     // -------- PATTERN 2: 3 vertical bands (LEFT | MIDDLE | RIGHT) --------
-    // Side bands use one orientation, middle band uses the other.
-    // This finds layouts like "portrait columns flanking a landscape grid."
     const orientations = [[pw, ph, false], [ph, pw, true]];
     for (const sideOri of orientations) {
       for (const midOri of orientations) {
         const [sw, sh, sRot] = sideOri;
         const [mw, mh, mRot] = midOri;
-        // Try each possible width for the side bands: 1, 2, ... pieces wide
-        for (let sideCols = 1; sideCols * sw + (sideCols - 1) * g <= uw / 2; sideCols++) {
-          const sideBandW = sideCols * sw + (sideCols - 1) * g;
-          // Need room for: leftBand + g + middleBand + g + rightBand
-          const middleW = uw - 2 * sideBandW - 2 * g;
+        for (let sideCols = 1; sideCols * sw + (sideCols - 1) * gH <= uw / 2; sideCols++) {
+          const sideBandW = sideCols * sw + (sideCols - 1) * gH;
+          const middleW = uw - 2 * sideBandW - 2 * gH;
           if (middleW <= 0) break;
-          const middle = gridFit(middleW, uh, mw, mh, g);
+          const middle = gridFit(middleW, uh, mw, mh, gH, gV);
           if (middle.count === 0) continue;
-          const sideRows = Math.max(0, Math.floor((uh + g) / (sh + g)));
+          const sideRows = Math.max(0, Math.floor((uh + gV) / (sh + gV)));
           if (sideRows === 0) continue;
           const sideCount = sideCols * sideRows;
           const total = 2 * sideCount + middle.count;
-          const sideBandH = sideRows * sh + (sideRows - 1) * g;
-          const middleX = sideBandW + g;
+          const sideBandH = sideRows * sh + (sideRows - 1) * gV;
+          const middleX = sideBandW + gH;
           arrangements.push({
             count: total,
             blocks: [
-              { // left band
-                x: 0, y: 0,
+              { x: 0, y: 0,
                 cols: sideCols, rows: sideRows,
                 pw: sw, ph: sh, rotated: sRot,
-                blockW: sideBandW, blockH: sideBandH,
-              },
-              { // middle band
-                x: middleX, y: 0,
+                blockW: sideBandW, blockH: sideBandH },
+              { x: middleX, y: 0,
                 cols: middle.cols, rows: middle.rows,
                 pw: mw, ph: mh, rotated: mRot,
-                blockW: middle.blockW, blockH: middle.blockH,
-              },
-              { // right band
-                x: middleX + middleW + g, y: 0,
+                blockW: middle.blockW, blockH: middle.blockH },
+              { x: middleX + middleW + gH, y: 0,
                 cols: sideCols, rows: sideRows,
                 pw: sw, ph: sh, rotated: sRot,
-                blockW: sideBandW, blockH: sideBandH,
-              },
+                blockW: sideBandW, blockH: sideBandH },
             ]
           });
         }
@@ -808,39 +1039,33 @@
       for (const midOri of orientations) {
         const [sw, sh, sRot] = sideOri;
         const [mw, mh, mRot] = midOri;
-        for (let sideRows = 1; sideRows * sh + (sideRows - 1) * g <= uh / 2; sideRows++) {
-          const sideBandH = sideRows * sh + (sideRows - 1) * g;
-          const middleH = uh - 2 * sideBandH - 2 * g;
+        for (let sideRows = 1; sideRows * sh + (sideRows - 1) * gV <= uh / 2; sideRows++) {
+          const sideBandH = sideRows * sh + (sideRows - 1) * gV;
+          const middleH = uh - 2 * sideBandH - 2 * gV;
           if (middleH <= 0) break;
-          const middle = gridFit(uw, middleH, mw, mh, g);
+          const middle = gridFit(uw, middleH, mw, mh, gH, gV);
           if (middle.count === 0) continue;
-          const sideCols = Math.max(0, Math.floor((uw + g) / (sw + g)));
+          const sideCols = Math.max(0, Math.floor((uw + gH) / (sw + gH)));
           if (sideCols === 0) continue;
           const sideCount = sideCols * sideRows;
           const total = 2 * sideCount + middle.count;
-          const sideBandW = sideCols * sw + (sideCols - 1) * g;
-          const middleY = sideBandH + g;
+          const sideBandW = sideCols * sw + (sideCols - 1) * gH;
+          const middleY = sideBandH + gV;
           arrangements.push({
             count: total,
             blocks: [
-              { // top band
-                x: 0, y: 0,
+              { x: 0, y: 0,
                 cols: sideCols, rows: sideRows,
                 pw: sw, ph: sh, rotated: sRot,
-                blockW: sideBandW, blockH: sideBandH,
-              },
-              { // middle band
-                x: 0, y: middleY,
+                blockW: sideBandW, blockH: sideBandH },
+              { x: 0, y: middleY,
                 cols: middle.cols, rows: middle.rows,
                 pw: mw, ph: mh, rotated: mRot,
-                blockW: middle.blockW, blockH: middle.blockH,
-              },
-              { // bottom band
-                x: 0, y: middleY + middleH + g,
+                blockW: middle.blockW, blockH: middle.blockH },
+              { x: 0, y: middleY + middleH + gV,
                 cols: sideCols, rows: sideRows,
                 pw: sw, ph: sh, rotated: sRot,
-                blockW: sideBandW, blockH: sideBandH,
-              },
+                blockW: sideBandW, blockH: sideBandH },
             ]
           });
         }
@@ -859,9 +1084,10 @@
     // Always treat the longer dimension as W (the gripper edge).
     // Users can enter dimensions in either order; the engine normalizes.
     if (SH > SW) { const tmp = SW; SW = SH; SH = tmp; }
-    const PW = +docW.value || 0;
-    const PH = +docH.value || 0;
-    const G  = Math.max(0, +gutter.value || 0);
+    let PW = +docW.value || 0;
+    let PH = +docH.value || 0;
+    const GH = Math.max(0, +gutter.value || 0);    // horizontal gutter (between cols)
+    const GV = Math.max(0, +gutterV.value || 0);   // vertical gutter (between rows)
     const M  = Math.max(0, +margin.value || 0);     // gripper, single edge of W
     const SG = Math.max(0, +sideGuide.value || 0);  // side guide, single edge of H
     const grain = document.querySelector('input[name="grain"]:checked').value;
@@ -870,17 +1096,18 @@
     const uw = Math.max(0, SW - M);
     const uh = Math.max(0, SH - SG);
 
+    const flipLocked = $('flipPiece') && $('flipPiece').checked;
     let chosen;
     let altInfo = null;
 
     if (mode === 'straight') {
-      chosen = straightLayout(uw, uh, PW, PH, G);
+      chosen = straightLayout(uw, uh, PW, PH, GH, GV, flipLocked);
     } else if (mode === 'dutch') {
-      chosen = dutchLayout(uw, uh, PW, PH, G);
+      chosen = dutchLayout(uw, uh, PW, PH, GH, GV);
     } else {
       // best fit: compare straight vs dutch, pick winner; report the other
-      const s = straightLayout(uw, uh, PW, PH, G);
-      const d = dutchLayout(uw, uh, PW, PH, G);
+      const s = straightLayout(uw, uh, PW, PH, GH, GV, flipLocked);
+      const d = dutchLayout(uw, uh, PW, PH, GH, GV);
       if (d.count > s.count) {
         chosen = d;
         altInfo = { type: 'dutch-wins', diff: d.count - s.count, straight: s.count };
@@ -905,49 +1132,62 @@
       $('r-nup-sub').textContent = parts;
     }
 
+    // ----- sheets needed -----
+    const qty = Math.max(0, +($('docQty')?.value) || 0);
+    if (chosen.count > 0 && qty > 0) {
+      const sheetsNeeded = Math.ceil(qty / chosen.count);
+      $('r-sheets').textContent = sheetsNeeded.toLocaleString();
+      $('r-sheets-sub').textContent = `for ${qty.toLocaleString()} pcs`;
+    } else if (chosen.count === 0) {
+      $('r-sheets').textContent = '—';
+      $('r-sheets-sub').textContent = 'piece does not fit';
+    } else {
+      $('r-sheets').textContent = '—';
+      $('r-sheets-sub').textContent = 'enter quantity';
+    }
+
     const sheetArea = SW * SH;
     const usedArea  = chosen.count * PW * PH;
     const wasteArea = Math.max(0, sheetArea - usedArea);
     const wastePct  = sheetArea > 0 ? (wasteArea / sheetArea) * 100 : 0;
 
     // count guillotine cuts:
-    // No bleed (gutter = 0): pieces share edges, so dividers are single cuts.
-    //   Total = (cols - 1) + (rows - 1) + 4 trims = cols + rows + 2
-    // With bleed (gutter > 0): each gutter is removed as a waste strip,
-    //   requiring TWO cuts per internal divider (one on each side of the strip).
-    //   Total = 2(cols - 1) + 2(rows - 1) + 4 trims = 2*cols + 2*rows
-    const hasBleed = G > 0;
+    // Horizontal axis: dividers between cols. GH=0 → single cut per divider.
+    //   GH>0 → bleed strip removed, requires 2 cuts per divider.
+    //   Cuts along W = bleedH ? 2*cols : cols + 1
+    // Vertical axis: same logic with GV.
+    //   Cuts along H = bleedV ? 2*rows : rows + 1
+    // Total per block = cutsAlongW + cutsAlongH
+    const bleedH = GH > 0;
+    const bleedV = GV > 0;
+    const cutsPerBlock = (b) => {
+      const cw = bleedH ? 2 * b.cols : b.cols + 1;
+      const ch = bleedV ? 2 * b.rows : b.rows + 1;
+      return cw + ch;
+    };
+
     let cuts = 0;
-    if (chosen.blocks.length === 1) {
-      const b = chosen.blocks[0];
-      if (hasBleed) {
-        cuts = 2 * b.cols + 2 * b.rows;
-      } else {
-        cuts = b.cols + b.rows + 2;
-      }
-    } else if (chosen.blocks.length > 1) {
-      // Multi-block layout: sum cuts per block.
-      // With bleed, blocks are separated by gutters (not shared edges) so
-      // each block keeps its own trim cuts on shared sides.
-      // Without bleed, adjacent blocks share an edge — deduct one cut per pair.
+    if (chosen.blocks.length >= 1) {
       for (const b of chosen.blocks) {
-        if (hasBleed) {
-          cuts += 2 * b.cols + 2 * b.rows;
-        } else {
-          cuts += b.cols + b.rows + 2;
-        }
+        cuts += cutsPerBlock(b);
       }
-      if (!hasBleed) {
+      // For multi-block layouts without bleed, adjacent blocks share edges —
+      // deduct one cut per additional block (only when both axes are no-bleed).
+      if (chosen.blocks.length > 1 && !bleedH && !bleedV) {
         cuts -= (chosen.blocks.length - 1);
       }
     }
 
     $('r-cuts').textContent = cuts;
+    let bleedLabel;
+    if (bleedH && bleedV) bleedLabel = 'with bleed';
+    else if (!bleedH && !bleedV) bleedLabel = 'no bleed';
+    else bleedLabel = bleedH ? 'horiz bleed only' : 'vert bleed only';
     let cutsSub;
     if (chosen.blocks.length > 1) {
-      cutsSub = `${chosen.blocks.length}-block · ${hasBleed ? 'with' : 'no'} bleed`;
+      cutsSub = `${chosen.blocks.length}-block · ${bleedLabel}`;
     } else {
-      cutsSub = hasBleed ? 'with bleed' : 'no bleed';
+      cutsSub = bleedLabel;
     }
     $('r-cuts-sub').textContent = cutsSub;
     $('r-waste').innerHTML = wastePct.toFixed(1) + '<span class="unit">%</span>';
@@ -997,11 +1237,11 @@
     }
 
     // ----- render SVG -----
-    render(SW, SH, M, SG, G, chosen.blocks, grain);
+    render(SW, SH, M, SG, GH, GV, chosen.blocks, grain);
   }
 
   // ============ RENDER ============
-  function render(SW, SH, M, SG, G, blocks, grain) {
+  function render(SW, SH, M, SG, GH, GV, blocks, grain) {
     if (SW <= 0 || SH <= 0) {
       svg.innerHTML = '';
       return;
@@ -1044,14 +1284,13 @@
     }
 
     // compute bounding box of the entire layout (in usable-area coords)
-    // so we can center it within the usable area
     let bbMinX = Infinity, bbMinY = Infinity, bbMaxX = -Infinity, bbMaxY = -Infinity;
     for (const b of blocks) {
       if (b.cols === 0 || b.rows === 0) continue;
       const bx0 = b.x;
       const by0 = b.y;
-      const bx1 = b.x + b.cols * b.pw + (b.cols - 1) * G;
-      const by1 = b.y + b.rows * b.ph + (b.rows - 1) * G;
+      const bx1 = b.x + b.cols * b.pw + (b.cols - 1) * GH;
+      const by1 = b.y + b.rows * b.ph + (b.rows - 1) * GV;
       if (bx0 < bbMinX) bbMinX = bx0;
       if (by0 < bbMinY) bbMinY = by0;
       if (bx1 > bbMaxX) bbMaxX = bx1;
@@ -1069,8 +1308,8 @@
     for (const b of blocks) {
       for (let c = 0; c < b.cols; c++) {
         for (let r = 0; r < b.rows; r++) {
-          const px = pad + M  + offsetX + b.x + c * (b.pw + G);
-          const py = pad + SG + offsetY + b.y + r * (b.ph + G);
+          const px = pad + M  + offsetX + b.x + c * (b.pw + GH);
+          const py = pad + SG + offsetY + b.y + r * (b.ph + GV);
           out += `<rect x="${px}" y="${py}" width="${b.pw}" height="${b.ph}" fill="var(--doc-fill)" stroke="var(--doc-stroke)" stroke-width="${tinyStroke * 1.4}" />`;
 
           // grain arrow on each piece
@@ -1096,12 +1335,692 @@
     svg.innerHTML = out;
   }
 
+  // ============ MULTI-PIECE STATE ============
+  const pieces = [
+    { name: 'Piece A', w: 8.5,  h: 11,  qty: 1000 },
+    { name: 'Piece B', w: 5.5,  h: 8.5, qty: 1000 },
+  ];
+  let pieceIdCounter = 0;
+
+  const PIECE_COLORS = [
+    { fill: '#2e5d8b1a', stroke: '#2e5d8b' },
+    { fill: '#c8472e1a', stroke: '#c8472e' },
+    { fill: '#3d7a4a1a', stroke: '#3d7a4a' },
+    { fill: '#b8761c1a', stroke: '#b8761c' },
+    { fill: '#6b3d8b1a', stroke: '#6b3d8b' },
+    { fill: '#1a76721a', stroke: '#1a7672' },
+  ];
+
+  function renderPieceList() {
+    const list = $('piece-list');
+    list.innerHTML = '';
+    pieces.forEach((p, idx) => {
+      const row = document.createElement('div');
+      row.className = 'piece-row';
+      row.innerHTML = `
+        <div class="x-label" style="color:${PIECE_COLORS[idx % PIECE_COLORS.length].stroke}">${p.name}</div>
+        <div class="dim-inputs">
+          <input type="number" data-idx="${idx}" data-dim="w" value="${p.w}" min="0.1" step="0.0625" placeholder="W" />
+          <span class="x">×</span>
+          <input type="number" data-idx="${idx}" data-dim="h" value="${p.h}" min="0.1" step="0.0625" placeholder="H" />
+        </div>
+        <input type="number" class="qty-input" data-idx="${idx}" data-dim="qty" value="${p.qty}" min="0" step="100" title="Quantity needed" />
+        <button type="button" class="remove-btn" data-idx="${idx}" title="Remove">×</button>
+      `;
+      list.appendChild(row);
+    });
+    // wire inputs
+    list.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const i = +e.target.dataset.idx;
+        const dim = e.target.dataset.dim;
+        pieces[i][dim] = +e.target.value || 0;
+        computeRouter();
+      });
+    });
+    list.querySelectorAll('.remove-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const i = +e.currentTarget.dataset.idx;
+        if (pieces.length > 1) {
+          pieces.splice(i, 1);
+          renamePieces();
+          renderPieceList();
+          computeRouter();
+        }
+      });
+    });
+  }
+
+  function renamePieces() {
+    pieces.forEach((p, i) => {
+      // Only auto-rename if it follows the default "Piece X" pattern
+      if (/^Piece [A-Z]$/.test(p.name)) {
+        p.name = 'Piece ' + String.fromCharCode(65 + i);
+      }
+    });
+  }
+
+  $('add-piece').addEventListener('click', () => {
+    pieces.push({
+      name: 'Piece ' + String.fromCharCode(65 + pieces.length),
+      w: 4, h: 6, qty: 1000
+    });
+    renderPieceList();
+    computeRouter();
+  });
+
+  // mode toggle
+  document.querySelectorAll('input[name="docMode"]').forEach(el => {
+    el.addEventListener('change', () => {
+      const isMulti = document.querySelector('input[name="docMode"]:checked').value === 'multi';
+      $('single-fields').style.display = isMulti ? 'none' : '';
+      $('multi-fields').style.display  = isMulti ? '' : 'none';
+      computeRouter();
+    });
+  });
+
+  renderPieceList();
+
+  // ============ MULTI-PIECE PACKING (block-based, guillotine-friendly) ============
+  // Each piece type forms a rectangular block of N×M identical pieces.
+  // Blocks are packed onto the sheet to maximize total pieces while keeping
+  // the layout cut-friendly: pieces of the same type stay clustered, and
+  // blocks form a small number of clean rectangular regions.
+
+  // For one piece, return all viable (cols, rows, orient) options that fit
+  // within the given area, sorted by total count descending.
+  function blockOptions(pieceW, pieceH, areaW, areaH, gH, gV) {
+    const opts = [];
+    for (const ori of [{w: pieceW, h: pieceH, rot: false}, {w: pieceH, h: pieceW, rot: true}]) {
+      if (ori.rot && pieceW === pieceH) continue;
+      const maxCols = Math.floor((areaW + gH) / (ori.w + gH));
+      const maxRows = Math.floor((areaH + gV) / (ori.h + gV));
+      for (let c = 1; c <= maxCols; c++) {
+        for (let r = 1; r <= maxRows; r++) {
+          const bw = c * ori.w + (c - 1) * gH;
+          const bh = r * ori.h + (r - 1) * gV;
+          if (bw > areaW + 0.0001 || bh > areaH + 0.0001) continue;
+          opts.push({ cols: c, rows: r, pw: ori.w, ph: ori.h, rotated: ori.rot,
+                       blockW: bw, blockH: bh, count: c * r });
+        }
+      }
+    }
+    opts.sort((a, b) => b.count - a.count);
+    return opts;
+  }
+
+  // Pack blocks into a 2-stage horizontal layout:
+  //  - Sheet split into vertical "columns" (each as wide as the widest block in it)
+  //  - Within each column, blocks stacked vertically
+  // For each piece, we choose ONE block size and place it at most once per layout.
+  // (If a piece has many copies, they form a single big block.)
+  //
+  // We enumerate combinations of block-options per piece and try packing them.
+  function tryBlockLayout(uw, uh, pieceList, gH, gV) {
+    // pieceList items now also include `qty` for quantity-driven optimization.
+    // Strategy:
+    //  - If all pieces have qty>0: MINIMIZE sheets_needed = max(ceil(qty_i / count_i))
+    //    This makes piece types finish together (right ratios on the sheet)
+    //  - Otherwise: MAXIMIZE total piece count (the old behavior)
+    const requireAll = pieceList.length > 1;
+    const allHaveQty = pieceList.every(p => p.qty > 0);
+
+    function diversifiedOptions(p) {
+      const all = blockOptions(p.w, p.h, uw, uh, gH, gV);
+      if (all.length === 0) return [];
+      const maxCount = all[0].count;
+      const tiers = [maxCount, Math.ceil(maxCount * 0.75), Math.ceil(maxCount * 0.5),
+                     Math.ceil(maxCount * 0.25), Math.ceil(maxCount * 0.1),
+                     Math.max(2, Math.ceil(maxCount * 0.04)), 1];
+      const picks = new Set();
+      const result = [];
+      const add = (opt) => {
+        const key = `${opt.cols}x${opt.rows}x${opt.rotated?1:0}`;
+        if (picks.has(key)) return false;
+        picks.add(key);
+        result.push(opt);
+        return true;
+      };
+      for (const tier of tiers) {
+        const best = all.find(o => o.count <= tier);
+        if (best) add(best);
+      }
+      for (const o of all.slice(0, 8)) {
+        if (result.length >= 14) break;
+        add(o);
+      }
+      return result;
+    }
+
+    const optsPerPiece = pieceList.map(p => {
+      const opts = diversifiedOptions(p);
+      return requireAll ? opts : opts.concat([null]);
+    });
+
+    // Scoring: lower sheetsNeeded is better. Ties broken by higher score (cleaner cuts).
+    let bestLayout = { blocks: [], count: 0, score: 0, sheetsNeeded: Infinity };
+
+    function scoreCandidate(layout) {
+      if (!layout) return null;
+      let sheetsNeeded = Infinity;
+      if (allHaveQty) {
+        sheetsNeeded = 0;
+        for (let i = 0; i < pieceList.length; i++) {
+          const c = layout.blocks.filter(b => b.pieceIdx === pieceList[i].idx)
+                                  .reduce((s, b) => s + b.count, 0);
+          if (c === 0) return null; // a piece is missing
+          const need = Math.ceil(pieceList[i].qty / c);
+          if (need > sheetsNeeded) sheetsNeeded = need;
+        }
+      }
+      return { ...layout, sheetsNeeded };
+    }
+
+    function compareAndStore(layout) {
+      if (!layout || !layoutHasAllPieces(layout, pieceList, requireAll)) return;
+      const scored = scoreCandidate(layout);
+      if (!scored) return;
+      if (allHaveQty) {
+        // Minimize sheets needed; tiebreak on score (clean cuts), then total count
+        if (scored.sheetsNeeded < bestLayout.sheetsNeeded ||
+            (scored.sheetsNeeded === bestLayout.sheetsNeeded && scored.score > bestLayout.score) ||
+            (scored.sheetsNeeded === bestLayout.sheetsNeeded && scored.score === bestLayout.score && scored.count > bestLayout.count)) {
+          bestLayout = scored;
+        }
+      } else {
+        // Maximize total count; tiebreak on score
+        if (scored.count > bestLayout.count ||
+            (scored.count === bestLayout.count && scored.score > bestLayout.score)) {
+          bestLayout = scored;
+        }
+      }
+    }
+
+    const totalCombos = optsPerPiece.reduce((acc, opts) => acc * opts.length, 1);
+    const cap = 8000;
+    const step = totalCombos > cap ? Math.ceil(totalCombos / cap) : 1;
+
+    // Pack and score with the given choices (one block per piece type)
+    function tryPack(chosen) {
+      compareAndStore(packBlocksHorizontal(uw, uh, chosen, pieceList, gH, gV));
+      compareAndStore(packBlocksVertical(uw, uh, chosen, pieceList, gH, gV));
+    }
+
+    // For ratio matching, also try adding a secondary smaller block of any piece
+    // type. This allows non-rectangular piece counts like 7-up = (3x2 + 1).
+    function tryPackWithSecondary(chosen) {
+      tryPack(chosen);
+      // For each piece in the layout, try adding a secondary smaller block
+      for (let pi = 0; pi < pieceList.length; pi++) {
+        if (!chosen[pi]) continue;
+        const primaryCount = chosen[pi].count;
+        // candidate secondaries: same piece, smaller count
+        const opts = optsPerPiece[pi];
+        for (const sec of opts) {
+          if (!sec || sec.count >= primaryCount) continue;
+          const augmented = chosen.map((c, i) =>
+            i === pi ? { ...c, _secondary: sec } : c
+          );
+          // Build a new "chosen" array with the secondary inserted as if it
+          // were another piece. We expand pieceList virtually.
+          const expandedChosen = [...chosen, sec];
+          const expandedPieceList = [...pieceList, { ...pieceList[pi], idx: pieceList[pi].idx }];
+          compareAndStore(packBlocksHorizontal(uw, uh, expandedChosen, expandedPieceList, gH, gV));
+          compareAndStore(packBlocksVertical(uw, uh, expandedChosen, expandedPieceList, gH, gV));
+        }
+      }
+    }
+
+    function enumerate(idx, chosen) {
+      if (idx === pieceList.length) {
+        tryPackWithSecondary(chosen);
+        return;
+      }
+      const opts = optsPerPiece[idx];
+      for (let i = 0; i < opts.length; i += step) {
+        chosen.push(opts[i]);
+        enumerate(idx + 1, chosen);
+        chosen.pop();
+      }
+    }
+    enumerate(0, []);
+
+    // Fallback: if requireAll was on and nothing fit, relax it
+    if (requireAll && bestLayout.count === 0) {
+      const relaxedOpts = pieceList.map(p =>
+        diversifiedOptions(p).concat([null])
+      );
+      function enumerateRelaxed(idx, chosen) {
+        if (idx === pieceList.length) {
+          const layout = packBlocksHorizontal(uw, uh, chosen, pieceList, gH, gV);
+          if (layout && layout.count > bestLayout.count) bestLayout = layout;
+          const layoutV = packBlocksVertical(uw, uh, chosen, pieceList, gH, gV);
+          if (layoutV && layoutV.count > bestLayout.count) bestLayout = layoutV;
+          return;
+        }
+        const opts = relaxedOpts[idx];
+        for (let i = 0; i < opts.length; i += step) {
+          chosen.push(opts[i]);
+          enumerateRelaxed(idx + 1, chosen);
+          chosen.pop();
+        }
+      }
+      enumerateRelaxed(0, []);
+    }
+
+    return bestLayout;
+  }
+
+  function layoutHasAllPieces(layout, pieceList, requireAll) {
+    if (!requireAll) return true;
+    const present = new Set(layout.blocks.map(b => b.pieceIdx));
+    return present.size === pieceList.length;
+  }
+
+  // Pack chosen blocks left-to-right in vertical columns.
+  // Each block occupies x-space = block.blockW; columns stack blocks vertically.
+  // Returns null if nothing fits.
+  function packBlocksHorizontal(uw, uh, chosen, pieceList, gH, gV) {
+    // Collect non-null blocks with piece index
+    const blocks = [];
+    for (let i = 0; i < chosen.length; i++) {
+      if (chosen[i]) blocks.push({ ...chosen[i], pieceIdx: pieceList[i].idx });
+    }
+    if (blocks.length === 0) return null;
+    // Sort blocks tallest first (helps stacking)
+    blocks.sort((a, b) => b.blockH - a.blockH);
+
+    // Columns are placed left-to-right. Each column = list of stacked blocks.
+    const columns = []; // each: {x, width, usedH, items: [{block, y}] }
+    for (const b of blocks) {
+      // Try to fit in existing column whose width >= block.blockW
+      // and remaining height (uh - usedH - gV) >= block.blockH
+      let placed = false;
+      for (const col of columns) {
+        if (col.width >= b.blockW - 0.0001) {
+          const need = b.blockH + (col.items.length > 0 ? gV : 0);
+          if (col.usedH + need <= uh + 0.0001) {
+            const y = col.items.length > 0 ? col.usedH + gV : 0;
+            col.items.push({ block: b, y });
+            col.usedH = y + b.blockH;
+            placed = true;
+            break;
+          }
+        }
+      }
+      if (!placed) {
+        // Start a new column to the right of the last
+        const xStart = columns.length > 0
+          ? columns[columns.length - 1].x + columns[columns.length - 1].width + gH
+          : 0;
+        if (xStart + b.blockW > uw + 0.0001) continue; // can't fit
+        columns.push({
+          x: xStart,
+          width: b.blockW,
+          usedH: b.blockH,
+          items: [{ block: b, y: 0 }]
+        });
+      }
+    }
+
+    // Build final block list with absolute coords
+    const out = [];
+    let totalCount = 0;
+    for (const col of columns) {
+      for (const it of col.items) {
+        const b = it.block;
+        out.push({
+          x: col.x, y: it.y,
+          cols: b.cols, rows: b.rows,
+          pw: b.pw, ph: b.ph, rotated: b.rotated,
+          blockW: b.blockW, blockH: b.blockH,
+          count: b.count,
+          pieceIdx: b.pieceIdx,
+        });
+        totalCount += b.count;
+      }
+    }
+    if (totalCount === 0) return null;
+    return { blocks: out, count: totalCount, score: scoreLayout(out, uw, uh) };
+  }
+
+  // Same as packBlocksHorizontal but pack top-to-bottom in horizontal rows.
+  function packBlocksVertical(uw, uh, chosen, pieceList, gH, gV) {
+    const blocks = [];
+    for (let i = 0; i < chosen.length; i++) {
+      if (chosen[i]) blocks.push({ ...chosen[i], pieceIdx: pieceList[i].idx });
+    }
+    if (blocks.length === 0) return null;
+    blocks.sort((a, b) => b.blockW - a.blockW);
+
+    const rows = [];
+    for (const b of blocks) {
+      let placed = false;
+      for (const row of rows) {
+        if (row.height >= b.blockH - 0.0001) {
+          const need = b.blockW + (row.items.length > 0 ? gH : 0);
+          if (row.usedW + need <= uw + 0.0001) {
+            const x = row.items.length > 0 ? row.usedW + gH : 0;
+            row.items.push({ block: b, x });
+            row.usedW = x + b.blockW;
+            placed = true;
+            break;
+          }
+        }
+      }
+      if (!placed) {
+        const yStart = rows.length > 0
+          ? rows[rows.length - 1].y + rows[rows.length - 1].height + gV
+          : 0;
+        if (yStart + b.blockH > uh + 0.0001) continue;
+        rows.push({
+          y: yStart,
+          height: b.blockH,
+          usedW: b.blockW,
+          items: [{ block: b, x: 0 }]
+        });
+      }
+    }
+
+    const out = [];
+    let totalCount = 0;
+    for (const row of rows) {
+      for (const it of row.items) {
+        const b = it.block;
+        out.push({
+          x: it.x, y: row.y,
+          cols: b.cols, rows: b.rows,
+          pw: b.pw, ph: b.ph, rotated: b.rotated,
+          blockW: b.blockW, blockH: b.blockH,
+          count: b.count,
+          pieceIdx: b.pieceIdx,
+        });
+        totalCount += b.count;
+      }
+    }
+    if (totalCount === 0) return null;
+    return { blocks: out, count: totalCount, score: scoreLayout(out, uw, uh) };
+  }
+
+  // Score a layout: higher = better cut-friendliness. We reward:
+  //  - Fewer total blocks (less complexity)
+  //  - Blocks that share x or y coordinates (aligned cut lines)
+  function scoreLayout(blocks, uw, uh) {
+    if (blocks.length === 0) return 0;
+    const round = v => Math.round(v * 100) / 100;
+    const xLines = new Set();
+    const yLines = new Set();
+    for (const b of blocks) {
+      xLines.add(round(b.x));
+      xLines.add(round(b.x + b.blockW));
+      yLines.add(round(b.y));
+      yLines.add(round(b.y + b.blockH));
+    }
+    // Fewer unique cut lines = cleaner. Score inversely.
+    const lineCount = xLines.size + yLines.size;
+    const blockCount = blocks.length;
+    return 1000 - lineCount * 5 - blockCount * 10;
+  }
+
+  function multiPieceLayout(uw, uh, gH, gV) {
+    const flipped = $('flipPiece') && $('flipPiece').checked;
+    const pieceList = pieces.map((p, i) => ({
+      w: flipped ? p.h : p.w,
+      h: flipped ? p.w : p.h,
+      qty: p.qty || 0,
+      idx: i,
+    }));
+    const result = tryBlockLayout(uw, uh, pieceList, gH, gV);
+    if (!result || result.count === 0) {
+      return { placements: [], count: 0, byPiece: {} };
+    }
+    // Expand blocks into individual piece placements
+    const placements = [];
+    for (const b of result.blocks) {
+      for (let c = 0; c < b.cols; c++) {
+        for (let r = 0; r < b.rows; r++) {
+          placements.push({
+            x: b.x + c * (b.pw + gH),
+            y: b.y + r * (b.ph + gV),
+            w: b.pw, h: b.ph,
+            pieceIdx: b.pieceIdx,
+            rotated: b.rotated,
+          });
+        }
+      }
+    }
+    const byPiece = {};
+    for (const pl of placements) byPiece[pl.pieceIdx] = (byPiece[pl.pieceIdx] || 0) + 1;
+    return { placements, count: placements.length, byPiece, blocks: result.blocks };
+  }
+
+  // ============ COMPUTE (multi) ============
+  function computeMulti() {
+    let SW = +sheetW.value || 0;
+    let SH = +sheetH.value || 0;
+    if (SH > SW) { const tmp = SW; SW = SH; SH = tmp; }
+    const GH = Math.max(0, +gutter.value || 0);
+    const GV = Math.max(0, +gutterV.value || 0);
+    const M  = Math.max(0, +margin.value || 0);
+    const SG = Math.max(0, +sideGuide.value || 0);
+    const grain = document.querySelector('input[name="grain"]:checked').value;
+
+    const uw = Math.max(0, SW - M);
+    const uh = Math.max(0, SH - SG);
+
+    const result = multiPieceLayout(uw, uh, GH, GV);
+
+    // ----- update results -----
+    $('r-nup').textContent = result.count;
+    if (result.count === 0) {
+      $('r-nup-sub').textContent = 'no pieces fit';
+    } else {
+      const parts = pieces.map((p, i) => {
+        const c = result.byPiece[i] || 0;
+        return c > 0 ? `${c}× ${p.name.replace(/^Piece /, '')}` : null;
+      }).filter(Boolean);
+      $('r-nup-sub').textContent = parts.join(' · ');
+    }
+
+    // ----- sheets needed -----
+    // For each piece type, compute ceil(qty / count_on_sheet).
+    // Total sheets = max across all piece types (the slowest piece to satisfy
+    // dictates the run length).
+    let sheetsNeeded = 0;
+    let limitingPiece = null;
+    let anyHasQty = false;
+    if (result.count > 0) {
+      for (let i = 0; i < pieces.length; i++) {
+        const p = pieces[i];
+        const c = result.byPiece[i] || 0;
+        if (p.qty > 0) anyHasQty = true;
+        if (p.qty > 0 && c > 0) {
+          const need = Math.ceil(p.qty / c);
+          if (need > sheetsNeeded) {
+            sheetsNeeded = need;
+            limitingPiece = p.name;
+          }
+        } else if (p.qty > 0 && c === 0) {
+          // This piece needs to be produced but doesn't fit. Flag it.
+          sheetsNeeded = Infinity;
+          limitingPiece = p.name + ' (does not fit)';
+          break;
+        }
+      }
+    }
+    if (sheetsNeeded === Infinity) {
+      $('r-sheets').textContent = '—';
+      $('r-sheets-sub').textContent = limitingPiece;
+    } else if (sheetsNeeded > 0) {
+      $('r-sheets').textContent = sheetsNeeded.toLocaleString();
+      $('r-sheets-sub').textContent = limitingPiece
+        ? `limited by ${limitingPiece.replace(/^Piece /, '')}`
+        : 'to run job';
+    } else if (result.count === 0) {
+      $('r-sheets').textContent = '—';
+      $('r-sheets-sub').textContent = 'no pieces fit';
+    } else {
+      $('r-sheets').textContent = '—';
+      $('r-sheets-sub').textContent = 'enter quantities';
+    }
+
+    const sheetArea = SW * SH;
+    let usedArea = 0;
+    for (const pl of result.placements) usedArea += pl.w * pl.h;
+    const wasteArea = Math.max(0, sheetArea - usedArea);
+    const wastePct  = sheetArea > 0 ? (wasteArea / sheetArea) * 100 : 0;
+
+    // Cuts: hard to compute exactly for arbitrary nested layouts.
+    // Approximation: count distinct horizontal + vertical cut lines.
+    const cuts = approximateCuts(result.placements, uw, uh);
+    $('r-cuts').textContent = cuts;
+    const bleedH = GH > 0, bleedV = GV > 0;
+    let bleedLabel;
+    if (bleedH && bleedV) bleedLabel = 'with bleed';
+    else if (!bleedH && !bleedV) bleedLabel = 'no bleed';
+    else bleedLabel = bleedH ? 'horiz bleed only' : 'vert bleed only';
+    $('r-cuts-sub').textContent = bleedLabel;
+
+    $('r-waste').innerHTML = wastePct.toFixed(1) + '<span class="unit">%</span>';
+    $('r-waste-sub').textContent = 'unused area';
+
+    // Grain analysis across all placements
+    if (result.placements.length === 0) {
+      $('r-grain').textContent = '—';
+      $('r-grain-sub').textContent = 'no pieces fit';
+    } else {
+      let withGrain = 0, crossGrain = 0;
+      for (const pl of result.placements) {
+        const orig = pieces[pl.pieceIdx];
+        const longEdgeAlongSheetW = pl.w >= pl.h;
+        const grainAlongSheetW = grain === 'long';
+        const inGrain = (longEdgeAlongSheetW === grainAlongSheetW);
+        if (inGrain) withGrain++; else crossGrain++;
+      }
+      if (crossGrain === 0) {
+        $('r-grain').textContent = 'With grain';
+        $('r-grain-sub').textContent = `${withGrain} pcs aligned`;
+      } else if (withGrain === 0) {
+        $('r-grain').textContent = 'Cross grain';
+        $('r-grain-sub').textContent = `${crossGrain} pcs across`;
+      } else {
+        $('r-grain').textContent = 'Mixed';
+        $('r-grain-sub').textContent = `${withGrain} with · ${crossGrain} cross`;
+      }
+    }
+
+    // hide alt-note
+    $('alt-note').style.display = 'none';
+
+    // ----- render -----
+    renderMulti(SW, SH, M, SG, result.placements, grain);
+  }
+
+  function approximateCuts(placements, uw, uh) {
+    if (placements.length === 0) return 0;
+    // Collect all unique vertical cut lines (x-coords of piece edges)
+    // and horizontal cut lines (y-coords). Cuts = unique edges + 4 trim cuts
+    // (already implied by 0 and uw / uh).
+    const xLines = new Set();
+    const yLines = new Set();
+    const round = v => Math.round(v * 1000) / 1000;
+    for (const pl of placements) {
+      xLines.add(round(pl.x));
+      xLines.add(round(pl.x + pl.w));
+      yLines.add(round(pl.y));
+      yLines.add(round(pl.y + pl.h));
+    }
+    // Each unique x line is a vertical cut; each unique y line is horizontal.
+    // With bleed each gutter creates two adjacent lines (already counted as 2).
+    // Without bleed, adjacent pieces share an edge so we don't double-count.
+    return xLines.size + yLines.size;
+  }
+
+  // ============ RENDER (multi) ============
+  function renderMulti(SW, SH, M, SG, placements, grain) {
+    if (SW <= 0 || SH <= 0) { svg.innerHTML = ''; return; }
+    const pad = Math.max(SW, SH) * 0.04;
+    const vbW = SW + pad * 2;
+    const vbH = SH + pad * 2;
+    svg.setAttribute('viewBox', `0 0 ${vbW} ${vbH}`);
+
+    const stroke = Math.max(SW, SH) * 0.004;
+    const tinyStroke = stroke * 0.7;
+    let out = '';
+
+    // shadow + sheet
+    out += `<rect x="${pad + SW * 0.005}" y="${pad + SW * 0.005}" width="${SW}" height="${SH}" fill="#1a161220" />`;
+    out += `<rect x="${pad}" y="${pad}" width="${SW}" height="${SH}" fill="var(--sheet-fill)" stroke="var(--rule-bold)" stroke-width="${stroke}" />`;
+
+    // grain pattern
+    const grainStep = Math.max(SW, SH) * 0.025;
+    const grainStroke = tinyStroke * 0.8;
+    if (grain === 'long') {
+      for (let y = pad + grainStep; y < pad + SH; y += grainStep) {
+        out += `<line x1="${pad}" y1="${y}" x2="${pad + SW}" y2="${y}" stroke="var(--grain-color)" stroke-width="${grainStroke}" stroke-dasharray="${grainStep * 0.2} ${grainStep * 0.15}" opacity="0.35" />`;
+      }
+    } else {
+      for (let x = pad + grainStep; x < pad + SW; x += grainStep) {
+        out += `<line x1="${x}" y1="${pad}" x2="${x}" y2="${pad + SH}" stroke="var(--grain-color)" stroke-width="${grainStroke}" stroke-dasharray="${grainStep * 0.2} ${grainStep * 0.15}" opacity="0.35" />`;
+      }
+    }
+
+    // usable area outline
+    const uw = Math.max(0, SW - M);
+    const uh = Math.max(0, SH - SG);
+    if ((M > 0 || SG > 0) && uw > 0 && uh > 0) {
+      out += `<rect x="${pad + M}" y="${pad + SG}" width="${uw}" height="${uh}" fill="none" stroke="var(--rule-bold)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 2}" opacity="0.35" />`;
+    }
+
+    // compute bounding box of all placements to center the layout
+    let bbMinX = Infinity, bbMinY = Infinity, bbMaxX = -Infinity, bbMaxY = -Infinity;
+    for (const pl of placements) {
+      if (pl.x < bbMinX) bbMinX = pl.x;
+      if (pl.y < bbMinY) bbMinY = pl.y;
+      if (pl.x + pl.w > bbMaxX) bbMaxX = pl.x + pl.w;
+      if (pl.y + pl.h > bbMaxY) bbMaxY = pl.y + pl.h;
+    }
+    let offsetX = 0, offsetY = 0;
+    if (isFinite(bbMinX)) {
+      const layoutW = bbMaxX - bbMinX;
+      const layoutH = bbMaxY - bbMinY;
+      offsetX = (uw - layoutW) / 2 - bbMinX;
+      offsetY = (uh - layoutH) / 2 - bbMinY;
+    }
+
+    // pieces
+    for (const pl of placements) {
+      const color = PIECE_COLORS[pl.pieceIdx % PIECE_COLORS.length];
+      const px = pad + M + offsetX + pl.x;
+      const py = pad + SG + offsetY + pl.y;
+      out += `<rect x="${px}" y="${py}" width="${pl.w}" height="${pl.h}" fill="${color.fill}" stroke="${color.stroke}" stroke-width="${tinyStroke * 1.4}" />`;
+      // piece label (piece letter) at center
+      const labelText = String.fromCharCode(65 + pl.pieceIdx);
+      const fs = Math.min(pl.w, pl.h) * 0.25;
+      out += `<text x="${px + pl.w/2}" y="${py + pl.h/2 + fs * 0.35}" font-family="Fraunces, serif" font-weight="700" font-size="${fs}" text-anchor="middle" fill="${color.stroke}" opacity="0.55">${labelText}</text>`;
+    }
+
+    // sheet dim labels
+    const fontSize = Math.max(SW, SH) * 0.025;
+    out += `<text x="${pad + SW / 2}" y="${pad - pad * 0.3}" font-family="DM Mono, monospace" font-size="${fontSize}" text-anchor="middle" fill="var(--ink)" opacity="0.7">${SW}"</text>`;
+    out += `<text x="${pad - pad * 0.3}" y="${pad + SH / 2}" font-family="DM Mono, monospace" font-size="${fontSize}" text-anchor="middle" fill="var(--ink)" opacity="0.7" transform="rotate(-90 ${pad - pad * 0.3} ${pad + SH / 2})">${SH}"</text>`;
+
+    svg.innerHTML = out;
+  }
+
+  // ============ ROUTER ============
+  function computeRouter() {
+    const mode = document.querySelector('input[name="docMode"]:checked').value;
+    if (mode === 'multi') computeMulti();
+    else compute();
+  }
+
   // ============ WIRE UP ============
   document.querySelectorAll('input, select').forEach(el => {
-    el.addEventListener('input', compute);
-    el.addEventListener('change', compute);
+    el.addEventListener('input', computeRouter);
+    el.addEventListener('change', computeRouter);
   });
-  compute();
+  computeRouter();
 </script>
 </body>
 </html>
