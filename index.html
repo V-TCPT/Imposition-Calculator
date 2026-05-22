@@ -381,6 +381,34 @@
 
   /* doc mode toggle (Single / Multi) end */
 
+  /* paper readout */
+  .paper-readout {
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .readout-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .readout-lbl {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .readout-val {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
   .preset-row {
     /* preset chips removed — left blank for any future use */
     display: none;
@@ -827,6 +855,87 @@
         </div>
       </div>
 
+      <div style="height: 14px"></div>
+
+      <div class="panel" data-label="Paper">
+        <div class="field">
+          <label>Paper type</label>
+          <select id="paperType">
+            <option value="text" selected>Text</option>
+            <option value="cover">Cover</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Basis weight (lb)</label>
+          <input type="number" id="basisWeight" value="80" min="1" step="1" />
+        </div>
+        <div class="field">
+          <label>Cost ($ per M sheets)</label>
+          <input type="number" id="paperCost" value="0" min="0" step="0.01" />
+          <div class="inline-help">Paper cost per 1,000 sheets. Leave at 0 to skip cost.</div>
+        </div>
+        <div class="paper-readout">
+          <div class="readout-row">
+            <span class="readout-lbl">M-weight</span>
+            <span class="readout-val" id="r-mweight">—</span>
+          </div>
+          <div class="readout-row">
+            <span class="readout-lbl">Finished piece weight</span>
+            <span class="readout-val" id="r-pieceweight">—</span>
+          </div>
+          <div class="readout-row">
+            <span class="readout-lbl">Paper cost</span>
+            <span class="readout-val" id="r-paperCost">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 14px"></div>
+
+      <div class="panel" data-label="Lamination">
+        <div class="field">
+          <label>Apply lamination</label>
+          <div class="grain-toggle">
+            <input type="radio" name="lamOn" id="lamOff" value="off" checked />
+            <label for="lamOff">Off</label>
+            <input type="radio" name="lamOn" id="lamOn" value="on" />
+            <label for="lamOn">On</label>
+          </div>
+        </div>
+        <div id="lam-fields" style="display: none;">
+          <div class="field">
+            <label>Sides</label>
+            <div class="grain-toggle">
+              <input type="radio" name="lamSides" id="lamSides1" value="1" />
+              <label for="lamSides1">1-side</label>
+              <input type="radio" name="lamSides" id="lamSides2" value="2" checked />
+              <label for="lamSides2">2-sides</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Film type</label>
+            <select id="lamFilm">
+              <option value="pet_12_g" data-sides="1">1.2 mil</option>
+              <option value="glueble_12" data-sides="1">1.2 mil Glueble/Stampable</option>
+              <option value="pet_17_g" data-sides="1,2" selected>1.7 mil</option>
+              <option value="pet_30_g" data-sides="1,2">3 mil</option>
+              <option value="pet_50_g" data-sides="2">5 mil</option>
+              <option value="pet_100_g" data-sides="2">10 mil</option>
+            </select>
+          </div>
+          <div class="paper-readout">
+            <div class="readout-row">
+              <span class="readout-lbl">Lamination weight</span>
+              <span class="readout-val" id="r-lamweight">—</span>
+            </div>
+            <div class="readout-row">
+              <span class="readout-lbl">Total piece weight</span>
+              <span class="readout-val" id="r-totalweight">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </aside>
 
     <!-- ============ OUTPUT ============ -->
@@ -1134,8 +1243,10 @@
 
     // ----- sheets needed -----
     const qty = Math.max(0, +($('docQty')?.value) || 0);
+    __sheetsNeeded = 0;
     if (chosen.count > 0 && qty > 0) {
       const sheetsNeeded = Math.ceil(qty / chosen.count);
+      __sheetsNeeded = sheetsNeeded;
       $('r-sheets').textContent = sheetsNeeded.toLocaleString();
       $('r-sheets-sub').textContent = `for ${qty.toLocaleString()} pcs`;
     } else if (chosen.count === 0) {
@@ -1849,17 +1960,21 @@
       }
     }
     if (sheetsNeeded === Infinity) {
+      __sheetsNeeded = 0;
       $('r-sheets').textContent = '—';
       $('r-sheets-sub').textContent = limitingPiece;
     } else if (sheetsNeeded > 0) {
+      __sheetsNeeded = sheetsNeeded;
       $('r-sheets').textContent = sheetsNeeded.toLocaleString();
       $('r-sheets-sub').textContent = limitingPiece
         ? `limited by ${limitingPiece.replace(/^Piece /, '')}`
         : 'to run job';
     } else if (result.count === 0) {
+      __sheetsNeeded = 0;
       $('r-sheets').textContent = '—';
       $('r-sheets-sub').textContent = 'no pieces fit';
     } else {
+      __sheetsNeeded = 0;
       $('r-sheets').textContent = '—';
       $('r-sheets-sub').textContent = 'enter quantities';
     }
@@ -2009,10 +2124,207 @@
   }
 
   // ============ ROUTER ============
+  // ============ PAPER M-WEIGHT ============
+  // Basis sizes (W × H, inches) per paper type
+  const BASIS_SIZES = {
+    text:    { w: 25,   h: 38 },   // Text / Book / Offset
+    cover:   { w: 20,   h: 26 },   // Cover
+    bond:    { w: 17,   h: 22 },   // Bond / Writing
+    bristol: { w: 22.5, h: 28.5 }, // Bristol / Index
+  };
+
+  // ============ LAMINATION ============
+  // Coefficients = lbs per square inch per side.
+  // Derived from: density (g/cm³) × 0.0361273 (lb/in³) × thickness (inches)
+  // Densities: PET 1.40, Nylon 1.14, PP 0.905, Glueble (PET/EVA) 1.35
+  const LAMINATION_FILMS = {
+    glueble_12: 0.00005853,   // 1.2 mil Glueble/Stampable
+    nylon_12_g: 0.00004942,   // 1.2 mil Nylon clear/gloss
+    nylon_12_m: 0.00004942,   // 1.2 mil Nylon matte
+    pp_12_g:    0.00003923,   // 1.2 mil Polypropylene clear/gloss
+    pp_12_m:    0.00003923,   // 1.2 mil Polypropylene matte
+    pet_12_g:   0.00006069,   // 1.2 mil Polyester clear/gloss
+    pet_12_m:   0.00006069,   // 1.2 mil Polyester matte
+    pet_17_g:   0.00008598,   // 1.7 mil Polyester clear/gloss
+    pet_17_m:   0.00008598,   // 1.7 mil Polyester matte
+    pet_30_g:   0.00015173,   // 3.0 mil Polyester clear/gloss
+    pet_30_m:   0.00015173,   // 3.0 mil Polyester matte
+    pet_50_g:   0.00025289,   // 5.0 mil Polyester clear/gloss
+    pet_100_g:  0.00050578,   // 10.0 mil Polyester clear/gloss
+  };
+
+  function updateLamination(finishedPiecesLbs) {
+    // returns the lamination weight in lbs (for the whole job)
+    const lamOn = document.querySelector('input[name="lamOn"]:checked').value === 'on';
+    if (!lamOn) {
+      $('r-lamweight').textContent = '—';
+      $('r-totalweight').textContent = '—';
+      return 0;
+    }
+    const film = $('lamFilm').value;
+    const sides = +document.querySelector('input[name="lamSides"]:checked').value;
+    const coef = LAMINATION_FILMS[film] || 0;
+
+    // Compute total laminated square inches across all pieces
+    let totalSqIn = 0;
+    const mode = document.querySelector('input[name="docMode"]:checked').value;
+    if (mode === 'multi') {
+      for (const p of pieces) {
+        if (p.w > 0 && p.h > 0 && p.qty > 0) {
+          totalSqIn += p.w * p.h * p.qty;
+        }
+      }
+    } else {
+      const pw = +docW.value || 0;
+      const ph = +docH.value || 0;
+      const qty = +$('docQty').value || 0;
+      if (pw > 0 && ph > 0 && qty > 0) {
+        totalSqIn = pw * ph * qty;
+      }
+    }
+
+    function formatLbs(lbs) {
+      if (lbs >= 100) return lbs.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' lbs';
+      return lbs.toFixed(2) + ' lbs';
+    }
+
+    let lamLbs = 0;
+    if (totalSqIn > 0 && coef > 0) {
+      lamLbs = totalSqIn * sides * coef;
+      $('r-lamweight').textContent = formatLbs(lamLbs);
+    } else {
+      $('r-lamweight').textContent = '—';
+    }
+
+    // Total piece weight = finished paper + lamination
+    if (finishedPiecesLbs > 0 && lamLbs > 0) {
+      $('r-totalweight').textContent = formatLbs(finishedPiecesLbs + lamLbs);
+    } else if (finishedPiecesLbs > 0) {
+      $('r-totalweight').textContent = formatLbs(finishedPiecesLbs);
+    } else {
+      $('r-totalweight').textContent = '—';
+    }
+
+    return lamLbs;
+  }
+
+  // Show/hide the lamination fields based on the on/off toggle
+  document.querySelectorAll('input[name="lamOn"]').forEach(el => {
+    el.addEventListener('change', () => {
+      const on = document.querySelector('input[name="lamOn"]:checked').value === 'on';
+      $('lam-fields').style.display = on ? '' : 'none';
+    });
+  });
+
+  // Sides ↔ film type constraint:
+  //  1-side films:  1.2 mil, 1.2 mil Glueble/Stampable, 1.7 mil, 3 mil
+  //  2-side films:  1.7 mil, 3 mil, 5 mil, 10 mil
+  // Each <option> declares its allowed sides via `data-sides` (CSV: "1", "2", or "1,2")
+  function syncLamConstraints() {
+    const sides = document.querySelector('input[name="lamSides"]:checked').value;
+    const filmSel = $('lamFilm');
+    let needSnap = false;
+    for (const opt of filmSel.options) {
+      const allowed = (opt.getAttribute('data-sides') || '1,2').split(',');
+      const ok = allowed.includes(sides);
+      opt.disabled = !ok;
+      if (!ok && filmSel.value === opt.value) needSnap = true;
+    }
+    if (needSnap) {
+      for (const opt of filmSel.options) {
+        if (!opt.disabled) { filmSel.value = opt.value; break; }
+      }
+    }
+  }
+  document.querySelectorAll('input[name="lamSides"]').forEach(el => {
+    el.addEventListener('change', syncLamConstraints);
+  });
+  // If user picks a film that doesn't allow the current sides, auto-switch sides
+  $('lamFilm').addEventListener('change', () => {
+    const sel = $('lamFilm').options[$('lamFilm').selectedIndex];
+    const allowed = (sel.getAttribute('data-sides') || '1,2').split(',');
+    const currentSides = document.querySelector('input[name="lamSides"]:checked').value;
+    if (!allowed.includes(currentSides)) {
+      // Snap sides to the first allowed value for this film
+      const target = allowed[0];
+      document.getElementById('lamSides' + target).checked = true;
+      syncLamConstraints();
+    }
+  });
+  syncLamConstraints();
+
+  function updatePaper(sheetsNeeded) {
+    let SW = +sheetW.value || 0;
+    let SH = +sheetH.value || 0;
+    if (SH > SW) { const tmp = SW; SW = SH; SH = tmp; }
+    const basisLb = +$('basisWeight').value || 0;
+    const paperType = $('paperType').value;
+    const costPerM = +$('paperCost').value || 0;
+    const basis = BASIS_SIZES[paperType] || BASIS_SIZES.text;
+    const basisArea = basis.w * basis.h;
+
+    function formatLbs(lbs) {
+      if (lbs >= 100) {
+        return lbs.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' lbs';
+      }
+      return lbs.toFixed(2) + ' lbs';
+    }
+
+    // M-weight at press sheet size: lbs per 1,000 sheets
+    const sheetArea = SW * SH;
+    let mWeight = 0;
+    if (sheetArea > 0 && basisArea > 0 && basisLb > 0) {
+      mWeight = (sheetArea / basisArea) * basisLb * 2;
+    }
+    $('r-mweight').textContent = mWeight > 0 ? mWeight.toFixed(1) + ' lb / M' : '—';
+
+    // Finished piece weight: sum over each piece of its own M-weight × (qty / 1000)
+    // This is the theoretical weight of the finished pieces (excludes waste).
+    let finishedLbs = 0;
+    let haveFinishedData = false;
+    if (basisArea > 0 && basisLb > 0) {
+      const mode = document.querySelector('input[name="docMode"]:checked').value;
+      if (mode === 'multi') {
+        for (const p of pieces) {
+          if (p.w > 0 && p.h > 0 && p.qty > 0) {
+            const pieceM = (p.w * p.h / basisArea) * basisLb * 2;
+            finishedLbs += pieceM * (p.qty / 1000);
+            haveFinishedData = true;
+          }
+        }
+      } else {
+        const pw = +docW.value || 0;
+        const ph = +docH.value || 0;
+        const qty = +$('docQty').value || 0;
+        if (pw > 0 && ph > 0 && qty > 0) {
+          const pieceM = (pw * ph / basisArea) * basisLb * 2;
+          finishedLbs = pieceM * (qty / 1000);
+          haveFinishedData = true;
+        }
+      }
+    }
+    $('r-pieceweight').textContent = haveFinishedData ? formatLbs(finishedLbs) : '—';
+
+    // Paper cost: cost_per_M × (sheets / 1000)
+    if (costPerM > 0 && sheetsNeeded > 0 && isFinite(sheetsNeeded)) {
+      const jobCost = costPerM * (sheetsNeeded / 1000);
+      $('r-paperCost').textContent = '$' + jobCost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    } else {
+      $('r-paperCost').textContent = '—';
+    }
+
+    return finishedLbs;
+  }
+
+  // Shared between compute paths so updatePaper() can find it
+  let __sheetsNeeded = 0;
+
   function computeRouter() {
     const mode = document.querySelector('input[name="docMode"]:checked').value;
     if (mode === 'multi') computeMulti();
     else compute();
+    const finishedLbs = updatePaper(__sheetsNeeded);
+    updateLamination(finishedLbs);
   }
 
   // ============ WIRE UP ============
