@@ -409,6 +409,90 @@
     color: var(--ink);
   }
 
+  /* ---- MATERIALS STRIP (Paper + Lamination above visualizer) ---- */
+  .materials-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+  }
+  .mat-panel {
+    background: var(--paper-2);
+    border: 1px solid var(--rule-bold);
+    padding: 10px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mat-title {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+    opacity: 0.85;
+  }
+  .mat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    align-items: end;
+  }
+  .mat-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+  .mat-field > span {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .mat-field input[type="number"],
+  .mat-field select {
+    padding: 5px 7px;
+    font-size: 12px;
+    width: 100%;
+  }
+  .grain-toggle.compact label {
+    padding: 5px 6px;
+    font-size: 10px;
+  }
+  .mat-readout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule);
+  }
+  .mat-lam .mat-readout {
+    grid-template-columns: 1fr 1fr;
+  }
+  .mat-r {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .mat-r span {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .mat-r b {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  @media (max-width: 860px) {
+    .materials-strip {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .preset-row {
     /* preset chips removed — left blank for any future use */
     display: none;
@@ -794,6 +878,24 @@
           </div>
           <div class="inline-help">Grain runs parallel to this dimension.</div>
         </div>
+        <div class="field">
+          <label>Bleed (horizontal × vertical)</label>
+          <div class="row">
+            <input type="number" id="gutter" value="0.125" min="0" step="0.0625" />
+            <span class="x">×</span>
+            <input type="number" id="gutterV" value="0.125" min="0" step="0.0625" />
+          </div>
+          <div class="inline-help">Horizontal: between columns. Vertical: between rows.</div>
+        </div>
+        <div class="field">
+          <label>Gripper × Side guide</label>
+          <div class="row">
+            <input type="number" id="margin" value="0.75" min="0" step="0.0625" />
+            <span class="x">×</span>
+            <input type="number" id="sideGuide" value="0.375" min="0" step="0.0625" />
+          </div>
+          <div class="inline-help">Gripper: actual <b>0.25"</b> + <b>0.5"</b> color bar. Side guide: <b>0.25"</b> for digital press.</div>
+        </div>
       </div>
 
       <div style="height: 14px"></div>
@@ -833,107 +935,6 @@
             <button type="button" id="add-piece" class="btn-add">+ Add piece</button>
           </div>
         </div>
-
-        <div class="field">
-          <label>Bleed (horizontal × vertical)</label>
-          <div class="row">
-            <input type="number" id="gutter" value="0.125" min="0" step="0.0625" />
-            <span class="x">×</span>
-            <input type="number" id="gutterV" value="0.125" min="0" step="0.0625" />
-          </div>
-          <div class="inline-help">Horizontal: between columns. Vertical: between rows.</div>
-        </div>
-        <div class="field">
-          <label>Gripper margin</label>
-          <input type="number" id="margin" value="0.75" min="0" step="0.0625" />
-          <div class="inline-help">Actual gripper is <b>0.25"</b>; <b>0.5"</b> added for color bar.</div>
-        </div>
-        <div class="field">
-          <label>Side guide</label>
-          <input type="number" id="sideGuide" value="0.375" min="0" step="0.0625" />
-          <div class="inline-help">Side edge reserved for side-guide registration. Adjust to <b>0.25"</b> for digital press.</div>
-        </div>
-      </div>
-
-      <div style="height: 14px"></div>
-
-      <div class="panel" data-label="Paper">
-        <div class="field">
-          <label>Paper type</label>
-          <select id="paperType">
-            <option value="text" selected>Text</option>
-            <option value="cover">Cover</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Basis weight (lb)</label>
-          <input type="number" id="basisWeight" value="80" min="1" step="1" />
-        </div>
-        <div class="field">
-          <label>Cost ($ per M sheets)</label>
-          <input type="number" id="paperCost" value="0" min="0" step="0.01" />
-          <div class="inline-help">Paper cost per 1,000 sheets. Leave at 0 to skip cost.</div>
-        </div>
-        <div class="paper-readout">
-          <div class="readout-row">
-            <span class="readout-lbl">M-weight</span>
-            <span class="readout-val" id="r-mweight">—</span>
-          </div>
-          <div class="readout-row">
-            <span class="readout-lbl">Finished piece weight</span>
-            <span class="readout-val" id="r-pieceweight">—</span>
-          </div>
-          <div class="readout-row">
-            <span class="readout-lbl">Paper cost</span>
-            <span class="readout-val" id="r-paperCost">—</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="height: 14px"></div>
-
-      <div class="panel" data-label="Lamination">
-        <div class="field">
-          <label>Apply lamination</label>
-          <div class="grain-toggle">
-            <input type="radio" name="lamOn" id="lamOff" value="off" checked />
-            <label for="lamOff">Off</label>
-            <input type="radio" name="lamOn" id="lamOn" value="on" />
-            <label for="lamOn">On</label>
-          </div>
-        </div>
-        <div id="lam-fields" style="display: none;">
-          <div class="field">
-            <label>Sides</label>
-            <div class="grain-toggle">
-              <input type="radio" name="lamSides" id="lamSides1" value="1" />
-              <label for="lamSides1">1-side</label>
-              <input type="radio" name="lamSides" id="lamSides2" value="2" checked />
-              <label for="lamSides2">2-sides</label>
-            </div>
-          </div>
-          <div class="field">
-            <label>Film type</label>
-            <select id="lamFilm">
-              <option value="pet_12_g" data-sides="1">1.2 mil</option>
-              <option value="glueble_12" data-sides="1">1.2 mil Glueble/Stampable</option>
-              <option value="pet_17_g" data-sides="1,2" selected>1.7 mil</option>
-              <option value="pet_30_g" data-sides="1,2">3 mil</option>
-              <option value="pet_50_g" data-sides="2">5 mil</option>
-              <option value="pet_100_g" data-sides="2">10 mil</option>
-            </select>
-          </div>
-          <div class="paper-readout">
-            <div class="readout-row">
-              <span class="readout-lbl">Lamination weight</span>
-              <span class="readout-val" id="r-lamweight">—</span>
-            </div>
-            <div class="readout-row">
-              <span class="readout-lbl">Total piece weight</span>
-              <span class="readout-val" id="r-totalweight">—</span>
-            </div>
-          </div>
-        </div>
       </div>
 
     </aside>
@@ -965,6 +966,74 @@
           <div class="lbl">Grain</div>
           <div class="val" id="r-grain" style="font-size: 18px; padding-top: 6px;">—</div>
           <div class="sub" id="r-grain-sub">on finished piece</div>
+        </div>
+      </div>
+
+      <!-- ============ MATERIALS STRIP ============ -->
+      <div class="materials-strip">
+        <div class="mat-panel mat-paper">
+          <div class="mat-title">Paper</div>
+          <div class="mat-grid">
+            <label class="mat-field">
+              <span>Type</span>
+              <select id="paperType">
+                <option value="text">Text</option>
+                <option value="cover" selected>Cover</option>
+              </select>
+            </label>
+            <label class="mat-field">
+              <span>Basis wt (lb)</span>
+              <input type="number" id="basisWeight" value="100" min="1" step="1" />
+            </label>
+            <label class="mat-field">
+              <span>Cost $/M</span>
+              <input type="number" id="paperCost" value="0" min="0" step="0.01" />
+            </label>
+          </div>
+          <div class="mat-readout">
+            <div class="mat-r"><span>M-wt</span><b id="r-mweight">—</b></div>
+            <div class="mat-r"><span>Piece wt</span><b id="r-pieceweight">—</b></div>
+            <div class="mat-r"><span>Paper $</span><b id="r-paperCost">—</b></div>
+          </div>
+        </div>
+
+        <div class="mat-panel mat-lam">
+          <div class="mat-title">Lamination</div>
+          <div class="mat-grid">
+            <label class="mat-field">
+              <span>Apply</span>
+              <div class="grain-toggle compact">
+                <input type="radio" name="lamOn" id="lamOff" value="off" checked />
+                <label for="lamOff">Off</label>
+                <input type="radio" name="lamOn" id="lamOn" value="on" />
+                <label for="lamOn">On</label>
+              </div>
+            </label>
+            <label class="mat-field">
+              <span>Sides</span>
+              <div class="grain-toggle compact">
+                <input type="radio" name="lamSides" id="lamSides1" value="1" />
+                <label for="lamSides1">1</label>
+                <input type="radio" name="lamSides" id="lamSides2" value="2" checked />
+                <label for="lamSides2">2</label>
+              </div>
+            </label>
+            <label class="mat-field">
+              <span>Film</span>
+              <select id="lamFilm">
+                <option value="pet_12_g" data-sides="1">1.2 mil</option>
+                <option value="glueble_12" data-sides="1">1.2 mil Glueble</option>
+                <option value="pet_17_g" data-sides="1,2" selected>1.7 mil</option>
+                <option value="pet_30_g" data-sides="1,2">3 mil</option>
+                <option value="pet_50_g" data-sides="2">5 mil</option>
+                <option value="pet_100_g" data-sides="2">10 mil</option>
+              </select>
+            </label>
+          </div>
+          <div class="mat-readout" id="lam-fields" style="display: none;">
+            <div class="mat-r"><span>Lam wt</span><b id="r-lamweight">—</b></div>
+            <div class="mat-r"><span>Total wt</span><b id="r-totalweight">—</b></div>
+          </div>
         </div>
       </div>
 
