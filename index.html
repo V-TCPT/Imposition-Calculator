@@ -861,7 +861,7 @@
     <aside>
       <div class="panel" data-label="Sheet">
         <div class="field">
-          <label>Press sheet (W × H)</label>
+          <label>Press sheet (W × L)</label>
           <div class="row">
             <input type="number" id="sheetW" value="28" min="0.1" step="0.125" />
             <span class="x">×</span>
@@ -874,7 +874,7 @@
             <input type="radio" name="grain" id="grainLong" value="long" checked />
             <label for="grainLong">↔ Long (W)</label>
             <input type="radio" name="grain" id="grainShort" value="short" />
-            <label for="grainShort">↕ Short (H)</label>
+            <label for="grainShort">↕ Short (L)</label>
           </div>
           <div class="inline-help">Grain runs parallel to this dimension.</div>
         </div>
@@ -913,7 +913,7 @@
         <!-- SINGLE PIECE -->
         <div id="single-fields">
           <div class="field">
-            <label>Finished piece (W × H)</label>
+            <label>Finished piece (W × L)</label>
             <div class="row">
               <input type="number" id="docW" value="8.5" min="0.1" step="0.125" />
               <span class="x">×</span>
@@ -1049,7 +1049,7 @@
               <input type="radio" name="mode" id="modeDutch" value="dutch" />
               <label for="modeDutch">Dutch cut</label>
             </div>
-            <label class="flip-toggle" title="Swap finished piece W ↔ H to force the alternate orientation">
+            <label class="flip-toggle" title="Swap finished piece W ↔ L to force the alternate orientation">
               <input type="checkbox" id="flipPiece" />
               <span>Flip piece</span>
             </label>
@@ -1542,7 +1542,7 @@
         <div class="dim-inputs">
           <input type="number" data-idx="${idx}" data-dim="w" value="${p.w}" min="0.1" step="0.0625" placeholder="W" />
           <span class="x">×</span>
-          <input type="number" data-idx="${idx}" data-dim="h" value="${p.h}" min="0.1" step="0.0625" placeholder="H" />
+          <input type="number" data-idx="${idx}" data-dim="h" value="${p.h}" min="0.1" step="0.0625" placeholder="L" />
         </div>
         <input type="number" class="qty-input" data-idx="${idx}" data-dim="qty" value="${p.qty}" min="0" step="100" title="Quantity needed" />
         <button type="button" class="remove-btn" data-idx="${idx}" title="Remove">×</button>
