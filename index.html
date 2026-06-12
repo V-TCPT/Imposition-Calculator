@@ -1021,8 +1021,8 @@
             <label class="mat-field">
               <span>Film</span>
               <select id="lamFilm">
-                <option value="pet_12_g" data-sides="1">1.2 Mil</option>
                 <option value="glueble_12" data-sides="1">1.2 Mil G/S</option>
+                <option value="pet_12_g" data-sides="1,2">1.2 Mil</option>
                 <option value="pet_17_g" data-sides="1,2" selected>1.7 Mil</option>
                 <option value="pet_30_g" data-sides="1,2">3 Mil</option>
                 <option value="pet_50_g" data-sides="2">5 Mil</option>
@@ -1088,6 +1088,8 @@
   function gridFit(uw, uh, pw, ph, gH, gV) {
     if (pw <= 0 || ph <= 0) return { count: 0, cols: 0, rows: 0, blockW: 0, blockH: 0 };
     // n pieces take: n*p + (n-1)*g  ≤ u   →   n ≤ (u + g) / (p + g)
+    // (Outer bleed is reserved upstream in compute() by shrinking the usable
+    // area, so g here is only the gutter BETWEEN pieces.)
     const cols = Math.max(0, Math.floor((uw + gH) / (pw + gH)));
     const rows = Math.max(0, Math.floor((uh + gV) / (ph + gV)));
     const count = cols * rows;
@@ -1271,8 +1273,12 @@
     const grain = document.querySelector('input[name="grain"]:checked').value;
     const mode  = document.querySelector('input[name="mode"]:checked').value;
 
-    const uw = Math.max(0, SW - M);
-    const uh = Math.max(0, SH - SG);
+    // Reserve outer bleed so the outermost pieces' bleed stays ON the press
+    // sheet (GH/2 on each of the two W edges, GV/2 on each of the two H edges).
+    // The render step still draws the full usable area and centers the layout
+    // inside it, which leaves that reserved bleed margin on every side.
+    const uw = Math.max(0, SW - M - GH);
+    const uh = Math.max(0, SH - SG - GV);
 
     const flipLocked = $('flipPiece') && $('flipPiece').checked;
     let chosen;
@@ -1985,8 +1991,9 @@
     const SG = Math.max(0, +sideGuide.value || 0);
     const grain = document.querySelector('input[name="grain"]:checked').value;
 
-    const uw = Math.max(0, SW - M);
-    const uh = Math.max(0, SH - SG);
+    // Reserve outer bleed (see compute()): keep edge-piece bleed on the sheet.
+    const uw = Math.max(0, SW - M - GH);
+    const uh = Math.max(0, SH - SG - GV);
 
     const result = multiPieceLayout(uw, uh, GH, GV);
 
@@ -2286,8 +2293,9 @@
   });
 
   // Sides ↔ film type constraint:
-  //  1-side films:  1.2 mil, 1.2 mil Glueble/Stampable, 1.7 mil, 3 mil
-  //  2-side films:  1.7 mil, 3 mil, 5 mil, 10 mil
+  //  1-side only:   1.2 mil Glueble/Stampable
+  //  1 or 2 sides:  1.2 mil, 1.7 mil, 3 mil
+  //  2-side only:   5 mil, 10 mil
   // Each <option> declares its allowed sides via `data-sides` (CSV: "1", "2", or "1,2")
   function syncLamConstraints() {
     const sides = document.querySelector('input[name="lamSides"]:checked').value;
