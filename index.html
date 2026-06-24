@@ -879,6 +879,15 @@
           <div class="inline-help">Grain runs parallel to this dimension.</div>
         </div>
         <div class="field">
+          <label>Press run</label>
+          <select id="pressRun">
+            <option value="sheetwise" selected>Sheetwise</option>
+            <option value="wt">Work &amp; Turn</option>
+            <option value="wtumble">Work &amp; Tumble</option>
+          </select>
+          <div class="inline-help">W&amp;T doubles gripper on the gripper axis. W&amp;Tumble adds a 0.25" center trim on the side-guide axis.</div>
+        </div>
+        <div class="field">
           <label>Bleed (horizontal × vertical)</label>
           <div class="row">
             <input type="number" id="gutter" value="0.125" min="0" step="0.0625" />
@@ -1085,13 +1094,17 @@
   // ============ CORE MATH ============
   // Given a usable area (uw × uh), piece (pw × ph), and gutter g,
   // return how many fit in a grid + the total area used.
-  function gridFit(uw, uh, pw, ph, gH, gV) {
+  function gridFit(uw, uh, pw, ph, gH, gV, pressMode) {
     if (pw <= 0 || ph <= 0) return { count: 0, cols: 0, rows: 0, blockW: 0, blockH: 0 };
     // n pieces take: n*p + (n-1)*g  ≤ u   →   n ≤ (u + g) / (p + g)
-    // (Outer bleed is reserved upstream in compute() by shrinking the usable
-    // area, so g here is only the gutter BETWEEN pieces.)
-    const cols = Math.max(0, Math.floor((uw + gH) / (pw + gH)));
-    const rows = Math.max(0, Math.floor((uh + gV) / (ph + gV)));
+    let cols = Math.max(0, Math.floor((uw + gH) / (pw + gH)));
+    let rows = Math.max(0, Math.floor((uh + gV) / (ph + gV)));
+    // Press run imposition constraint: W&T and W&Tumble both split the
+    // imposition across the horizontal midline (A on top, B on bottom),
+    // which requires the row count to be even.
+    if ((pressMode === 'wt' || pressMode === 'wtumble') && rows % 2 !== 0) rows--;
+    cols = Math.max(0, cols);
+    rows = Math.max(0, rows);
     const count = cols * rows;
     const blockW = cols > 0 ? cols * pw + (cols - 1) * gH : 0;
     const blockH = rows > 0 ? rows * ph + (rows - 1) * gV : 0;
@@ -1099,13 +1112,16 @@
   }
 
   // Straight layouts: try both orientations of the piece, pick higher count.
-  function straightLayout(uw, uh, pw, ph, gH, gV, flipAlt) {
-    const a = gridFit(uw, uh, pw, ph, gH, gV);
-    const b = gridFit(uw, uh, ph, pw, gH, gV);
+  function straightLayout(uw, uh, pw, ph, gH, gV, flipAlt, pressLocked, pressMode) {
+    const a = gridFit(uw, uh, pw, ph, gH, gV, pressMode);
+    // If press-locked, only allow the as-given orientation.
+    const b = pressLocked ? { count: -1 } : gridFit(uw, uh, ph, pw, gH, gV, pressMode);
     // Normal: pick higher count. Flip: pick the OTHER orientation (alternate).
     // If both yield the same count, flip still toggles which gets picked.
     let aChosen;
-    if (flipAlt) {
+    if (pressLocked) {
+      aChosen = true;
+    } else if (flipAlt) {
       aChosen = a.count < b.count;
     } else {
       aChosen = a.count >= b.count;
@@ -1129,7 +1145,12 @@
   // the leftover strip (right of block, and below block) with pieces in
   // the OTHER orientation. Recurse one level so we can also fill the
   // remaining corner. Try all four arrangements and pick best.
-  function dutchLayout(uw, uh, pw, ph, gH, gV) {
+  function dutchLayout(uw, uh, pw, ph, gH, gV, pressLocked) {
+    // Press lock means we can't mix orientations — fall back to straight layout
+    // in the as-given orientation.
+    if (pressLocked) {
+      return straightLayout(uw, uh, pw, ph, gH, gV, false, true);
+    }
     const arrangements = [];
 
     // -------- PATTERN 1: L-shape (main + right strip + bottom strip) --------
@@ -1257,6 +1278,60 @@
     return arrangements[0];
   }
 
+  // Symmetric Dutch layout for W&T and W&Tumble.
+  //  W&T: imposition splits across vertical midline of usable area (A on left,
+  //       B on right). Each piece on the left has a mirror partner on the right
+  //       — they are the front/back pair after the turn.
+  //  W&Tumble: same logic, split across horizontal midline.
+  // Strategy: run dutchLayout on the half-sheet, then mirror blocks across
+  // the midline to produce the full layout.
+  function symmetricDutchLayout(uw, uh, pw, ph, gH, gV, axis) {
+    // axis = 'vertical' (W&T, mirror across W midline)
+    //      = 'horizontal' (W&Tumble, mirror across L midline)
+    if (axis === 'vertical') {
+      // Half-sheet has half of uw, full uh. Subtract one bleed for the center
+      // gutter between halves.
+      const halfW = (uw - gH) / 2;
+      if (halfW <= 0) return { count: 0, blocks: [] };
+      // Run dutchLayout on the half (it will also try straight as one of its
+      // arrangements, since 1-block layouts are valid dutch results).
+      const halfResult = dutchLayout(halfW, uh, pw, ph, gH, gV, false);
+      // Also try plain straight on the half (in case it beats dutch for the half)
+      const halfStraight = straightLayout(halfW, uh, pw, ph, gH, gV, false, false, null);
+      const halfBest = (halfStraight.count > halfResult.count) ? halfStraight : halfResult;
+      if (halfBest.count === 0) return { count: 0, blocks: [] };
+      // Mirror across vertical midline to build full layout
+      const mirroredBlocks = [];
+      const midline = halfW + gH;
+      for (const b of halfBest.blocks) {
+        // Original block on left half
+        mirroredBlocks.push({ ...b });
+        // Mirrored block on right half: x flipped around midline
+        // Original block's right edge: b.x + b.blockW
+        // Mirrored block's left edge: midline + (halfW - (b.x + b.blockW))
+        const mirroredX = midline + (halfW - b.x - b.blockW);
+        mirroredBlocks.push({ ...b, x: mirroredX });
+      }
+      return { count: halfBest.count * 2, blocks: mirroredBlocks };
+    } else {
+      // Horizontal mirror (W&Tumble)
+      const halfH = (uh - gV) / 2;
+      if (halfH <= 0) return { count: 0, blocks: [] };
+      const halfResult = dutchLayout(uw, halfH, pw, ph, gH, gV, false);
+      const halfStraight = straightLayout(uw, halfH, pw, ph, gH, gV, false, false, null);
+      const halfBest = (halfStraight.count > halfResult.count) ? halfStraight : halfResult;
+      if (halfBest.count === 0) return { count: 0, blocks: [] };
+      const mirroredBlocks = [];
+      const midline = halfH + gV;
+      for (const b of halfBest.blocks) {
+        mirroredBlocks.push({ ...b });
+        const mirroredY = midline + (halfH - b.y - b.blockH);
+        mirroredBlocks.push({ ...b, y: mirroredY });
+      }
+      return { count: halfBest.count * 2, blocks: mirroredBlocks };
+    }
+  }
+
   // ============ COMPUTE ============
   function compute() {
     let SW = +sheetW.value || 0;
@@ -1272,26 +1347,85 @@
     const SG = Math.max(0, +sideGuide.value || 0);  // side guide, single edge of H
     const grain = document.querySelector('input[name="grain"]:checked').value;
     const mode  = document.querySelector('input[name="mode"]:checked').value;
+    const pressRun = $('pressRun').value;
 
     // Reserve outer bleed so the outermost pieces' bleed stays ON the press
     // sheet (GH/2 on each of the two W edges, GV/2 on each of the two H edges).
     // The render step still draws the full usable area and centers the layout
     // inside it, which leaves that reserved bleed margin on every side.
-    const uw = Math.max(0, SW - M - GH);
-    const uh = Math.max(0, SH - SG - GV);
+    //
+    // Press run also affects usable area, AND depends on whether the layout
+    // is a straight grid or a Dutch (mixed-orientation) arrangement:
+    //  - W&T straight: 4× gripper on W (inner edges of each A/B half need their
+    //         own gripper+color-bar zone for standard imposition).
+    //  - W&T Dutch:    2× gripper on W (inner area is available because the
+    //         layout is hand-built — no need for inner color bars on a
+    //         per-row basis).
+    //  - W&Tumble: gripper + side guide + center trim on L axis (same for both).
+    //  - Sheetwise: normal single-edge gripper + side-guide.
+    const WTUMBLE_CT = 0.25; // center trim for W&Tumble
+    let uwStraight, uhStraight, uwDutch, uhDutch;
+    if (pressRun === 'wt') {
+      uwStraight = Math.max(0, SW - 4 * M - GH);
+      uhStraight = Math.max(0, SH - SG - GV);
+      uwDutch    = Math.max(0, SW - 2 * M - GH);
+      uhDutch    = Math.max(0, SH - SG - GV);
+    } else if (pressRun === 'wtumble') {
+      uwStraight = Math.max(0, SW - M - GH);
+      // No outer-bleed reservation on L for W&Tumble — the gripper + side
+      // guide + center trim already account for the edge constraints.
+      uhStraight = Math.max(0, SH - M - SG - WTUMBLE_CT);
+      uwDutch    = uwStraight;
+      uhDutch    = uhStraight;
+    } else {
+      uwStraight = Math.max(0, SW - M - GH);
+      uhStraight = Math.max(0, SH - SG - GV);
+      uwDutch    = uwStraight;
+      uhDutch    = uhStraight;
+    }
+    // For the visualizer / waste calc we use the straight-mode usable area as
+    // the "official" usable area; the Dutch layout uses uwDutch/uhDutch.
+    const uw = uwStraight;
+    const uh = uhStraight;
 
-    const flipLocked = $('flipPiece') && $('flipPiece').checked;
+    // Press run orientation lock:
+    //  W&T: piece long edge perpendicular to gripper (portrait when L > W)
+    //  W&Tumble: no lock (let algorithm pick best orientation)
+    //  Sheetwise: no constraint
+    let lockedPW = PW, lockedPH = PH;
+    let pressLocked = false;
+    if (pressRun === 'wt') {
+      if (PW > PH) { lockedPW = PH; lockedPH = PW; }
+      pressLocked = true;
+    }
+
+    // Flip checkbox picks alternate orientation; press lock overrides flip.
+    const flipLocked = ($('flipPiece') && $('flipPiece').checked) && !pressLocked;
     let chosen;
     let altInfo = null;
 
+    // For W&T/W&Tumble, Dutch mode uses symmetric layout (left/right or
+    // top/bottom halves are mirror images for the front/back imposition).
+    // The mirror axis is the imposition fold line.
+    const mirrorAxis = pressRun === 'wt' ? 'vertical'
+                     : pressRun === 'wtumble' ? 'horizontal'
+                     : null;
+
     if (mode === 'straight') {
-      chosen = straightLayout(uw, uh, PW, PH, GH, GV, flipLocked);
+      chosen = straightLayout(uwStraight, uhStraight, lockedPW, lockedPH, GH, GV, flipLocked, pressLocked, pressRun);
     } else if (mode === 'dutch') {
-      chosen = dutchLayout(uw, uh, PW, PH, GH, GV);
+      if (mirrorAxis) {
+        // Symmetric Dutch uses the looser Dutch usable area
+        chosen = symmetricDutchLayout(uwDutch, uhDutch, PW, PH, GH, GV, mirrorAxis);
+      } else {
+        chosen = dutchLayout(uwStraight, uhStraight, lockedPW, lockedPH, GH, GV, pressLocked);
+      }
     } else {
       // best fit: compare straight vs dutch, pick winner; report the other
-      const s = straightLayout(uw, uh, PW, PH, GH, GV, flipLocked);
-      const d = dutchLayout(uw, uh, PW, PH, GH, GV);
+      const s = straightLayout(uwStraight, uhStraight, lockedPW, lockedPH, GH, GV, flipLocked, pressLocked, pressRun);
+      const d = mirrorAxis
+        ? symmetricDutchLayout(uwDutch, uhDutch, PW, PH, GH, GV, mirrorAxis)
+        : dutchLayout(uwStraight, uhStraight, lockedPW, lockedPH, GH, GV, pressLocked);
       if (d.count > s.count) {
         chosen = d;
         altInfo = { type: 'dutch-wins', diff: d.count - s.count, straight: s.count };
@@ -1323,7 +1457,8 @@
       const sheetsNeeded = Math.ceil(qty / chosen.count);
       __sheetsNeeded = sheetsNeeded;
       $('r-sheets').textContent = sheetsNeeded.toLocaleString();
-      $('r-sheets-sub').textContent = `for ${qty.toLocaleString()} pcs`;
+      const runLabel = pressRun === 'wt' ? ' · W&T' : pressRun === 'wtumble' ? ' · W&Tumble' : '';
+      $('r-sheets-sub').textContent = `for ${qty.toLocaleString()} pcs${runLabel}`;
     } else if (chosen.count === 0) {
       $('r-sheets').textContent = '—';
       $('r-sheets-sub').textContent = 'piece does not fit';
@@ -1423,11 +1558,11 @@
     }
 
     // ----- render SVG -----
-    render(SW, SH, M, SG, GH, GV, chosen.blocks, grain);
+    render(SW, SH, M, SG, GH, GV, chosen.blocks, grain, pressRun);
   }
 
   // ============ RENDER ============
-  function render(SW, SH, M, SG, GH, GV, blocks, grain) {
+  function render(SW, SH, M, SG, GH, GV, blocks, grain, pressRun) {
     if (SW <= 0 || SH <= 0) {
       svg.innerHTML = '';
       return;
@@ -1462,11 +1597,43 @@
       }
     }
 
-    // usable area outline (gripper on one W edge, side-guide on one H edge)
-    const uw = Math.max(0, SW - M);
-    const uh = Math.max(0, SH - SG);
+    // Press-shop convention:
+    //  - Gripper bar runs along the LONG edge of the sheet (W = long dim).
+    //    In screen coords that's a horizontal strip at the top edge of the sheet.
+    //    Its thickness (M) sits on top of the sheet's L axis.
+    //  - Side guide registers on a SHORT edge of the sheet (L axis).
+    //    In screen coords that's a vertical strip on the left edge.
+    // The usable area is the sheet minus these two bands.
+    const uw = Math.max(0, SW - SG);  // along W axis (long), minus side guide
+    const uh = Math.max(0, SH - M);   // along L axis (short), minus gripper
+
+    // Primary gripper band (top, long edge)
+    if (M > 0) {
+      out += `<rect x="${pad}" y="${pad}" width="${SW}" height="${M}" fill="var(--accent)" opacity="0.12" />`;
+      out += `<line x1="${pad}" y1="${pad + M}" x2="${pad + SW}" y2="${pad + M}" stroke="var(--accent)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.55" />`;
+    }
+    // Primary side-guide band (left, short edge)
+    if (SG > 0) {
+      out += `<rect x="${pad}" y="${pad + M}" width="${SG}" height="${SH - M}" fill="var(--accent2, var(--accent))" opacity="0.08" />`;
+      out += `<line x1="${pad + SG}" y1="${pad + M}" x2="${pad + SG}" y2="${pad + SH}" stroke="var(--accent2, var(--accent))" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.45" />`;
+    }
+    // Usable area outline
     if ((M > 0 || SG > 0) && uw > 0 && uh > 0) {
-      out += `<rect x="${pad + M}" y="${pad + SG}" width="${uw}" height="${uh}" fill="none" stroke="var(--rule-bold)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 2}" opacity="0.35" />`;
+      out += `<rect x="${pad + SG}" y="${pad + M}" width="${uw}" height="${uh}" fill="none" stroke="var(--rule-bold)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 2}" opacity="0.35" />`;
+    }
+
+    // Press-run second-edge indicator:
+    //  W&T → second gripper on opposite LONG edge (trailing edge becomes new
+    //         gripper after the sheet is turned around the gripper axis)
+    //  W&Tumble → second side guide on opposite SHORT edge (after tumble flip)
+    if (pressRun === 'wt' && M > 0) {
+      // Second gripper band on bottom (trailing long) edge
+      out += `<rect x="${pad}" y="${pad + SH - M}" width="${SW}" height="${M}" fill="var(--accent)" opacity="0.12" />`;
+      out += `<line x1="${pad}" y1="${pad + SH - M}" x2="${pad + SW}" y2="${pad + SH - M}" stroke="var(--accent)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.55" />`;
+    } else if (pressRun === 'wtumble' && SG > 0) {
+      // Second side-guide band on right (opposite short) edge
+      out += `<rect x="${pad + SW - SG}" y="${pad + M}" width="${SG}" height="${SH - M}" fill="var(--accent2, var(--accent))" opacity="0.08" />`;
+      out += `<line x1="${pad + SW - SG}" y1="${pad + M}" x2="${pad + SW - SG}" y2="${pad + SH}" stroke="var(--accent2, var(--accent))" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.45" />`;
     }
 
     // compute bounding box of the entire layout (in usable-area coords)
@@ -1494,8 +1661,8 @@
     for (const b of blocks) {
       for (let c = 0; c < b.cols; c++) {
         for (let r = 0; r < b.rows; r++) {
-          const px = pad + M  + offsetX + b.x + c * (b.pw + GH);
-          const py = pad + SG + offsetY + b.y + r * (b.ph + GV);
+          const px = pad + SG + offsetX + b.x + c * (b.pw + GH);
+          const py = pad + M  + offsetY + b.y + r * (b.ph + GV);
           out += `<rect x="${px}" y="${py}" width="${b.pw}" height="${b.ph}" fill="var(--doc-fill)" stroke="var(--doc-stroke)" stroke-width="${tinyStroke * 1.4}" />`;
 
           // grain arrow on each piece
@@ -1615,14 +1782,20 @@
 
   // For one piece, return all viable (cols, rows, orient) options that fit
   // within the given area, sorted by total count descending.
-  function blockOptions(pieceW, pieceH, areaW, areaH, gH, gV) {
+  function blockOptions(pieceW, pieceH, areaW, areaH, gH, gV, pressLocked, pressMode) {
     const opts = [];
-    for (const ori of [{w: pieceW, h: pieceH, rot: false}, {w: pieceH, h: pieceW, rot: true}]) {
+    const orientations = pressLocked
+      ? [{w: pieceW, h: pieceH, rot: false}]
+      : [{w: pieceW, h: pieceH, rot: false}, {w: pieceH, h: pieceW, rot: true}];
+    for (const ori of orientations) {
       if (ori.rot && pieceW === pieceH) continue;
       const maxCols = Math.floor((areaW + gH) / (ori.w + gH));
       const maxRows = Math.floor((areaH + gV) / (ori.h + gV));
       for (let c = 1; c <= maxCols; c++) {
         for (let r = 1; r <= maxRows; r++) {
+          // W&T and W&Tumble both require even row count (A/B fold along
+          // horizontal midline of the imposition).
+          if ((pressMode === 'wt' || pressMode === 'wtumble') && r % 2 !== 0) continue;
           const bw = c * ori.w + (c - 1) * gH;
           const bh = r * ori.h + (r - 1) * gV;
           if (bw > areaW + 0.0001 || bh > areaH + 0.0001) continue;
@@ -1642,7 +1815,7 @@
   // (If a piece has many copies, they form a single big block.)
   //
   // We enumerate combinations of block-options per piece and try packing them.
-  function tryBlockLayout(uw, uh, pieceList, gH, gV) {
+  function tryBlockLayout(uw, uh, pieceList, gH, gV, pressLocked, pressMode) {
     // pieceList items now also include `qty` for quantity-driven optimization.
     // Strategy:
     //  - If all pieces have qty>0: MINIMIZE sheets_needed = max(ceil(qty_i / count_i))
@@ -1652,7 +1825,7 @@
     const allHaveQty = pieceList.every(p => p.qty > 0);
 
     function diversifiedOptions(p) {
-      const all = blockOptions(p.w, p.h, uw, uh, gH, gV);
+      const all = blockOptions(p.w, p.h, uw, uh, gH, gV, pressLocked, pressMode);
       if (all.length === 0) return [];
       const maxCount = all[0].count;
       const tiers = [maxCount, Math.ceil(maxCount * 0.75), Math.ceil(maxCount * 0.5),
@@ -1950,13 +2123,18 @@
 
   function multiPieceLayout(uw, uh, gH, gV) {
     const flipped = $('flipPiece') && $('flipPiece').checked;
-    const pieceList = pieces.map((p, i) => ({
-      w: flipped ? p.h : p.w,
-      h: flipped ? p.w : p.h,
-      qty: p.qty || 0,
-      idx: i,
-    }));
-    const result = tryBlockLayout(uw, uh, pieceList, gH, gV);
+    const pressRun = $('pressRun').value;
+    // W&T locks orientation (long edge perpendicular to gripper);
+    // W&Tumble does NOT lock orientation (algorithm picks best fit).
+    const pressLocked = (pressRun === 'wt');
+
+    const pieceList = pieces.map((p, i) => {
+      let pw = p.w, ph = p.h;
+      if (flipped) { const t = pw; pw = ph; ph = t; }
+      if (pressRun === 'wt' && pw > ph) { const t = pw; pw = ph; ph = t; }
+      return { w: pw, h: ph, qty: p.qty || 0, idx: i };
+    });
+    const result = tryBlockLayout(uw, uh, pieceList, gH, gV, pressLocked, pressRun);
     if (!result || result.count === 0) {
       return { placements: [], count: 0, byPiece: {} };
     }
@@ -1990,10 +2168,24 @@
     const M  = Math.max(0, +margin.value || 0);
     const SG = Math.max(0, +sideGuide.value || 0);
     const grain = document.querySelector('input[name="grain"]:checked').value;
+    const pressRun = $('pressRun').value;
 
     // Reserve outer bleed (see compute()): keep edge-piece bleed on the sheet.
-    const uw = Math.max(0, SW - M - GH);
-    const uh = Math.max(0, SH - SG - GV);
+    // Press run also affects usable area:
+    //   W&T: 2× gripper on W axis
+    //   W&Tumble: normal gripper + side guide + 0.75" center trim on L axis
+    const WTUMBLE_CT = 0.25;
+    let uw, uh;
+    if (pressRun === 'wt') {
+      uw = Math.max(0, SW - 2 * M - GH);
+      uh = Math.max(0, SH - SG - GV);
+    } else if (pressRun === 'wtumble') {
+      uw = Math.max(0, SW - M - GH);
+      uh = Math.max(0, SH - M - SG - WTUMBLE_CT);
+    } else {
+      uw = Math.max(0, SW - M - GH);
+      uh = Math.max(0, SH - SG - GV);
+    }
 
     const result = multiPieceLayout(uw, uh, GH, GV);
 
@@ -2028,7 +2220,6 @@
             limitingPiece = p.name;
           }
         } else if (p.qty > 0 && c === 0) {
-          // This piece needs to be produced but doesn't fit. Flag it.
           sheetsNeeded = Infinity;
           limitingPiece = p.name + ' (does not fit)';
           break;
@@ -2104,7 +2295,7 @@
     $('alt-note').style.display = 'none';
 
     // ----- render -----
-    renderMulti(SW, SH, M, SG, result.placements, grain);
+    renderMulti(SW, SH, M, SG, result.placements, grain, pressRun);
   }
 
   function approximateCuts(placements, uw, uh) {
@@ -2128,7 +2319,7 @@
   }
 
   // ============ RENDER (multi) ============
-  function renderMulti(SW, SH, M, SG, placements, grain) {
+  function renderMulti(SW, SH, M, SG, placements, grain, pressRun) {
     if (SW <= 0 || SH <= 0) { svg.innerHTML = ''; return; }
     const pad = Math.max(SW, SH) * 0.04;
     const vbW = SW + pad * 2;
@@ -2156,11 +2347,33 @@
       }
     }
 
-    // usable area outline
-    const uw = Math.max(0, SW - M);
-    const uh = Math.max(0, SH - SG);
+    // Press-shop convention: gripper along LONG (top) edge, side guide on
+    // SHORT (left) edge. See render() for full notes.
+    const uw = Math.max(0, SW - SG);
+    const uh = Math.max(0, SH - M);
+
+    // Primary gripper band (top, long edge)
+    if (M > 0) {
+      out += `<rect x="${pad}" y="${pad}" width="${SW}" height="${M}" fill="var(--accent)" opacity="0.12" />`;
+      out += `<line x1="${pad}" y1="${pad + M}" x2="${pad + SW}" y2="${pad + M}" stroke="var(--accent)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.55" />`;
+    }
+    // Primary side-guide band (left, short edge)
+    if (SG > 0) {
+      out += `<rect x="${pad}" y="${pad + M}" width="${SG}" height="${SH - M}" fill="var(--accent2, var(--accent))" opacity="0.08" />`;
+      out += `<line x1="${pad + SG}" y1="${pad + M}" x2="${pad + SG}" y2="${pad + SH}" stroke="var(--accent2, var(--accent))" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.45" />`;
+    }
+    // Usable area outline
     if ((M > 0 || SG > 0) && uw > 0 && uh > 0) {
-      out += `<rect x="${pad + M}" y="${pad + SG}" width="${uw}" height="${uh}" fill="none" stroke="var(--rule-bold)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 2}" opacity="0.35" />`;
+      out += `<rect x="${pad + SG}" y="${pad + M}" width="${uw}" height="${uh}" fill="none" stroke="var(--rule-bold)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 2}" opacity="0.35" />`;
+    }
+
+    // Press-run second-edge indicator
+    if (pressRun === 'wt' && M > 0) {
+      out += `<rect x="${pad}" y="${pad + SH - M}" width="${SW}" height="${M}" fill="var(--accent)" opacity="0.12" />`;
+      out += `<line x1="${pad}" y1="${pad + SH - M}" x2="${pad + SW}" y2="${pad + SH - M}" stroke="var(--accent)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.55" />`;
+    } else if (pressRun === 'wtumble' && SG > 0) {
+      out += `<rect x="${pad + SW - SG}" y="${pad + M}" width="${SG}" height="${SH - M}" fill="var(--accent2, var(--accent))" opacity="0.08" />`;
+      out += `<line x1="${pad + SW - SG}" y1="${pad + M}" x2="${pad + SW - SG}" y2="${pad + SH}" stroke="var(--accent2, var(--accent))" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.45" />`;
     }
 
     // compute bounding box of all placements to center the layout
@@ -2182,8 +2395,8 @@
     // pieces
     for (const pl of placements) {
       const color = PIECE_COLORS[pl.pieceIdx % PIECE_COLORS.length];
-      const px = pad + M + offsetX + pl.x;
-      const py = pad + SG + offsetY + pl.y;
+      const px = pad + SG + offsetX + pl.x;
+      const py = pad + M  + offsetY + pl.y;
       out += `<rect x="${px}" y="${py}" width="${pl.w}" height="${pl.h}" fill="${color.fill}" stroke="${color.stroke}" stroke-width="${tinyStroke * 1.4}" />`;
       // piece label (piece letter) at center
       const labelText = String.fromCharCode(65 + pl.pieceIdx);
