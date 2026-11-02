@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TEAM Imposition Calculator | N-Up Layout & Press Sheet Planner</title>
+<title>TEAM Estimating Calculator | Imposition & Packaging</title>
 <meta name="description" content="Free online imposition calculator for commercial printing. Calculate N-up layouts, sheet yield, waste, cuts, and grain direction for press sheets. Built by TEAM Concept Printing." />
 <meta name="keywords" content="imposition calculator, N-up calculator, print layout, press sheet calculator, printing imposition, sheet yield, dutch cut, commercial printing, TEAM Concept Printing" />
 <meta name="author" content="TEAM Concept Printing" />
@@ -184,6 +184,282 @@
   }
   @media (max-width: 640px) {
     .contact { text-align: left; }
+  }
+
+  /* ---------- TABS ---------- */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--rule-bold);
+    flex-shrink: 0;
+  }
+  .tab-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--rule-bold);
+    border-bottom: none;
+    color: var(--ink);
+    cursor: pointer;
+    margin-right: -1px;
+    margin-bottom: -1px;
+    transition: background 0.12s ease, color 0.12s ease;
+    opacity: 0.55;
+  }
+  .tab-btn:hover { opacity: 0.85; }
+  .tab-btn.active {
+    background: var(--sheet-fill);
+    opacity: 1;
+    border-bottom: 1px solid var(--sheet-fill);
+    position: relative;
+    font-weight: 700;
+  }
+  .tab-btn.active::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    height: 3px;
+    background: var(--accent);
+  }
+  .tab-pane { display: none; }
+  .tab-pane.active {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  /* Never show a scrollbar on the controls column; on very short windows it
+     still scrolls with the mouse wheel. */
+  aside { scrollbar-width: none; }
+  aside::-webkit-scrollbar { display: none; }
+
+  @media (max-height: 720px) {
+    header { padding-bottom: 6px; margin-bottom: 8px; gap: 12px; }
+    .logo-frame img { height: 32px !important; }
+    .title-block h1 { font-size: 24px; }
+    .contact { font-size: 9px; line-height: 1.3; }
+    .tabs { margin-bottom: 8px; }
+    .tab-btn { padding: 6px 16px; }
+  }
+
+  /* ---------- SHORT WINDOWS: compact mode so everything fits ---------- */
+  @media (max-height: 900px) {
+    .wrap { padding-top: 10px; padding-bottom: 10px; }
+    header { padding-bottom: 8px; margin-bottom: 10px; }
+    .logo-frame img { height: 40px; }
+    .tabs { margin-bottom: 10px; }
+    .tab-btn { padding: 8px 18px; }
+    aside .inline-help { display: none; }
+    aside .field { margin-bottom: 8px; }
+    #tab-packaging aside input, #tab-packaging aside select { padding-top: 4px; padding-bottom: 4px; }
+    #tab-packaging aside .field { margin-bottom: 6px; }
+    #tab-packaging aside .field label { margin-bottom: 2px; }
+    #tab-packaging .pkg-sublabel { margin: 5px 0 3px; }
+    .panel { padding-top: 12px; padding-bottom: 10px; }
+  }
+
+  /* ---------- PACKAGING ---------- */
+  .pkg-aside { display: flex; flex-direction: column; gap: 12px; }
+  .pkg-main { display: flex; flex-direction: column; min-height: 0; gap: 12px; }
+  .pkg-main .footer-note { margin-top: 0; flex-shrink: 0; }
+  .row3 {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 6px;
+    align-items: center;
+  }
+  .row3 .x { text-align: center; opacity: 0.4; font-size: 12px; }
+  .row3 input { padding-left: 6px; padding-right: 4px; }
+  .pkg-check {
+    display: flex !important;
+    gap: 8px;
+    align-items: center;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    cursor: pointer;
+  }
+  .pkg-results {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0;
+    border: 1px solid var(--rule-bold);
+    background: var(--sheet-fill);
+    flex-shrink: 0;
+  }
+  .pkg-stat { min-width: 0; }
+  .pkg-stat-value { white-space: nowrap; }
+  @media (max-width: 1300px) {
+    .pkg-results { grid-template-columns: repeat(4, 1fr); }
+    .pkg-stat:nth-child(4n) { border-right: none; }
+    .pkg-stat:nth-child(-n+4) { border-bottom: 1px solid var(--rule-bold); }
+  }
+  .pkg-stat {
+    padding: 12px 14px;
+    border-right: 1px solid var(--rule-bold);
+  }
+  .pkg-stat:last-child { border-right: none; }
+  .pkg-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 4px;
+  }
+  .pkg-stat-value {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .pkg-stat-value.ink { color: var(--ink); font-size: 18px; }
+  .pkg-stat-sub {
+    font-size: 10px;
+    opacity: 0.65;
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+  .pkg-viz {
+    border: 1px solid var(--rule-bold);
+    background: var(--sheet-fill);
+    padding: 14px 16px;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.9fr);
+    gap: 18px;
+  }
+  .pkg-viz-left { display: flex; flex-direction: column; min-height: 0; }
+  .pkg-viz-left svg { flex: 1; min-height: 0; width: 100%; height: 100%; display: block; }
+  .pkg-viz-right { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .pkg-viz-right .pkg-caliper-readout { margin-top: 0; }
+  @media (max-width: 1100px) {
+    .pkg-viz { grid-template-columns: 1fr; }
+  }
+  .pkg-viz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .pkg-viz-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .pkg-caliper-readout {
+    background: var(--sheet-fill);
+    border: 1px dashed var(--rule-bold);
+    padding: 10px 12px;
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 6px;
+  }
+  .pkg-caliper-readout b { font-weight: 700; color: var(--accent); }
+  .pkg-orient-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 10px;
+  }
+  .pkg-orient-table th, .pkg-orient-table td {
+    text-align: left;
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--rule-bold);
+    opacity: 0.9;
+  }
+  .pkg-orient-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+    font-weight: 400;
+    border-bottom: 1px solid var(--rule-bold);
+  }
+  .pkg-orient-table tr.best td {
+    background: #c8472e14;
+    font-weight: 700;
+  }
+  .pkg-orient-table tr.best td:first-child::before {
+    content: '▸ ';
+    color: var(--accent);
+  }
+  .pkg-inherit {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.75;
+    margin-top: 4px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .pkg-inherit:hover { opacity: 1; }
+  .pkg-boxwt {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    margin-top: 5px;
+    opacity: 0.75;
+    cursor: help;
+  }
+  .pkg-boxwt b { color: var(--accent); font-weight: 700; }
+  .pkg-label-flex { display: flex !important; justify-content: space-between; align-items: baseline; }
+  .pkg-label-flex .pkg-inherit { margin-top: 0; margin-left: 8px; font-size: 9px; white-space: nowrap; }
+  #pkgProduct { min-width: 0; padding-right: 22px; }
+  .pkg-prodrow { grid-template-columns: 1.7fr auto 1fr !important; }
+  .pkg-sublabel { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; margin: 7px 0 4px; }
+  .pkg-boxrow select { min-width: 0; padding-right: 22px; }
+  .pkg-viz-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+  .pkg-viz-head .pkg-viz-title { margin-right: auto; }
+  .pkg-hide { display: none !important; }
+  .pkg-flat-toggle { font-family: 'DM Mono', monospace; font-size: 10px !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; margin: 0; }
+  .pkg-spine::placeholder { color: var(--ink); opacity: 0.45; font-style: italic; }
+  /* Bound-product fields hide for flat sheets */
+  .pkg-flat .pkg-bound-only, .pkg-flat .pkg-cover-only { display: none !important; }
+  .pkg-nocover .pkg-cover-only { display: none !important; }
+  .pkg-chip-only { display: none; }
+  .pkg-case-only { display: none; }
+  .pkg-is-case .pkg-case-only { display: block; }
+  #pkgExtraRow.pkg-row4 { grid-template-columns: 1.35fr 0.75fr auto 0.95fr; }
+  #pkgExtraRow select { min-width: 0; padding-right: 20px; }
+  #pkgSpineOverride { min-width: 0; }
+  #pkgExtraRow.pkg-pct #pkgExtra { padding-right: 22px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Ctext x='0' y='11' font-family='monospace' font-size='12' fill='%23a33'%3E%25%3C/text%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; }
+  .pkg-is-brochure #pkgCoverCaliper, .pkg-is-brochure #pkgCalRow > .x.pkg-bound-only,
+  .pkg-is-brochure .pkg-cover-only { display: none !important; }
+  .pkg-is-brochure #pkgCalRow { grid-template-columns: 1fr auto 1fr; }
+  .pkg-is-pad .pkg-chip-only { display: block; }
+  .pkg-flat #pkgCalRow { grid-template-columns: 1fr auto 1fr; }
+  .pkg-flat #pkgPages { visibility: hidden; }
+  .pkg-custom-lb {
+    width: 100%; min-width: 0; box-sizing: border-box;
+    padding: 6px 8px;
+    background: var(--sheet-fill);
+    border: 1px solid var(--rule-bold);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    border-radius: 0;
+  }
+  .pkg-custom-lb:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  #pkgBoxStyle { min-width: 0; }
+  .pkg-na, #pkgExtra:disabled { width: 100%; }
+  #pkgExtra:disabled, .pkg-custom-lb:disabled {
+    background: transparent;
+    color: var(--ink);
+    opacity: 0.4;
+    border-style: dashed;
+    cursor: not-allowed;
   }
 
   /* ---------- LAYOUT ---------- */
@@ -467,6 +743,12 @@
     padding-top: 8px;
     border-top: 1px solid var(--rule);
   }
+  .mat-paper .mat-readout { grid-template-columns: 1fr 1fr; }
+  .mat-paper .mat-grid { grid-template-columns: 0.8fr 1.6fr; }
+  .mat-sheet { display: grid; grid-template-columns: 1fr auto 1fr; gap: 4px; align-items: center; }
+  .mat-sheet input { min-width: 0; }
+  .mat-sheet .x { font-size: 11px; opacity: 0.5; }
+  .mat-lam .mat-grid { grid-template-columns: 1fr 1fr; }
   .mat-lam .mat-readout {
     grid-template-columns: 1fr 1fr;
   }
@@ -743,8 +1025,8 @@
     margin-top: 4px;
     line-height: 1.3;
   }
-  /* ---------- MOBILE ---------- */
-  @media (max-width: 720px) {
+  /* ---------- MOBILE / TABLET PORTRAIT / PHONE LANDSCAPE: normal scrolling page ---------- */
+  @media (max-width: 900px), (max-height: 500px) {
     html, body {
       overflow: auto;
       height: auto;
@@ -831,6 +1113,10 @@
       font-size: 9px;
     }
   }
+  /* ---------- PHONES: packaging result tiles 2 across ---------- */
+  @media (max-width: 640px) {
+    .pkg-results { grid-template-columns: repeat(2, 1fr) !important; }
+  }
 </style>
 </head>
 <body>
@@ -843,7 +1129,7 @@
         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALIAAABJCAIAAAAWvevlAAAtrklEQVR42u29WZNc15UeuvZ8pjyZWXMBRaAK80iCIimSasnyVTfUrRv2vdfhuLbD4Qj/Bj/4zb+if8GN++SXG+F2+HbIare7TaklghRJcQQKQ1Whpqw5pzPu0Q+7kCyCAElAoFpqYz9UJDKRZ5+z97fX+tZa396Jsu4mPG/P2xcbfj4Ez9tzWDxvz2HxvD2HxfP2HBbP27fb6O+mm+2DklKqlJoZjx766M79vbMnJwDgfmdACImiSGutlAIA9MUGAFMt9kT97vWriWbwpHdbahHS+jksHtFuvH8zz3MhQowxIYQx9vKVhdGnheJ+qvynGGP/T6VqP39H5xIh1GoJjLFSSjqqtUYIVVU1Pj7e6w+zLFvdEoSQe/fuGWPa7bYxxl+QHGkYY4wxuAYA+E/9O74XKeWo0yMv7FNgQqNEyjzPdVVVKysr+/v7aZo2m01/P/RB87cUhmKiyf8XgsX29vbi4iKlfDQ97777rn+BEDLGjGAxagghSg+90kOwCMMQY+ycI4RYaxljzrlz584tnDqzsbFBCFFKra2t7e7uJkkipfRffOjiCCFKiH/hZ4U8+GcURV+GI4C9/o9ff9IRGQ6HGxsb+/v7w+FwbW1tZ2cnDEPGGMbYA4Ix5l9gjNM0uXz58slj7W9+/f/xy/f8FYwxzjkpJWPMGGOMiaLIOffGK1eeydT+5V/9stVqWWv9gBhjrLUYY855nuec8++/fuWJYRGGYVEUzpV+rEcTgzEGACGEf3/0//3rMBRfxgQAOOeOTrAQAmM8Pz+PMfIfMcaUUn4ytNZhGI4wNzIVCCHB+ZedC0Ko3+8/st+naAcHB4uLi0tLS9ZaALDW9nq9o/bpqIHs97sY4xMn/hTp4Te5+F+/dWNlZcUbG6WUt6BBEFhrtdZRFCmlOOffuXrut8TEz/7mnY2NjV6vp7VmjCGE6rrWWnPOhRC9Xq/RaMBTwKLVanHOGRMIyAgQo3EXQnwZE4AsQu6R09Nut72pGA2rMWZsbKyupTTWYcJFEMQJFQETIiDkqIcaORECiBE6uvjR+3nIWhz2i+yTjuZOV66vbW5ubGXDgnMehmEzFcaY0ZVH+EAIIewwhl6v1+v12u02qMHXXt9bTcaYt5qEEOccpdRa65HR7XYPDg5+e1Oxv9e1BhgVGFFvpzkLCDaUUko4wYxg9mROZGXjYP74mDdoCCGEHDgEyDp3iAPnnKeERw0AxhghygUdQeEIOGxRFMYYP8GUUgCoqurg4GBmdlYIwTlnjAkhKKV+MrxN+sJFHELgvH85yjb8i7p+BKcBZDt7+exE/A2HcrdXLy2vfnrz5kanE4YhpnQ4zDDGYRgCuFF3D3onCEG73d7e3VleXk6SCBxnSH51F1LqqqoIYQghawHAVJV0znEeWGvrWh0cHOzt/baw+ODj+2tra5TSdruNMbbWelflXYnWWmvt2dgTBKjzx8dyiYRgGOOiyJwzhCKMgVCECQCyhKLhcBhFkR+pJGkQQhHClDIlDcGMEp5npTVgtCOYIUQIYUKEABgh4pzr9/tBEPhVaGStqtIqmYRRHITYAbJOljUYVxcVdkjXSlUyCRNKmTFGBIwyzDihDGMCjBPrtHWaUMQF9TdJKAJkpZR1/QQBxd5+99fvf3DQG2AaWKDGMkIjQgNAJE2bjLG00RCcE4wpploaRlheFGk7/eiTDylBaRx9TTIgnnSAjYNa6mFeaOOkNpQJC6jbGyBCa6mjpLG0fP/dj24/HSC6mVnbGi7evlmUGSZgnQZkizLTRkpVWacdmKouwkgwTp6YcmZZppRqtdLhMBdCeFtHiL8QZow1kmYcx5ubm8YYxrjnMhhj54i1DsAJEaRp0xjjnHXaEYqOBBcoCAJCiJRSa+ucq+va+1qttbeu3nIchiRAnHNCiDASyDlCsFLKOeec01p76xUEwcinHDX4TzSmKysrg2G/kpUDBJ4SIYTxoS+jDDtkg4BSGmCMhXKYImsNZUSV1crq/XMLp6vKBMFjhxshghDyThkcQQgBEECAAEdRFAaRNdDvO2vt+trmay8+Db3AGHt+5hkbAHi7PnJY3lthjP2afDJYTI/FzWYzjuMgiBhj1lofelhrESJCiLpSPjbpdDpRFNV17efJ2wCM8eTk5OXLl5IkCYKAUprlA0qp1hIhRCn1OJiamnIAURQxxoIgEEJ4wu+JmHdhjLFARJzzCxcutMea4+02JlCWpWdt/joeSZ7Yjxiuh2AUBWCybzKgf/OL927fuaW1ZBRxSglBGDuEECOIMjTM+400NEZiwIIFABZZqGQZphGlVNV6eWX15AvzXAQA6vGwcOJBG03biNF7B+oN/r179wD+8VPAoqqq1dXVbrfrKQvnvCgK353/633HgxX+5AGqEOLUqVOcBx4NnpYbYwhhlOLlpbWJiYlms7m9vQ0Ao1DeBz9KKUJIkiRRFPmbGB8fp5QaowBgFI8RQnZ29/2Mehbmp9NHsB771loE1lobRdHk5KTVOk3TMAw9/DnnfkzjOJRSe0SOFgfntNvtVhWk4dcP6Orqanf/IEpiwJgi6jDBiBBCGMEYg1Tq3Lkz3d7B3t4eYYAQsaDBAuECE8REsHfQ29ndn52ecfqxsKAIPzJW8uh3zkVR5NdYlmX//1/98s9+8mOisyeCxfRY2Ol0yrIcWQV/fa21O9K8ZX1iWLz93idlWWKMpdT+HU8VrbWMiUajsbd7kKYpAEgpKWUA4GfogQEHhMA51+v1ur19a+1wOCSEOGecc5RihJBSyhh39twFj2KPKkKI9y+UMmutfwZP0SmlQoif/vVfnzl7ihCyMNc2Cg4xb+Dttz+WUo4GYhSgNxoxAKTHx756NH/16097vR5jjFOCKaGYYcIwpggha7V1enJm8uq1F9fW7+9192pTcRYQTiIWA0KACAsjpeWd5ZU4SRkNAlI9shcHhj1oX7YWUso4jpvNpl/f9+/f39raOj6RPBEs/vqtd6WUPk70y2ZkKoIg8D7FOcc5fxpr8bUZlZ9ubDWbzbGxsUajIURQ17Vf9D5n4mEUxzFCSASMc95sNkeOHmNACHmDpg1qNBr7+/uUUj86ozv2iPahNmMsSZIoYseOHbtw4YIu9x66n6sXXvhtqPva2pq1ttFoBAEHAIwpIcwaqJVUqjZWfffsq5OTk9bpu3fv9no9TFggAsJFWUmHcBQJLdlBt7/X7c1MTj22G+tGOHDOHY3t67r21MqHr1EUdbvdzz777Pg/+u6TFRm2tznnlFKt9djYWKvViqLIWuvfNMYopTyr8JzjGddEPALqusYYp2ma5/kDewXWsqqqlFK1LIMgiKKo1UqzLHsw086DxgdLYZiMyKYfKWutUiqKYm9sq6oy1Pj0dpbV3qjoZ5roff/ju91uNwgChFAoIq2tteAsttY5gxgL0jA9ffrsYDBsJM3z5y5+/OknCOEwjIHQqjYY4zCMKlc6bTY3OmPt8fAxjttabawaLZ4RE/Ij42mZtTZJEo+MlZUVeBJYvPWr9/f29qIo8UxFCKGU8t7Ej7/W2iNDKfXVMdrTl8rKsuz3+1prIYSPCCilrVYTIeRzq55DaK2rqnpAV91ooXjW48B6fHh70Gw2fXZ1lCHwJpFz7qnr11q/p3uQuq7jOK5rBUC1qo1xhBDrMGfB2NjYxHQ74snte7fm5+enp2du3bpTlLUUulY1oYggIAgpJRmmq+trc3NzzenHcBnn2s1Wq9X6MuX0wVdd1x4QWus0TXd2t979zc3Xrl38Jk/x8xvvvfXWzxEiQRD5Kc+yrCiKkRFyznk+59NOUsp3Prj13ZcvPEtYFEWxvr5+48aNwWCwurqGEOKca60RAhEwa22z2TRWXbhwIY7DPM+jKPKD4JwDZI21Ripw2CgNDgNAGAaNRkMI0Wg0GGNBEPoE13A4ZFRYa30NotVqbWxsAMBE85nVfpeWlsbHx4uiCMPQGiREzKhIkkYYxlkxbLfbP/je9/KiL0g47OanTs9/58VXb99bmp6a6fW7rbGG1nI4zNvNhmBBs5EWRQHwCFhoQ5ysqqpqNpse6H4p+xCvqipCSKPR6Ha7vV7Px3SU0p/+9Kezs7Nz062vzan/7Gc/S5IkisI8z/2lMMZVVfmcurdD3n0458IwNMY8DhNPDwvGmHdXI8aLECIEF0VhnbbW+jw/gPUhBqX489TZKCftMEFYK6uUGgyG29vba2trw+FQSskY99WBLMuaaTsMw42NjbwYxmGIsAOArP4Ck6eUjtZfWZbeVhE7/Lqyu7x165a1tigK5xxjKAojcBQAYUzrSgkWvPDCC3FMhxlMTUwTisq8wgjJvFy+cxdjVGZ71qq6VsY6jLmSrndwkA/mXn3pxCMS0vv7a2trO7v7fujquvbW1LtObzCWlpaklD4RjBAiGG7evDk3/eZXP0i/3282m0mSEsKCIOCc+yCuqipvif31Pd/0xOJb4RaU0jAMPaKPRjtJkmACPivl86QIIULQ4U18oUjhAFAYptYoY0xRFPv7+51Op6oqa62UKsuyJEmKokjiHiFkZ2cHYRcFgb/IUUx46+WR6t3q+fPnT548ubW19eLFE1+Bifv377/33nt5nmdZJoQQIrRml2BhjCWEOAPT09MnThy/v7LBOW2lcVFmBzvbuioPdrZv3747OdWu8j2ErQXkgDpEwVEH9KOPPtLmT974zplRX0HSLrO83++XZVmWpZ8qKaWPs0a5HJ8z9NyiqiohhNHys89uzcwcu3rh5OMe5PbyVrfbbzbblFLGRBiG3lPkee7R4K/suYUnNKPyxTOGhbU2DMM4jn0ayhMoY0wjjX33QRAkSQIAUlbOsUNO8IVY2QEgB4dhtI9EvKHzzoIQ0m638zzHiCqlOp2OVFUoBCD7ECZ8jz4VJqUMw3Bubi6Koq/AxG6v5pzv7e1tbm76xwEAra3RLkoS5Gi/30+SdHKqJQKiZTk7MxvEgiKFTE1bjdmp1vIdbcqMI4WxQ4RbBwijIEqUxb1+vrezA3DmgU1MAA5rN6OQ278YZWP9aykl59xXo/yKikIxGAzu3LnzSFiUmvnqGsbYCxK8d5BSRlHU7/d9BdF7qMMkkK9yOfc0Wc6vbV5CEUWRT2Q9CLdcXdcAPhEOPkD1NOdLduLziMannjzIRolOH0dJKZVSzmofggchDzh/JCwIIT5YHwwG3sdZa3/z6cq1y/OPvP/JlljfHiwvLx+m1cPQF7gpJ0kzBY1J15w7s/Dydy4lSZQmAUYSrBXcVUQLjK6cXxge7CwvLTZiTLBzYCttMdCQEYGpUbzX630+VjazllkEUZT4+fATU1XVKMUyEhP5jL5fV3Vdh2GilFpdXX3kU6RpKqXc39+P43iEJCmlx0eWZWEY+guOwOcHbZRHeIJS2TeERRCIUVzgp82LJEaJlEajwTn3eTDzmDZaqZ5geuvnP/L+1VujIAja7fbY2NhRYc6oiDpahaPALEkSD8qveISPP/749u3bnPM4jn2SPm01REwB1bXJmuPRC/NTjZQzqoMAMKoB1UA0gbqu+3OzY6+8eCHmmGMVMxQxHDEUcsyxE5S2Wq2yyH79m6WjxlVry4UYWYvRrPgH8evY54H8eIZhmCSJ9yllWf7sb97+kgag8uqQnZ0dL3P0lWRPKsuyTJLEGOPB592HfdB8pPrsYWGMIQQ8nfSSPh89+vH1lEoINspSPEjuUcYoO9L8jPqb9pcaVTS80sczGO9fhsOhfUwbkV/PezzV/2pY3L17l1I6OTmZpinnPE3TKAriVCibF7J36crps+dPaJuHESbU0ogAVK7uY1TpekCQvHRh4dWXL4KsQgpJQNNIxJEwWtVVwQh22qyvrR3WKUygjfF8Sz5onvSNvMlwOMzz/MSJE+122ztETzz9AkvTdGNj48PPlo+IJmmj0dja2vrggw+KoiiKwl82yzJPLXd3d69cuZIkiS9ESCn1keZv4Nk7EaXrUSmEc4YxOXSjD6ZZSjkqfDjntDYPuQ9vdAIaevPgl4sHkHOOEOqxTwjxFpZSWpS21WqN/NHRyoL/uocC55xz7lfMV6krur2Z2eNps12WpVQ6iWOt6oDiXp7rPLu4MHd8Kl269UnSJlD3YZBtb6339/cDwQbdXrUbz5+98OJCOrxXT40lWODKUmnRdi/rl4hHIUZmb29nZTN74eTJ3d3N6ZkpbSkgAHSIex+D+CXrrQUAnDt3zvvBNE2Hw2EcxwhASjk+Prm9vb25ufXSpQUAWNnonThxIo7jlZX3FxfvCBF4k6OUKsuSEFIUxcHBweXLl6uq2tra8k7Z6998neHbi0SwA/DyCxEwX1B1Drz38vacEEYptVY75yglj+IWyBpDCeGMYYQwoFAEoQillNZYjEkcJozwWtecsT/+0fVmq2GMJBR5UYmvyHtHVhRFo9HwUIiiaHx8fG9vLwwfWyL78//nP47NzCCHhrUhRCBHh4PC6VJiOejs/B//9M9OtpJ3/vL/Az08NWaAmt69Tw42lvN+t2ZI1ZVrNXWw2ajyFyd6AmfDzAJvFi6gYdAQyd2tW6I5V1ny81+9/ceN8anj83lRIxTHCZ+cnLlz+3aSJNIYbxWcc0pKRun+3p6z9s033tjZ3t7e3p6eni7LUhsXBIEIokbaWl3b+PDm+vnz5wENKRNb27vvvPteGCVSSgJQy3o4HE5NTiwtLRFC3nzzzdnZ2aqqdnZ2xsfHnXODwcAHB76q/q3A4uGljyyA55X46ZjKSHPl3cEDLTHx5NHz8yRJ0jSO4sBrsQgh3jJ7ju0LAWVZegckhBhrPPpm3rt131nEGaeEI2ecUsYpbUor87o6OHt8Yoy5xV//Xbm7nEZo66NfzizMFlt3bHeT1lkAnKgCsmG1V6usx+vNOBAIoUoVGjWavM1I1G2gnhoop9WALa8sTUyMEcyklJwjb+FHGggvBnDOFUXhP2q1WidPnux2u4e6S8ystUppQqiUamdnd3b22NTUtHOwurrW6WyNj4/neZEkyf7+QRxHe7sHnmy99NJLvsLgc80jWd2IdT5lYf0pkeLcI9/84vvuy7AYcRTO2agQOzI/GGMuaBDwt95664d/dPWDT5Z9Uty75xGTHxWO/aUeF6Aufnyn6lUodEBqXQ9NlVFXIyOxGriq+8r57zO9u7F6rxUzUpXrS/dnGrbsHRCtAs5jIXItTV1lvW417ApkLJIOE2MKC5TQJqDSmgI7YoypB/rOZ+9fPrvAmIA6JyDsA7/+wLdqb1l9aqGqKkLQqVOn1tbWvNnjIsrz3NfcjTG7u7vb29uTk5O9Xm9tbc1TLp+eklI2GklvOEQYzpw5s7CwMJKhjOjtqPLwlIX13xIZD7WvhdFIh+Ll9gDgv2SMG4HGl0V++EdXAeDojpUnar0uvrl4b2t9h2PBHHFVroc9bAZpgtMGoUgg3bhwdur+vbuCVOONpLOxGQksq4phRkRMscOYYqKM0Q4E0IAFTjlpgSIacBbWGIosy/IBbSTcQVWVu5311eXbCydPYVM7WTh7SPo8CRtVm0eOXynTbDYXFhYWFxellA6wDy996D4cDldWVqIoWlpaWl5e9hpuQsjBwQHnfDAYIOziOP7+97+f5/nIfCZJMhJeHF2Ev1Nr8WUcfKW1sAAPsIwdJvCgSEZ9WOXv3rNIIdjf/Xr5lZeeEhMMT22uf3rn1l1TQxxxYo1VNdZFTORUEh4bD4IgABxxpoIQJTXrZ33r0NT0cd6YSNpy2O8dDLqk0oQ14mYYpS1eNpzcywZ7BjiLUizatRJVXRmNsAVwDgGysr7z6acTadqIYqS1f9iHNIVeZeLFR91uFyF06tSpTqezsbHBuHygqZYIIWvNxsZ6nme7u7vD4ZBSaozGGGmt0jQdDAYEo7Nnz87Nza2srMRx7C8+Cua94N6vsW+rgvrNDcY3dD1HvzLao+FzL563K2WeGhMA0OsN7t65t7neETzMsowiieTQyRIHNQEsMI846Uu1urVz7OT8jgj3t/Zm5y+0pqdhfGKMj8vN9bqgmKLJycmJ2amw2YTsYOPeB31TO8dwHRqJhtr1c+dQVBRWAThLCKLr65uba5tnT5+hlFN0uPvo831yAL6AIKUMgsCv74mJibm5ubW1Ne8QfWTns/tlWXY6HZ8l6vV6zWbTSxi9bKrRiF9++eXhcOgHLQzDVqvlu/MdjRJCX12L/nvmFg/et164Za31Mm6jfKbLZ/JlXeOyzIsiXFxcf/HS3JPVzStcV6rVInfu3V1aWS7KknEude2woshhgh1ArVStlcCiQlGFG8HM2dnoWNDuj7cnCBEQRdCAyeSEbe9gjNN2GrabEAWQ9xsV1axTVnpnf7DTzQsJByVROKqUsERYSyxmKle3bt4bb09Nz8x5nZHfPeWp9Miw+zeFEJubm2EYnj179u7du93eYMQMvDfxUzuqUBZF4Qs6WZa12+2rV6/Ozc11Oh1PIxqNRhiGo15GpP6o3Ol3xy2+wqF8hWnxuR3PkghmXvw32t4IANaaJ8UEAISBVZJ2u3Z1dXVnf5cwVtlSOumcsWAJQrly/UL3S0s0nzoxPz23AHySHZufmkUgLTgEmAIipCmOzdaAEIABpIBScHF6eSqZ6Ox3h+vZJ53eUqFQDYxFqbHcgdAIrAGC2dLq2rlz584oBeSQQnko+AnzZSA/2UEQDAaDIAiuXLk0Ozu7vtHxdTVPFHyMhjHO8xwhND09vb6+7hP/1tqJiYlr1675WT99YlwBeGmWj+Yeyg5/K9xCCOFjgRF466oIQj5KsvrMvxDCOUMIsdYcyUF9rkqilA4GA0IQgEXIUYq9FKWuS8YYApJlhbW20Ug6nc7x6eDp7jYv5b17d3554xeE0SAKgeiAC0BGlXWYjMkcPrp79+KLr7x+/fqgcjRMgafAArA4L4eH/AcAlPLhd9BsO2QAAAcNXOt9LcXEsdMvTt3fJ1v3N4GLvMaI0FoZAL8NAmPB1rY2Xja1D7/9Cq7repTg945gtLnh+PHji4t3/vRPr3/08cfr69uzs7OMESkrIYQvwIahKIpiZ2crTRMpJSHIGPXqq9+Znp7udDrHJiMAYJCXZZmmqZ+sRqPhATeSIjx7WOR5PlJ2PGBP5kHu3XhNmE/UK1Vzzv1us6MWwuPDb0jxIbtP0Pr9RX4NwQNZ2/7+/jvvvPPBB++XVf5Is+TJ1Ei44Ec/z8p/+S/+zfTkTK+3u7a2Zpypq4oExFmwCBBymJDcOWnIzOmr6bFzpY6AciBRXhiA/LGi+/4XZBzR9LHBQYUT0piZ152ew1w5p5QyDiilGFnnrNF1qQvpaib4UccxYp3epKdpGgSB3/5FCKlr9frrr2dZ5jWFvnboV2NVVSOVvN+OdeXKlddeey3Lsukx8ZAsJgxDH/v4PdaccyllURTfSmF9tJHSm4eqqqzTUkrO6Ygz+pkTQlinj+zg+HxSRwJUT78IQc45a/VoYyPGmBNura3rKssUoejLmPCBu7eTowqkUmo4LIqisuC2drZX11cbaaxtnTajWspcVg4w4bxUUuNw4fLLydSp/Rza7cDZJ965mo4FgzqcO3Xq9ur9YV5abShBBEAISig2sjRlDURS5uI49HIK7929nGCkYPWbRDDGDPLZibAoigsXz91burO1teWBDgBc0SAI8jy3zpV57iCYmpoqy/Kla1cRdhGTD20bqarKd3S0VOYR8+xh4b2Up83esWmtEXZaa86p5zv+TR9NgPs8RXE00UYIOqoastY6hzDG1h6Wia21Stf+Ioyxh2AxAod3zyPRhq8CaGWZ4Bbc3bt3Nzc3J8abjOI6z/K6MggDJuAwAGtPjJ86f1XEE+0EPTWjsoCb42Njk2MHg+WyKigTDgHCllqkZKFkKVWhdG3M4S71oxv5/REG3nBWVXXh9MyhCUFFmI69/vrr3o5WVeW/6420Umo4HHLOz5w5I4Q4c/rMMBs+xBc8gTi6ev2a+VrO95Sw8OUG/xhlWXrTxAX1HY/WLudcKWeMcfA5Jo5aC220scpvH/WlDb/93BiNEMWYYYwNUtZpr+Jw2j3SWvgV4PMBfgi01toaZet+1t3a2QRntKwQcoM81w4oj4AgAzKIo9nZY2mjPfZbYAIApCoYccdmJtdWliswyEgLSIMDBM4o0EqVdTYYEozjOPa+w//17s85533Hl688Pz8fBqGxxsvr/SryD6619nUAzvnu3m5MH5bER1HktQ1+o43fNuzX6rciw7HWlmXpO8iyjBDiLFIaa63ruvTqPa8A8NJfv8pHirGjaXlfkSeY+Id8YAa8JuXzDaXOOq21r9x+GRajlTeiO1rrwXDokFGmfuGF4wsnjhNnA8bLsmRMKIctoFobHgbnTp37aov6jdYJZwFGp06eyIfZYDCMk1QZ55wDa8HIuiymxtohDQb97NB8PqijehbV6/W8gsYY8/HttdG2l3feeWdU9/EindHRGtba1148B4K/8+GiLxNeOn38obuq69rX3P1+rVEeyIsWnj0ssizTWs/MzFy9evUw7wTEgcEYS1l5db+v8HJOAQA/CDIfshaepeZ5XtVVu92+fPmyh7MQoTFGKfPQztLR/D0Ei1F1wPtOX3HI8nxiZsw598qrL0UigErFQciw0MoiJoyzyoE0cnxyjHEM8FvtPmlw7Fhg09YrV18aZmWrNabtYcxJHSqyAQHXiseww34FPzhTSnHOjTFJkozKOl7069srV858bdfffen84z6Komh2dtZfdpRfd855aY//P58srlw5P/9sYME5b7Vab775+ssvvyRE6JwjBBnjHLLWak5ZnudxHO/u7nLGOKdSSnAjsd3nqjtKiDOmLktO6UsvXrly9ZLgYjAcWANBEARBdLiqnEUIYYSNcQBoVDRBYI8K0UamSAgGAJWsDYK9vZ342LHxhAPAcF8KFuzu7secGgxpEJR1icAkwsJv3RCyrVaj1Wo8Qk7cCasy18a99sbrCwe7fn+9p4Q+xCCEDAaDiYkxSil+Rqcfsmjy4kV04sQJxogxTgimtQWwxjjGyObm1lc9y9Od+f3hZ/fGxsZ8ZsJaCMNwMBhoq3jItVZOW3COMRYFYRJGIuDO2EM0IOsOxZh+OvFgMPC6dVlrIDiKEs55f5D5Mol3KBaBc85ZZC1GgEcH5dAHe32zLMMYM4oJIeSBNbLgptoB/L410Rjl6JxzYJ1zzjodiEBJub293W48m3suNSMEUcr9X+cMAHbOOIcOX8v+s5f4jnauWWunx8I0TB8r8FPlF0k7OIwALABOQhGJKBIPHxgST7Sf6H4m0gb8IbQbH99yziF7GIQ7Z5DDDrx2lVBMOWftKxeeSV83b35alqXnK18uPPnXP/mTHzxLa/G8/cNu9PkQfMGypZMWWeywN2YAFjkMyOLB/nNY/I7akLQapve779c2Z6y1XqJkAKS2FhwjBCMwABq0BUcQpnB4yKgBYxoTDgw4jAlQxDAAAHJgZS0ZxYxw3OsAgG5MyEopVTeh+oOGxe+XE9GUCk4JIcN+j1PCOeeMAALwCQBrgVBwDhwGBOAQIMjzr5qAikeUM2NMXhZaWcSpMqisKoQwIKKdLWs5yIpK1tZaRMBgrbUCQELwJGkIwZFDWqt22nJgwSHKiGCCUoIQBmtjKjAAWLDOUES8BB4DaAeo33luLZ6yxa3QVBkAEAxSSlAKNGjnEuyQQ0giU1vnHFh/JoTDJDLGSa3qSta1KmUtlTEONre2pXVS6qqua6W11to6C25n2BNBYAANs0xKbTBUtekPs1obwBQwUdYobay1DjAQYAExprYWOKdhGDNGwCJjlSwlgEWIIOQIogg5hAhxtsFj4ixyGIMNRZSmSSNOBSPj7YlI8EacNtL46onxrzdgaBK7XQBwaLKuFMZYMIaQs27nHywsBBijJCCLHSCErM9ZIEKcMdsdrUpKKQjBjWHWIozBuW6364+QyrIsz3O/Id9YvNfLrCPaWmOMNqCdtQYb5JiIlLPWYmOtQxhjDJg4iq21jmJOeIyAGYswpqXSCDUYNwgjzBDBDhFEMAJikeUCSV0rKUcZYqmlkSoIAwyHWzdrf2IEAAbkpBWUMUycc1XZ2z840LWUUoI2YRgKTOu6HvYHSqkoCOI4ZoRyzpMwabVaY2Nj4+PjrbQZBMGpU4FzAgPiXAZBwDmmCJyDoh6dreMTNZag/T9gJ1KUGUWmEQritKpyDI5gQJgAIeAcaG2UMTLHdQayKPKqnw0Hg+EwK7KyUEpRFlpw1oB21h+qjDB1hNaIsiCmXr1ikcOIkgBz6hDV4OK4SSgta4kxZiIwzirkgiTmPFDWaOMQwdriSuvZY3PDskqbYwZcXlZhFCllEEUOZJ4PCUJxHPtSQlVVZV5UVSUYH6nfjDFllpdFwRFx1lZ5AQDUIaWULKvBYICt6/f7oEwcx8iBUiofDsuyzAZDAADja11GSqlq7Q1hGIbtZmtqamZ2dnZ2dnZybDwKU8KC8fHJOCbGgAOgFIyxedFHCIKQh6FwZvcPAxaVqghCYGrilKCWYUBWFYMuchaMVVL6zXFVKZ2S+V6HOGsBO+ccEIfAAjYYJ402woQwQbkgTDDGMKGWEAVExEkQhc6CMY5wFsWNIIotoNpY+qW6oI4TAECYentgADBQB1BaN8iLpBGX2iKMCQZfOMqGg1Yj4YBLUEZZzigALuu8KRIAqLVCyFkLlGKtLcbACbdgldQYLHLYGEUQpRhUrXVdYSCEohYq7m7nqlLOmTKvtJaylFmWDQaDwSDLh1ldq729vbKsskE+HA69loICJYSfnL94/Pjc3Nzc2Fh7fLw9Mzs1PtEUAmMCVVUV5dBaPTH2BwGLuogDSrBT5aAYHqgyw04Oe/vImLquyywvy8pay1kQCJF1+5RSKoIgDIOwIaKIixAoC8IEUUZEwHhEGUeEOYQBAFGEMAaHtdHOIUxJVT9lLUNG04Lj2gLFoBxYC4QAA7AAZV3XdcUI45wxxihAWUnKiKpVHAUOgAAUpaQBq6zFBFtjHdiQMC9GQs7h/sOp5dI1EAbBAwcWzOF+zLpSSkqt7HCYW2tVrQaDwe7ufqfT2d3aHvTLe0sdcMQYg7BLkvjYsZkTJ4+NT7Rfe+07k1Pj09NtEUI+6AwLWlXV5Bj9/YVFXQ05gbrM+gdbvf3tIus7XamyZARhjI1x4HAQRK3WWJI2gyBAmBLGKQ94EFAeAOOAeV3VjlKEOWBiMbEOAWCQ5VPcT0DTSg+e4AvxRFVKxkkcBEqbsqwpAko5xlDmVRQHShouaJlXhJPcGh4LZ1Fd5pwHnNOqqJ0zkRrKoMWrbxp+azeOMUUOrHVSyrKsq7yQte32i63O3urq6tbW5u7e9u7udre3X5ZFs9k4febkm2++8dp3X5mdnfYlwiSSv8ewyPpZ3tveWOvubyOkOEMEoNVsJkmSpmkgYkAEY8ZESESgHRiE/QkgFrADbBF2QBxgg7B2zgEGwAhjjClGLqiGT3QzxMWcMl+Vrd03AgeLxglh1mqKGYDN87LMh5PTM4DA1hpjqCoZRAFoV+lKU0oCioBURSZEiJAriqqRxAgQABjndH/rCQytTJ1FGGPGOCeYEKAc8hzq2iCEallub293Op3BoPfrX79769atjc2106dP//N//s9+9KMfRVEEdu/3FxY6H/T7+1udTVllzTRqthKvRQ6DOIxjTANjiDLIIQwIk4BrcESDwsCOVDFV2LCARDnIWIIQAf8LSAiT7OGA7cPPlofDYaPReOnSwsbO8PjU58WRm7fXiQN/4Obxua8qsrz34a1XXvq8EvHZnXV/tuR4e2x2djZN0w8++MAZ4w/DA+tOnDgxMTm5f7C/sr5mwfm618zMDKV0dXXVbwnX1lKML5469mSpNphwzhntnDHWWmVr51yz8YhtxEsrg5s3by4uLoZh+Morr5w7d66V6t9TWJT9jGGndVXVhXM6ioMg4BgfmgELTBks+DOrav7sb9/b2dnyv6HCOb986dLVq1epy/7rf/vl+vo65cxaUEq12+3/+/+67r/yd+98+NYvfn7t2rWf/Oj7vDEuh/t/+6t3f/GLX/yHf//v/H/4f//Tf+kfdP3xI61m8/LlyydPnvzzP/9zMHZmZqbf73PKLl68eP78+cXFxXdu3JidmqaC7+3tnTx58oUXXrhz9+7BwcH6+nqjmU5PTrXG2v/k+g+fzNyqJgAQQJR9vQ/a2bNKqTRtcc4F6/++5i0wkUYD5iLiGAPCTjpAlhBKtcWMCkGeWVd/e+PTTqczNzf36qvfYUxsbW02ksRa+5tP7nU6nZMnT/7RD75PmbizdO/Tjz7+j3/xV//q/7wOAI1mqp1dXFw8dfbMwgmhHHbOdXa2LQuVNX/xn/8L5/xH1//k9OnTw15fSjk+Po4wjuN4YmLihz/8oZQSO2iOtZMw+tWNt1ut1ve+9704jv/b3/x3p83c3Fyz2dzb20MInTt37gdvvPw0aZ4nmd2pCQwgAEqA8hlO4zOGRdh47JES7Jn+tubyRm91eWlyYvzP/vT67u725MS0s3JqaqqqqpuLt+ZPLVy/ft3Lwy5dODc11v7pz/7rX/7VL/7369/HQE4cP4EBvfv2uwERFy9daMRpXdSNOP3gw9+s3F3+8Y9//MLUsYiIZHIGY0wJXd9Yzwf5+TPnG1EjnUlVLaM43up0rHYI05ljc1VVIUwrqdsN3m6MY8Kq6p00bT1Pfv+u28ryvV53/9VXXmaMtFqtbrfr913dvn17c3Nzfn6ec35wcOCPaeszhtzhXgxrbb/b+8lPfnLnzp3FxcV2u53npWCBUoZTQRBuN1uz0zNZlilr4zjOs6wqSoLw/eWV7c6WlHJ+fv7atWteEbm8vPyf/vNf+APg/u2//mf+3uamU0qpP7nmOSx+p83vSLDWekCMfmDA79cb/c7eYDBotVpe/eXflFJWVXXx4sXBYPD++++32+2yLKenp0fHzvtj7f3vDfizEMfHx+u6FkJMTU0NBoN2u+13HhBCZmZmms1mEATj418ofJRl+eFny3+4yPhDhcUPv/fy9vb20tLS3NycV7H639FI03RmZqbT6SwvLy8sLHDO/UFB/tcSAYAQ0mw2jTGnT5/e2dnpdDrdbtdvsPHi29XV1cnJybm5Ob8nCgD8mcDz8/PXr18fnQa2t7fnf1rrz/74e1++Pa9Mfm4t/h7a7OzsRx99dOPGjVarFQTB7u7u/Pz8wsLC1atXP/jgg7fffntzc9M5d3BwcHBw0Gq13nz1Mjz4QQ3PVa9du/bzn/+80+ns7u5mWdZsNi9evLi7u3vjxo0sy/yJuwsLC/7HHG7fvh2God8UMzs72263oyjyB5A/gkgx9hwWfz/tB2+8pLXe3t7e2NgwxgRBMDExobU+ceLE7u7uysrKu+++67f1zczM/Ph/e8N/67svX9jf3/ckY25ubn5+Pooif5ZvGIaXLl36zW9+c+fOnb29PQ+U6elp/xOB29vbv/rVr/yx9levXv1Hb15LkuTChQuPg+zLV07/4Y7tPzQtp0YRdYebbjd3s2OTj/31HksS/MWfMcOiFYZh3nuEfKabmXZC4H+Z9lzi+7w9itE/H4Ln7TksnrfnsHjensPieXsOi+ft223/Exqlr4hfVdRSAAAAAElFTkSuQmCC" alt="TEAM Concept Printing" />
       </div>
       <div class="title-block">
-        <h1>Imposition <em>Calculator</em></h1>
+        <h1>Estimating <em>Calculator</em></h1>
       </div>
     </div>
     <div class="contact">
@@ -854,6 +1140,15 @@
       <a href="mailto:sales@teamconceptprinting.com">sales@teamconceptprinting.com</a>
     </div>
   </header>
+
+  <!-- ============ TAB NAV ============ -->
+  <nav class="tabs">
+    <button type="button" class="tab-btn active" data-tab="imposition">Imposition</button>
+    <button type="button" class="tab-btn" data-tab="packaging">Packaging</button>
+  </nav>
+
+  <!-- ============ IMPOSITION TAB ============ -->
+  <div id="tab-imposition" class="tab-pane active">
 
   <div class="grid">
 
@@ -885,16 +1180,16 @@
             <option value="wt">Work &amp; Turn</option>
             <option value="wtumble">Work &amp; Tumble</option>
           </select>
-          <div class="inline-help">W&amp;T doubles gripper on the gripper axis. W&amp;Tumble adds a 0.25" center trim on the side-guide axis.</div>
+          <div class="inline-help">W&amp;T: side guide on both short edges, even columns. W&amp;Tumble: gripper on both long edges, even rows.</div>
         </div>
         <div class="field">
-          <label>Bleed (horizontal × vertical)</label>
+          <label>Bleed per side (H × V)</label>
           <div class="row">
-            <input type="number" id="gutter" value="0.125" min="0" step="0.0625" />
+            <input type="number" id="gutter" value="0.125" min="0" step="0.0625" title="Bleed on each left/right side of every piece. Two pieces side by side are 2 × this apart." />
             <span class="x">×</span>
-            <input type="number" id="gutterV" value="0.125" min="0" step="0.0625" />
+            <input type="number" id="gutterV" value="0.125" min="0" step="0.0625" title="Bleed on each top/bottom side of every piece. Two stacked pieces are 2 × this apart." />
           </div>
-          <div class="inline-help">Horizontal: between columns. Vertical: between rows.</div>
+          <div class="inline-help">Per side of each piece: 0.125" puts 0.25" between pieces. Bleed stays inside the gripper and side guide.</div>
         </div>
         <div class="field">
           <label>Gripper × Side guide</label>
@@ -903,7 +1198,7 @@
             <span class="x">×</span>
             <input type="number" id="sideGuide" value="0.375" min="0" step="0.0625" />
           </div>
-          <div class="inline-help">Gripper: actual <b>0.25"</b> + <b>0.5"</b> color bar. Side guide: <b>0.25"</b> for digital press.</div>
+          <div class="inline-help">Gripper (long edge): actual <b>0.25"</b> + <b>0.5"</b> color bar. Side guide (short edge): <b>0.25"</b> for digital press.</div>
         </div>
       </div>
 
@@ -984,25 +1279,21 @@
           <div class="mat-title">Paper</div>
           <div class="mat-grid">
             <label class="mat-field">
-              <span>Type</span>
-              <select id="paperType">
-                <option value="text">Text</option>
-                <option value="cover" selected>Cover</option>
-              </select>
+              <span>M wt (lb)</span>
+              <input type="number" id="impMWeight" value="431" min="0" step="1" title="Paper M weight: lbs per 1,000 sheets of the size at right, as on the mill / merchant price sheet" />
             </label>
-            <label class="mat-field">
-              <span>Basis wt (lb)</span>
-              <input type="number" id="basisWeight" value="100" min="1" step="1" />
-            </label>
-            <label class="mat-field">
-              <span>Cost $/M</span>
-              <input type="number" id="paperCost" value="0" min="0" step="0.01" />
-            </label>
+            <div class="mat-field">
+              <span>@ Sheet W × L</span>
+              <div class="mat-sheet">
+                <input type="number" id="impMSheetW" value="28" min="0.1" step="0.125" title="Sheet W the M weight is for" />
+                <span class="x">×</span>
+                <input type="number" id="impMSheetL" value="40" min="0.1" step="0.125" title="Sheet L the M weight is for" />
+              </div>
+            </div>
           </div>
           <div class="mat-readout">
-            <div class="mat-r"><span>M-wt</span><b id="r-mweight">—</b></div>
+            <div class="mat-r"><span>M-wt @ press</span><b id="r-mweight">—</b></div>
             <div class="mat-r"><span>Piece wt</span><b id="r-pieceweight">—</b></div>
-            <div class="mat-r"><span>Paper $</span><b id="r-paperCost">—</b></div>
           </div>
         </div>
 
@@ -1010,22 +1301,12 @@
           <div class="mat-title">Lamination</div>
           <div class="mat-grid">
             <label class="mat-field">
-              <span>Apply</span>
-              <div class="grain-toggle compact">
-                <input type="radio" name="lamOn" id="lamOff" value="off" checked />
-                <label for="lamOff">Off</label>
-                <input type="radio" name="lamOn" id="lamOn" value="on" />
-                <label for="lamOn">On</label>
-              </div>
-            </label>
-            <label class="mat-field">
               <span>Sides</span>
-              <div class="grain-toggle compact">
-                <input type="radio" name="lamSides" id="lamSides1" value="1" />
-                <label for="lamSides1">1</label>
-                <input type="radio" name="lamSides" id="lamSides2" value="2" checked />
-                <label for="lamSides2">2</label>
-              </div>
+              <select id="lamSidesSel">
+                <option value="0" selected>None</option>
+                <option value="1">1 side</option>
+                <option value="2">2 sides</option>
+              </select>
             </label>
             <label class="mat-field">
               <span>Film</span>
@@ -1062,6 +1343,10 @@
               <input type="checkbox" id="flipPiece" />
               <span>Flip piece</span>
             </label>
+            <label class="flip-toggle" title="Butt cut (common cut): pieces touch with no bleed between them. Bleed is kept only on the outside edges of the layout, still inside the gripper and side guide.">
+              <input type="checkbox" id="buttCut" />
+              <span>Butt cut</span>
+            </label>
             <div class="legend">
               <div class="legend-item"><div class="legend-swatch doc"></div>Piece</div>
               <div class="legend-item"><div class="legend-swatch waste"></div>Waste</div>
@@ -1081,6 +1366,232 @@
     </main>
 
   </div>
+
+  </div> <!-- end #tab-imposition -->
+
+  <!-- ============ PACKAGING TAB ============ -->
+  <div id="tab-packaging" class="tab-pane">
+
+  <div class="grid">
+
+    <!-- ============ PACKAGING CONTROLS ============ -->
+    <aside class="pkg-aside">
+      <div class="panel" data-label="Carton & Piece">
+        <div class="field">
+          <label>Carton inside (L × W × D)</label>
+          <div class="row3">
+            <input type="number" id="pkgCartonL" value="17.25" min="0.1" step="0.125" title="Carton inside L" />
+            <span class="x">×</span>
+            <input type="number" id="pkgCartonW" value="11.25" min="0.1" step="0.125" title="Carton inside W" />
+            <span class="x">×</span>
+            <input type="number" id="pkgCartonD" value="8" min="0.1" step="0.125" title="Carton inside D" />
+          </div>
+          <div class="pkg-sublabel">Box style · Custom lb · Max lb</div>
+          <div class="row3 pkg-boxrow">
+            <select id="pkgBoxStyle" title="Carton style: RSC = regular slotted carton; Easy-Fold = Uline-style folder mailer; Custom = type the empty box weight (lbs) in the field at right.">
+              <option value="rsc" selected>RSC</option>
+              <option value="easyfold">Easy-Fold</option>
+              <option value="custom">Custom</option>
+            </select>
+            <span class="x">·</span>
+            <input type="text" inputmode="decimal" id="pkgBoxCustomLb" class="pkg-custom-lb" value="n/a" title="Empty box weight in lbs. Only used when Custom weight is selected." disabled />
+          
+            <span class="x">·</span>
+            <input type="number" id="pkgMaxWt" value="31" min="0" step="1" title="Max carton weight (lbs), pieces plus the estimated empty box. Default 31 lb leaves ~1 lb for void fill and corner boards (~32 lb packed). Type a higher number for heavier jobs, or 0 for no limit." />
+          </div>
+          <div class="pkg-boxwt" id="pkgBoxWtInfo">—</div>
+        </div>
+        <div class="field">
+          <label class="pkg-label-flex">Finished piece (W × L) · Qty <span class="pkg-inherit" id="pkgInheritBtn" title="Copy piece size, quantity, lamination and paper M weight from the Imposition tab">↶ Pull</span></label>
+          <div class="row3">
+            <input type="number" id="pkgPieceW" value="8.5" min="0.1" step="0.125" title="Finished piece W" />
+            <span class="x">×</span>
+            <input type="number" id="pkgPieceL" value="11" min="0.1" step="0.125" title="Finished piece L" />
+            <span class="x">·</span>
+            <input type="number" id="pkgQty" value="1000" min="0" step="1" title="Job quantity (pcs)" />
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" data-label="Product & Stock">
+        <div class="field">
+          <label id="pkgProductLbl">Product · Pages</label>
+          <div class="row pkg-prodrow">
+            <select id="pkgProduct" title="What is being packed. Bound products figure thickness from page count, text and cover calipers, and binding.">
+              <option value="flat" selected>Flat sheet</option>
+              <option value="brochure">Brochure</option>
+              <option value="saddle">Saddle stitch</option>
+              <option value="perfect">Perfect bound</option>
+              <option value="spiral">Spiral coil</option>
+              <option value="wireo">Double Wire-O</option>
+              <option value="notepad">Notepad</option>
+              <option value="case">Case bound</option>
+            </select>
+            <span class="x">·</span>
+            <input type="number" id="pkgPages" value="64" min="1" step="1" title="Page count (each leaf = 2 pages). For notepads: sheets per pad." />
+          </div>
+        </div>
+        <div class="field">
+          <label id="pkgCalLbl">Caliper (pt) × Bundle (pcs)</label>
+          <div class="row3" id="pkgCalRow">
+            <input type="number" id="pkgPaperCaliper" value="9.9" min="0.1" step="0.5" title="Text / sheet caliper in points (1pt = 0.001&quot;)" />
+            <span class="x pkg-bound-only">·</span>
+            <input type="number" id="pkgCoverCaliper" class="pkg-bound-only" value="9.9" min="0" step="0.5" title="Cover caliper in points; 0 = no cover" />
+            <span class="x">×</span>
+            <input type="number" id="pkgBundle" value="1" min="1" step="1" title="Pieces (or books) per banded pack; stacks fill in whole packs. 1 = loose" />
+          </div>
+        </div>
+        <div class="field pkg-bound-only" id="pkgExtraField">
+          <label id="pkgExtraLbl">Binding detail · Spine (in)</label>
+          <div class="row" id="pkgExtraRow">
+            <select id="pkgDetailSel" style="display:none"></select>
+            <input type="number" id="pkgExtra" value="0" min="0" step="0.01" />
+            <datalist id="pkgChipList"><option value="20"><option value="22"><option value="30"><option value="40"><option value="50"><option value="60"></datalist>
+            <select id="pkgWireSel" style="display:none" title="Stitching wire gauge. The crown (outside the spine) and clinch (inside the center spread) add about 2 wire thicknesses at the spine.">
+              <option value="0.0230">24 ga</option>
+              <option value="0.0204" selected>25 ga</option>
+              <option value="0.0181">26 ga</option>
+            </select>
+            <span class="x">·</span>
+            <input type="text" inputmode="decimal" id="pkgSpineOverride" class="pkg-custom-lb pkg-spine" value="" placeholder="auto" title="Spine thickness per unit in inches. Leave blank to use the calculated thickness; type a measured value to override it." />
+          </div>
+        </div>
+        <div class="field">
+          <label>Lamination (sides · film)</label>
+          <div class="row">
+            <select id="pkgLamSides" title="Flat: sides of each piece. Bound: sides of each cover (front and back covers both count).">
+              <option value="0" selected>None</option>
+              <option value="1">1 side</option>
+              <option value="2">2 sides</option>
+            </select>
+            <span class="x">·</span>
+            <select id="pkgLamFilm">
+              <option value="1.2gs">1.2 Mil G/S</option>
+              <option value="1.2">1.2 Mil</option>
+              <option value="1.7" selected>1.7 Mil</option>
+              <option value="3">3 Mil</option>
+              <option value="5">5 Mil</option>
+              <option value="10">10 Mil</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label id="pkgMWtLbl">Paper M wt (lbs) @ sheet W × L</label>
+          <div class="row3">
+            <input type="number" id="pkgMWeight" value="431" min="0" step="0.1" title="Paper M weight: lbs per 1,000 sheets of the size at right" />
+            <span class="x">@</span>
+            <input type="number" id="pkgMSheetW" value="28" min="0.1" step="0.125" title="Sheet W the M weight is for" />
+            <span class="x">×</span>
+            <input type="number" id="pkgMSheetL" value="40" min="0.1" step="0.125" title="Sheet L the M weight is for" />
+          </div>
+          <div class="inline-help" id="pkgMWeightHelp">As quoted for that sheet size. Set it to the piece size to enter piece M wt. Lam is added on top.</div>
+        </div>
+        <div class="field pkg-cover-only">
+          <label id="pkgCoverMWtLbl">Cover M wt (lbs) @ sheet W × L</label>
+          <div class="row3">
+            <input type="number" id="pkgCoverMWeight" value="431" min="0" step="0.1" title="Cover stock M weight: lbs per 1,000 sheets of the size at right. Default 431 lb on 28 × 40." />
+            <span class="x">@</span>
+            <input type="number" id="pkgCoverMSheetW" value="28" min="0.1" step="0.125" />
+            <span class="x">×</span>
+            <input type="number" id="pkgCoverMSheetL" value="40" min="0.1" step="0.125" />
+          </div>
+        </div>
+        <div class="field pkg-case-only">
+          <label>Endsheet M wt (lbs) @ sheet W × L</label>
+          <div class="row3">
+            <input type="number" id="pkgEndMWeight" value="160" min="0" step="0.1" title="Endsheet stock M weight: lbs per 1,000 sheets of the size at right. Default 160 lb on 25 × 38 (80# text). Two folded endsheets (front and back) = 4 leaves per book." />
+            <span class="x">@</span>
+            <input type="number" id="pkgEndMSheetW" value="25" min="0.1" step="0.125" title="Endsheet sheet W" />
+            <span class="x">×</span>
+            <input type="number" id="pkgEndMSheetL" value="38" min="0.1" step="0.125" title="Endsheet sheet L" />
+          </div>
+        </div>
+        <div class="field pkg-chip-only">
+          <label>Chipboard M wt @ sheet W × L</label>
+          <div class="row3">
+            <input type="number" id="pkgChipMWeight" value="622" min="0" step="1" title="Chipboard M weight: lbs per 1,000 sheets of the size at right. Fills in automatically from the caliper (22pt = 622 lb/M on 28 × 40). Type a different M weight to override; clear the field to go back to automatic." />
+            <span class="x">@</span>
+            <input type="number" id="pkgChipSheetW" value="28" min="0.1" step="0.125" title="Chipboard sheet W" />
+            <span class="x">×</span>
+            <input type="number" id="pkgChipSheetL" value="40" min="0.1" step="0.125" title="Chipboard sheet L" />
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============ PACKAGING RESULTS ============ -->
+    <main class="pkg-main">
+      <div class="pkg-results">
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Pieces / Carton</div>
+          <div class="pkg-stat-value" id="pkgTotal">—</div>
+          <div class="pkg-stat-sub" id="pkgTotalSub">enter dimensions</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Best Fit</div>
+          <div class="pkg-stat-value ink" id="pkgBestFit">—</div>
+          <div class="pkg-stat-sub" id="pkgBestFitSub">—</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Piece Depth</div>
+          <div class="pkg-stat-value ink" id="pkgPieceDepth">—</div>
+          <div class="pkg-stat-sub" id="pkgPieceDepthSub">—</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Stack Height</div>
+          <div class="pkg-stat-value ink" id="pkgStackHeight">—</div>
+          <div class="pkg-stat-sub" id="pkgStackHeightSub">—</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Fill</div>
+          <div class="pkg-stat-value ink" id="pkgFill">—</div>
+          <div class="pkg-stat-sub">volumetric efficiency</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Carton Weight</div>
+          <div class="pkg-stat-value ink" id="pkgWeight">—</div>
+          <div class="pkg-stat-sub" id="pkgWeightSub">enter M weight</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Cartons</div>
+          <div class="pkg-stat-value" id="pkgCartons">—</div>
+          <div class="pkg-stat-sub" id="pkgCartonsSub">enter quantity</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Total Weight</div>
+          <div class="pkg-stat-value ink" id="pkgTotalWt">—</div>
+          <div class="pkg-stat-sub" id="pkgTotalWtSub">enter M weight</div>
+        </div>
+      </div>
+
+      <div class="pkg-viz">
+        <div class="pkg-viz-left">
+          <div class="pkg-viz-head">
+            <div class="pkg-viz-title">Carton Visualizer</div>
+            <label class="pkg-check pkg-flat-toggle" title="Only consider pieces lying flat. Uncheck to also try packing on edge (standing up).">
+              <input type="checkbox" id="pkgFlatOnly" checked /> Pack flat only
+            </label>
+            <label class="pkg-check pkg-flat-toggle pkg-hide" id="pkgNestWrap" title="Turn every other book 180° so the coils alternate edges and each coil lies beside the next book's pages instead of on top of another coil.">
+              <input type="checkbox" id="pkgNest" checked /> Nest coils
+            </label>
+          </div>
+          <svg id="pkgSvg" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div class="pkg-viz-right">
+          <div class="pkg-caliper-readout" id="pkgCaliperReadout"></div>
+          <table class="pkg-orient-table" id="pkgOrientTable"></table>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        Depth = paper caliper + lam mil × sides (1pt = 1 mil = 0.001"). Best fit tries flat and on-edge packing, piece rotated both ways. Stacks are trimmed evenly in whole bundles so each packed carton (pieces + empty box) stays under the max weight. Box weight is estimated from the carton style on 200# / 32 ECT board, or entered for Custom.
+      </div>
+    </main>
+
+  </div>
+
+  </div> <!-- end #tab-packaging -->
+
 </div>
 
 <script>
@@ -1099,10 +1610,11 @@
     // n pieces take: n*p + (n-1)*g  ≤ u   →   n ≤ (u + g) / (p + g)
     let cols = Math.max(0, Math.floor((uw + gH) / (pw + gH)));
     let rows = Math.max(0, Math.floor((uh + gV) / (ph + gV)));
-    // Press run imposition constraint: W&T and W&Tumble both split the
-    // imposition across the horizontal midline (A on top, B on bottom),
-    // which requires the row count to be even.
-    if ((pressMode === 'wt' || pressMode === 'wtumble') && rows % 2 !== 0) rows--;
+    // Press run imposition split:
+    //   W&T  — sheet turns side to side; image splits left/right → even columns
+    //   W&Tumble — sheet tumbles head to tail; image splits top/bottom → even rows
+    if (pressMode === 'wt' && cols % 2 !== 0) cols--;
+    if (pressMode === 'wtumble' && rows % 2 !== 0) rows--;
     cols = Math.max(0, cols);
     rows = Math.max(0, rows);
     const count = cols * rows;
@@ -1341,63 +1853,43 @@
     if (SH > SW) { const tmp = SW; SW = SH; SH = tmp; }
     let PW = +docW.value || 0;
     let PH = +docH.value || 0;
-    const GH = Math.max(0, +gutter.value || 0);    // horizontal gutter (between cols)
-    const GV = Math.max(0, +gutterV.value || 0);   // vertical gutter (between rows)
-    const M  = Math.max(0, +margin.value || 0);     // gripper, single edge of W
-    const SG = Math.max(0, +sideGuide.value || 0);  // side guide, single edge of H
+    // Bleed is entered PER SIDE of each piece. Pieces never share bleed, so the
+    // space between two trims is 2 × bleed, and the outer bleed must stay inside
+    // the gripper / side guide (it can't run off the press sheet).
+    // Internally the layout uses gap = 2 × bleed and reserves one gap's worth
+    // (a bleed on each outer edge) from the usable area — identical to every
+    // piece occupying trim + 2 × bleed.
+    const bleedSideH = Math.max(0, +gutter.value || 0);
+    const bleedSideV = Math.max(0, +gutterV.value || 0);
+    // Butt cut (common cut): pieces touch, bleed only on the outside edges.
+    const butt = $('buttCut') && $('buttCut').checked;
+    const GH = butt ? 0 : 2 * bleedSideH;    // space between columns (bleed + bleed)
+    const GV = butt ? 0 : 2 * bleedSideV;    // space between rows
+    const outerH = 2 * bleedSideH;           // outer bleed, one on each end of the layout
+    const outerV = 2 * bleedSideV;
+    const M  = Math.max(0, +margin.value || 0);     // gripper (long edge; bites into the short dimension)
+    const SG = Math.max(0, +sideGuide.value || 0);  // side guide (short edge; bites into the long dimension)
     const grain = document.querySelector('input[name="grain"]:checked').value;
     const mode  = document.querySelector('input[name="mode"]:checked').value;
     const pressRun = $('pressRun').value;
 
-    // Reserve outer bleed so the outermost pieces' bleed stays ON the press
-    // sheet (GH/2 on each of the two W edges, GV/2 on each of the two H edges).
-    // The render step still draws the full usable area and centers the layout
-    // inside it, which leaves that reserved bleed margin on every side.
-    //
-    // Press run also affects usable area, AND depends on whether the layout
-    // is a straight grid or a Dutch (mixed-orientation) arrangement:
-    //  - W&T straight: 4× gripper on W (inner edges of each A/B half need their
-    //         own gripper+color-bar zone for standard imposition).
-    //  - W&T Dutch:    2× gripper on W (inner area is available because the
-    //         layout is hand-built — no need for inner color bars on a
-    //         per-row basis).
-    //  - W&Tumble: gripper + side guide + center trim on L axis (same for both).
-    //  - Sheetwise: normal single-edge gripper + side-guide.
-    const WTUMBLE_CT = 0.25; // center trim for W&Tumble
-    let uwStraight, uhStraight, uwDutch, uhDutch;
-    if (pressRun === 'wt') {
-      uwStraight = Math.max(0, SW - 4 * M - GH);
-      uhStraight = Math.max(0, SH - SG - GV);
-      uwDutch    = Math.max(0, SW - 2 * M - GH);
-      uhDutch    = Math.max(0, SH - SG - GV);
-    } else if (pressRun === 'wtumble') {
-      uwStraight = Math.max(0, SW - M - GH);
-      // No outer-bleed reservation on L for W&Tumble — the gripper + side
-      // guide + center trim already account for the edge constraints.
-      uhStraight = Math.max(0, SH - M - SG - WTUMBLE_CT);
-      uwDutch    = uwStraight;
-      uhDutch    = uhStraight;
-    } else {
-      uwStraight = Math.max(0, SW - M - GH);
-      uhStraight = Math.max(0, SH - SG - GV);
-      uwDutch    = uwStraight;
-      uhDutch    = uhStraight;
-    }
-    // For the visualizer / waste calc we use the straight-mode usable area as
-    // the "official" usable area; the Dutch layout uses uwDutch/uhDutch.
-    const uw = uwStraight;
-    const uh = uhStraight;
+    // Usable area (W = long dimension, H = short dimension). The gripper bar runs
+    // along a LONG edge, so it takes M off the short dimension; the side guide
+    // registers a SHORT edge, so it takes SG off the long dimension.
+    //   Sheetwise: 1 gripper + 1 side guide.
+    //   Work & turn: same gripper edge both passes, side guide switches sides
+    //                → side guide on BOTH short edges.
+    //   Work & tumble: tail becomes the gripper on the second pass
+    //                → gripper on BOTH long edges.
+    const sgEdges = pressRun === 'wt' ? 2 : 1;
+    const gripEdges = pressRun === 'wtumble' ? 2 : 1;
+    const uw = Math.max(0, SW - sgEdges * SG - outerH);
+    const uh = Math.max(0, SH - gripEdges * M - outerV);
+    const uwStraight = uw, uhStraight = uh, uwDutch = uw, uhDutch = uh;
 
-    // Press run orientation lock:
-    //  W&T: piece long edge perpendicular to gripper (portrait when L > W)
-    //  W&Tumble: no lock (let algorithm pick best orientation)
-    //  Sheetwise: no constraint
-    let lockedPW = PW, lockedPH = PH;
-    let pressLocked = false;
-    if (pressRun === 'wt') {
-      if (PW > PH) { lockedPW = PH; lockedPH = PW; }
-      pressLocked = true;
-    }
+    // No orientation lock: like EPMS, the best-yield orientation wins.
+    const lockedPW = PW, lockedPH = PH;
+    const pressLocked = false;
 
     // Flip checkbox picks alternate orientation; press lock overrides flip.
     const flipLocked = ($('flipPiece') && $('flipPiece').checked) && !pressLocked;
@@ -1488,20 +1980,26 @@
     };
 
     let cuts = 0;
-    if (chosen.blocks.length >= 1) {
-      for (const b of chosen.blocks) {
-        cuts += cutsPerBlock(b);
-      }
-      // For multi-block layouts without bleed, adjacent blocks share edges —
-      // deduct one cut per additional block (only when both axes are no-bleed).
-      if (chosen.blocks.length > 1 && !bleedH && !bleedV) {
-        cuts -= (chosen.blocks.length - 1);
-      }
+    const blks = chosen.blocks;
+    const disjoint = (lo, hi) => {
+      const r = blks.map(b => [lo(b), hi(b)]).sort((a, c) => a[0] - c[0]);
+      for (let i = 1; i < r.length; i++) if (r[i][0] < r[i-1][1] - 1e-6) return false;
+      return true;
+    };
+    if (blks.length > 1 && disjoint(b => b.x, b => b.x + b.blockW)) {
+      // Side-by-side blocks: count every column of pieces separately
+      for (const b of blks) cuts += b.cols * cutsPerBlock({ cols: 1, rows: b.rows });
+    } else if (blks.length > 1 && disjoint(b => b.y, b => b.y + b.blockH)) {
+      // Stacked bands: count every row of pieces separately
+      for (const b of blks) cuts += b.rows * cutsPerBlock({ cols: b.cols, rows: 1 });
+    } else {
+      for (const b of blks) cuts += cutsPerBlock(b);
     }
 
     $('r-cuts').textContent = cuts;
     let bleedLabel;
     if (bleedH && bleedV) bleedLabel = 'with bleed';
+    else if ($('buttCut').checked && (+gutter.value > 0 || +gutterV.value > 0)) bleedLabel = 'butt cut';
     else if (!bleedH && !bleedV) bleedLabel = 'no bleed';
     else bleedLabel = bleedH ? 'horiz bleed only' : 'vert bleed only';
     let cutsSub;
@@ -1604,8 +2102,10 @@
     //  - Side guide registers on a SHORT edge of the sheet (L axis).
     //    In screen coords that's a vertical strip on the left edge.
     // The usable area is the sheet minus these two bands.
-    const uw = Math.max(0, SW - SG);  // along W axis (long), minus side guide
-    const uh = Math.max(0, SH - M);   // along L axis (short), minus gripper
+    // Usable area matches the math: W&T has a side guide on both short edges,
+    // W&Tumble has a gripper on both long edges.
+    const uw = Math.max(0, SW - (pressRun === 'wt' ? 2 : 1) * SG);
+    const uh = Math.max(0, SH - (pressRun === 'wtumble' ? 2 : 1) * M);
 
     // Primary gripper band (top, long edge)
     if (M > 0) {
@@ -1623,14 +2123,15 @@
     }
 
     // Press-run second-edge indicator:
-    //  W&T → second gripper on opposite LONG edge (trailing edge becomes new
-    //         gripper after the sheet is turned around the gripper axis)
-    //  W&Tumble → second side guide on opposite SHORT edge (after tumble flip)
-    if (pressRun === 'wt' && M > 0) {
-      // Second gripper band on bottom (trailing long) edge
+    //  W&Tumble → second gripper on the opposite LONG edge (the tail becomes
+    //             the gripper edge after the sheet tumbles head to tail)
+    //  W&T → second side guide on the opposite SHORT edge (the sheet turns
+    //        side to side on the same gripper edge)
+    if (pressRun === 'wtumble' && M > 0) {
+      // Second gripper band on bottom (tail) long edge
       out += `<rect x="${pad}" y="${pad + SH - M}" width="${SW}" height="${M}" fill="var(--accent)" opacity="0.12" />`;
       out += `<line x1="${pad}" y1="${pad + SH - M}" x2="${pad + SW}" y2="${pad + SH - M}" stroke="var(--accent)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.55" />`;
-    } else if (pressRun === 'wtumble' && SG > 0) {
+    } else if (pressRun === 'wt' && SG > 0) {
       // Second side-guide band on right (opposite short) edge
       out += `<rect x="${pad + SW - SG}" y="${pad + M}" width="${SG}" height="${SH - M}" fill="var(--accent2, var(--accent))" opacity="0.08" />`;
       out += `<line x1="${pad + SW - SG}" y1="${pad + M}" x2="${pad + SW - SG}" y2="${pad + SH}" stroke="var(--accent2, var(--accent))" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.45" />`;
@@ -1795,7 +2296,8 @@
         for (let r = 1; r <= maxRows; r++) {
           // W&T and W&Tumble both require even row count (A/B fold along
           // horizontal midline of the imposition).
-          if ((pressMode === 'wt' || pressMode === 'wtumble') && r % 2 !== 0) continue;
+          if (pressMode === 'wt' && c % 2 !== 0) continue;
+          if (pressMode === 'wtumble' && r % 2 !== 0) continue;
           const bw = c * ori.w + (c - 1) * gH;
           const bh = r * ori.h + (r - 1) * gV;
           if (bw > areaW + 0.0001 || bh > areaH + 0.0001) continue;
@@ -2126,12 +2628,11 @@
     const pressRun = $('pressRun').value;
     // W&T locks orientation (long edge perpendicular to gripper);
     // W&Tumble does NOT lock orientation (algorithm picks best fit).
-    const pressLocked = (pressRun === 'wt');
+    const pressLocked = false;   // no orientation lock — best yield wins
 
     const pieceList = pieces.map((p, i) => {
       let pw = p.w, ph = p.h;
       if (flipped) { const t = pw; pw = ph; ph = t; }
-      if (pressRun === 'wt' && pw > ph) { const t = pw; pw = ph; ph = t; }
       return { w: pw, h: ph, qty: p.qty || 0, idx: i };
     });
     const result = tryBlockLayout(uw, uh, pieceList, gH, gV, pressLocked, pressRun);
@@ -2163,29 +2664,19 @@
     let SW = +sheetW.value || 0;
     let SH = +sheetH.value || 0;
     if (SH > SW) { const tmp = SW; SW = SH; SH = tmp; }
-    const GH = Math.max(0, +gutter.value || 0);
-    const GV = Math.max(0, +gutterV.value || 0);
+    // Same model as compute(): bleed per side, 2 × bleed between pieces,
+    // bleed stays inside gripper / side guide; standard W&T / W&Tumble margins.
+    const butt = $('buttCut') && $('buttCut').checked;
+    const outerH = 2 * Math.max(0, +gutter.value || 0);
+    const outerV = 2 * Math.max(0, +gutterV.value || 0);
+    const GH = butt ? 0 : outerH;
+    const GV = butt ? 0 : outerV;
     const M  = Math.max(0, +margin.value || 0);
     const SG = Math.max(0, +sideGuide.value || 0);
     const grain = document.querySelector('input[name="grain"]:checked').value;
     const pressRun = $('pressRun').value;
-
-    // Reserve outer bleed (see compute()): keep edge-piece bleed on the sheet.
-    // Press run also affects usable area:
-    //   W&T: 2× gripper on W axis
-    //   W&Tumble: normal gripper + side guide + 0.75" center trim on L axis
-    const WTUMBLE_CT = 0.25;
-    let uw, uh;
-    if (pressRun === 'wt') {
-      uw = Math.max(0, SW - 2 * M - GH);
-      uh = Math.max(0, SH - SG - GV);
-    } else if (pressRun === 'wtumble') {
-      uw = Math.max(0, SW - M - GH);
-      uh = Math.max(0, SH - M - SG - WTUMBLE_CT);
-    } else {
-      uw = Math.max(0, SW - M - GH);
-      uh = Math.max(0, SH - SG - GV);
-    }
+    const uw = Math.max(0, SW - (pressRun === 'wt' ? 2 : 1) * SG - outerH);
+    const uh = Math.max(0, SH - (pressRun === 'wtumble' ? 2 : 1) * M - outerV);
 
     const result = multiPieceLayout(uw, uh, GH, GV);
 
@@ -2259,6 +2750,7 @@
     const bleedH = GH > 0, bleedV = GV > 0;
     let bleedLabel;
     if (bleedH && bleedV) bleedLabel = 'with bleed';
+    else if ($('buttCut').checked && (+gutter.value > 0 || +gutterV.value > 0)) bleedLabel = 'butt cut';
     else if (!bleedH && !bleedV) bleedLabel = 'no bleed';
     else bleedLabel = bleedH ? 'horiz bleed only' : 'vert bleed only';
     $('r-cuts-sub').textContent = bleedLabel;
@@ -2349,8 +2841,8 @@
 
     // Press-shop convention: gripper along LONG (top) edge, side guide on
     // SHORT (left) edge. See render() for full notes.
-    const uw = Math.max(0, SW - SG);
-    const uh = Math.max(0, SH - M);
+    const uw = Math.max(0, SW - (pressRun === 'wt' ? 2 : 1) * SG);
+    const uh = Math.max(0, SH - (pressRun === 'wtumble' ? 2 : 1) * M);
 
     // Primary gripper band (top, long edge)
     if (M > 0) {
@@ -2367,11 +2859,11 @@
       out += `<rect x="${pad + SG}" y="${pad + M}" width="${uw}" height="${uh}" fill="none" stroke="var(--rule-bold)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 2}" opacity="0.35" />`;
     }
 
-    // Press-run second-edge indicator
-    if (pressRun === 'wt' && M > 0) {
+    // Press-run second-edge indicator (W&Tumble: 2nd gripper; W&T: 2nd side guide)
+    if (pressRun === 'wtumble' && M > 0) {
       out += `<rect x="${pad}" y="${pad + SH - M}" width="${SW}" height="${M}" fill="var(--accent)" opacity="0.12" />`;
       out += `<line x1="${pad}" y1="${pad + SH - M}" x2="${pad + SW}" y2="${pad + SH - M}" stroke="var(--accent)" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.55" />`;
-    } else if (pressRun === 'wtumble' && SG > 0) {
+    } else if (pressRun === 'wt' && SG > 0) {
       out += `<rect x="${pad + SW - SG}" y="${pad + M}" width="${SG}" height="${SH - M}" fill="var(--accent2, var(--accent))" opacity="0.08" />`;
       out += `<line x1="${pad + SW - SG}" y1="${pad + M}" x2="${pad + SW - SG}" y2="${pad + SH}" stroke="var(--accent2, var(--accent))" stroke-width="${tinyStroke}" stroke-dasharray="${stroke * 2} ${stroke * 1.5}" opacity="0.45" />`;
     }
@@ -2442,16 +2934,19 @@
     pet_100_g:  0.00050578,   // 10.0 mil Polyester clear/gloss
   };
 
+  // Lamination sides: 0 = none, 1 or 2
+  const getLamSides = () => +$('lamSidesSel').value || 0;
+
   function updateLamination(finishedPiecesLbs) {
     // returns the lamination weight in lbs (for the whole job)
-    const lamOn = document.querySelector('input[name="lamOn"]:checked').value === 'on';
+    const lamOn = getLamSides() > 0;
     if (!lamOn) {
       $('r-lamweight').textContent = '—';
       $('r-totalweight').textContent = '—';
       return 0;
     }
     const film = $('lamFilm').value;
-    const sides = +document.querySelector('input[name="lamSides"]:checked').value;
+    const sides = getLamSides();
     const coef = LAMINATION_FILMS[film] || 0;
 
     // Compute total laminated square inches across all pieces
@@ -2497,13 +2992,9 @@
     return lamLbs;
   }
 
-  // Show/hide the lamination fields based on the on/off toggle
-  document.querySelectorAll('input[name="lamOn"]').forEach(el => {
-    el.addEventListener('change', () => {
-      const on = document.querySelector('input[name="lamOn"]:checked').value === 'on';
-      $('lam-fields').style.display = on ? '' : 'none';
-    });
-  });
+  // Show the lamination weights only when lamination is applied (sides > 0)
+  function syncLamFields() { $('lam-fields').style.display = getLamSides() > 0 ? '' : 'none'; }
+  $('lamSidesSel').addEventListener('change', syncLamFields);
 
   // Sides ↔ film type constraint:
   //  1-side only:   1.2 mil Glueble/Stampable
@@ -2511,8 +3002,9 @@
   //  2-side only:   5 mil, 10 mil
   // Each <option> declares its allowed sides via `data-sides` (CSV: "1", "2", or "1,2")
   function syncLamConstraints() {
-    const sides = document.querySelector('input[name="lamSides"]:checked').value;
+    const sides = $('lamSidesSel').value;
     const filmSel = $('lamFilm');
+    if (sides === '0') { for (const opt of filmSel.options) opt.disabled = false; return; }
     let needSnap = false;
     for (const opt of filmSel.options) {
       const allowed = (opt.getAttribute('data-sides') || '1,2').split(',');
@@ -2526,32 +3018,29 @@
       }
     }
   }
-  document.querySelectorAll('input[name="lamSides"]').forEach(el => {
-    el.addEventListener('change', syncLamConstraints);
-  });
+  $('lamSidesSel').addEventListener('change', syncLamConstraints);
   // If user picks a film that doesn't allow the current sides, auto-switch sides
   $('lamFilm').addEventListener('change', () => {
     const sel = $('lamFilm').options[$('lamFilm').selectedIndex];
     const allowed = (sel.getAttribute('data-sides') || '1,2').split(',');
-    const currentSides = document.querySelector('input[name="lamSides"]:checked').value;
-    if (!allowed.includes(currentSides)) {
+    const currentSides = $('lamSidesSel').value;
+    if (currentSides !== '0' && !allowed.includes(currentSides)) {
       // Snap sides to the first allowed value for this film
-      const target = allowed[0];
-      document.getElementById('lamSides' + target).checked = true;
+      $('lamSidesSel').value = allowed[0];
       syncLamConstraints();
     }
   });
   syncLamConstraints();
+  syncLamFields();
 
   function updatePaper(sheetsNeeded) {
     let SW = +sheetW.value || 0;
     let SH = +sheetH.value || 0;
     if (SH > SW) { const tmp = SW; SW = SH; SH = tmp; }
-    const basisLb = +$('basisWeight').value || 0;
-    const paperType = $('paperType').value;
-    const costPerM = +$('paperCost').value || 0;
-    const basis = BASIS_SIZES[paperType] || BASIS_SIZES.text;
-    const basisArea = basis.w * basis.h;
+    // Typed M weight at its own sheet size -> lb per square inch
+    const typedM = +$('impMWeight').value || 0;
+    const mSheetArea = (+$('impMSheetW').value || 0) * (+$('impMSheetL').value || 0);
+    const lbPerSqIn = (typedM > 0 && mSheetArea > 0) ? typedM / (1000 * mSheetArea) : 0;
 
     function formatLbs(lbs) {
       if (lbs >= 100) {
@@ -2563,21 +3052,21 @@
     // M-weight at press sheet size: lbs per 1,000 sheets
     const sheetArea = SW * SH;
     let mWeight = 0;
-    if (sheetArea > 0 && basisArea > 0 && basisLb > 0) {
-      mWeight = (sheetArea / basisArea) * basisLb * 2;
+    if (sheetArea > 0 && lbPerSqIn > 0) {
+      mWeight = Math.round(sheetArea * lbPerSqIn * 1000);   // M wt converted to the press sheet
     }
-    $('r-mweight').textContent = mWeight > 0 ? mWeight.toFixed(1) + ' lb / M' : '—';
+    $('r-mweight').textContent = mWeight > 0 ? mWeight + ' lb / M' : '—';
 
     // Finished piece weight: sum over each piece of its own M-weight × (qty / 1000)
     // This is the theoretical weight of the finished pieces (excludes waste).
     let finishedLbs = 0;
     let haveFinishedData = false;
-    if (basisArea > 0 && basisLb > 0) {
+    if (lbPerSqIn > 0) {
       const mode = document.querySelector('input[name="docMode"]:checked').value;
       if (mode === 'multi') {
         for (const p of pieces) {
           if (p.w > 0 && p.h > 0 && p.qty > 0) {
-            const pieceM = (p.w * p.h / basisArea) * basisLb * 2;
+            const pieceM = p.w * p.h * lbPerSqIn * 1000;
             finishedLbs += pieceM * (p.qty / 1000);
             haveFinishedData = true;
           }
@@ -2587,7 +3076,7 @@
         const ph = +docH.value || 0;
         const qty = +$('docQty').value || 0;
         if (pw > 0 && ph > 0 && qty > 0) {
-          const pieceM = (pw * ph / basisArea) * basisLb * 2;
+          const pieceM = pw * ph * lbPerSqIn * 1000;
           finishedLbs = pieceM * (qty / 1000);
           haveFinishedData = true;
         }
@@ -2595,13 +3084,6 @@
     }
     $('r-pieceweight').textContent = haveFinishedData ? formatLbs(finishedLbs) : '—';
 
-    // Paper cost: cost_per_M × (sheets / 1000)
-    if (costPerM > 0 && sheetsNeeded > 0 && isFinite(sheetsNeeded)) {
-      const jobCost = costPerM * (sheetsNeeded / 1000);
-      $('r-paperCost').textContent = '$' + jobCost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    } else {
-      $('r-paperCost').textContent = '—';
-    }
 
     return finishedLbs;
   }
@@ -2617,12 +3099,911 @@
     updateLamination(finishedLbs);
   }
 
-  // ============ WIRE UP ============
-  document.querySelectorAll('input, select').forEach(el => {
-    el.addEventListener('input', computeRouter);
-    el.addEventListener('change', computeRouter);
+
+  // ============ FIT TO WINDOW ============
+  // The layout is sized to the window with no page scrollbar. On short screens
+  // (e.g. Windows display scaling at 125%+) the sidebars can run past the
+  // bottom. If that happens, scale the whole calculator down just enough to fit.
+  let pkgFitPending = false;
+  function fitToWindow() {
+    const wrap = document.querySelector('.wrap');
+    const pane = document.querySelector('.tab-pane.active');
+    if (!wrap || !pane) return;
+    const overflow = () => Math.max(0, ...['aside', 'main'].map(sel => {
+      const el = pane.querySelector(sel);
+      return el ? el.scrollHeight - el.clientHeight : 0;
+    }));
+    // Phones, tablets in portrait and phones in landscape use the scrolling layout
+    if (window.matchMedia('(max-width: 900px), (max-height: 500px)').matches) { wrap.style.zoom = ''; wrap.style.height = ''; return; }
+    const apply = (z) => {
+      wrap.style.zoom = z === 1 ? '' : String(z);
+      wrap.style.height = z === 1 ? '' : (window.innerHeight / z) + 'px';
+    };
+    apply(1);
+    if (overflow() <= 1) return;
+    let z = 1;
+    while (z > 0.7) {
+      z = Math.round((z - 0.02) * 100) / 100;
+      apply(z);
+      if (overflow() <= 1) break;
+    }
+  }
+  function scheduleFit() {
+    if (pkgFitPending) return;
+    pkgFitPending = true;
+    requestAnimationFrame(() => { pkgFitPending = false; fitToWindow(); });
+  }
+  window.addEventListener('resize', scheduleFit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleFit);
+
+  // ============ TAB SWITCHING ============
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.tab-pane').forEach(p => {
+        p.classList.toggle('active', p.id === 'tab-' + tab);
+      });
+      if (tab === 'packaging') computePackaging();
+      scheduleFit();
+    });
   });
+
+  // ============ PACKAGING ============
+  // Single-wall 32 ECT / 200# C-flute combined board, ~125 lb per MSF.
+  const PKG_BOARD_LB_PER_SQFT = 0.125;
+  // Empty regular slotted carton (RSC) weight from inside dims.
+  // Blank = (2L + 2W + 1.5" glue flap) x (D + top & bottom flaps); each flap
+  // is half the shorter side, so the flaps add one short side in total.
+  function estCartonLb(w, l, d, style) {
+    if (!(w > 0 && l > 0 && d > 0)) return { lb: 0, sqft: 0 };
+    let sqft;
+    if (style === 'easyfold') {
+      // One-piece folder mailer (e.g. Uline Easy-Fold, multi-depth scored).
+      // Blank fitted to Uline's published bundle weights across 22 sizes
+      // (within ~4% avg): (long side + 2") x (2 x short side + 16.7").
+      // Depth isn't used: the same blank folds to every scored depth.
+      const long = Math.max(w, l), short = Math.min(w, l);
+      sqft = ((long + 2) * (2 * short + 16.7)) / 144;
+    } else {
+      // Regular slotted carton (RSC)
+      const blankLen = 2 * w + 2 * l + 1.5;
+      const blankWid = d + Math.min(w, l);
+      sqft = (blankLen * blankWid) / 144;
+    }
+    return { lb: sqft * PKG_BOARD_LB_PER_SQFT, sqft };
+  }
+  // Custom box weight field: grayed out and showing "n/a" unless the
+  // Custom weight style is selected; remembers the last value typed.
+  let pkgBoxCustomLast = '1';
+  function syncBoxCustomField() {
+    const el = $('pkgBoxCustomLb');
+    const isCustom = $('pkgBoxStyle').value === 'custom';
+    if (isCustom) {
+      el.disabled = false;
+      if (el.value === 'n/a') el.value = pkgBoxCustomLast;
+    } else {
+      if (el.value !== 'n/a') pkgBoxCustomLast = el.value;
+      el.value = 'n/a';
+      el.disabled = true;
+    }
+  }
+  $('pkgBoxStyle').addEventListener('change', () => {
+    syncBoxCustomField();
+  });
+  const PKG_LAM_COEF_KEY = { 1.2: 'pet_12_g', 1.7: 'pet_17_g', 3: 'pet_30_g', 5: 'pet_50_g', 10: 'pet_100_g' };
+  // Packaging film helpers: '1.2gs' = 1.2 mil glueable/stampable (1 side only)
+  const pkgFilmIsGS = () => $('pkgLamFilm').value === '1.2gs';
+  const pkgFilmMil = () => parseFloat($('pkgLamFilm').value) || 0;
+  const pkgFilmCoef = () => LAMINATION_FILMS[pkgFilmIsGS() ? 'glueble_12' : PKG_LAM_COEF_KEY[pkgFilmMil()]] || 0;
+  const pkgFilmTxt = () => pkgFilmIsGS() ? '1.2 mil G/S' : `${pkgFilmMil()} mil`;
+  // G/S film is 1-side only: grey it out at 2 sides; picking it switches to 1 side
+  function syncPkgFilmRules() {
+    const gs = $('pkgLamFilm').querySelector('option[value="1.2gs"]');
+    gs.disabled = $('pkgLamSides').value === '2';
+    if (gs.disabled && pkgFilmIsGS()) $('pkgLamFilm').value = '1.2';
+  }
+  $('pkgLamSides').addEventListener('change', syncPkgFilmRules);
+  $('pkgLamFilm').addEventListener('change', () => {
+    if (pkgFilmIsGS() && $('pkgLamSides').value === '2') $('pkgLamSides').value = '1';
+    syncPkgFilmRules();
+  });
+  const LAM_FILM_MIL = {
+    glueble_12: '1.2gs', pet_12_g: 1.2, pet_17_g: 1.7,
+    pet_30_g: 3, pet_50_g: 5, pet_100_g: 10,
+  };
+
+  // Copy piece size + lamination from the Imposition tab.
+  function pullFromImposition() {
+    const mode = document.querySelector('input[name="docMode"]:checked').value;
+    if (mode === 'multi' && pieces.length > 0) {
+      $('pkgPieceW').value = pieces[0].w;
+      $('pkgPieceL').value = pieces[0].h;
+    } else {
+      $('pkgPieceW').value = $('docW').value;
+      $('pkgPieceL').value = $('docH').value;
+    }
+    const lamOn = getLamSides() > 0;
+    if (lamOn) {
+      $('pkgLamSides').value = String(getLamSides());
+      const mil = LAM_FILM_MIL[$('lamFilm').value];
+      if (mil) $('pkgLamFilm').value = String(mil);
+    } else {
+      $('pkgLamSides').value = '0';
+    }
+    // Quantity: single piece qty, or the total of all nested pieces
+    if (mode === 'multi' && pieces.length > 0) {
+      $('pkgQty').value = pieces.reduce((t, pc) => t + (+pc.qty || 0), 0);
+    } else {
+      $('pkgQty').value = $('docQty').value;
+    }
+    // Paper M weight and its sheet size, straight from the Imposition paper panel
+    const im = +$('impMWeight').value || 0, iw = +$('impMSheetW').value || 0, il = +$('impMSheetL').value || 0;
+    if (im > 0 && iw > 0 && il > 0) {
+      $('pkgMWeight').value = im;
+      $('pkgMSheetW').value = iw;
+      $('pkgMSheetL').value = il;
+    }
+  }
+  // Brochure fold style sets its usual page count (you can still type over it)
+  const PKG_FOLD_PAGES = { bifold: 4, trifold: 6, zfold: 6, gate: 8, dblpar: 8 };
+  $('pkgDetailSel').addEventListener('change', () => {
+    if ($('pkgProduct').value !== 'brochure') return;
+    const pg = PKG_FOLD_PAGES[$('pkgDetailSel').value];
+    if (pg) $('pkgPages').value = pg;
+  });
+  $('pkgInheritBtn').addEventListener('click', () => { pullFromImposition(); computePackaging(); });
+
+  // Try every way the piece can sit in the carton. The stacking axis is the
+  // carton dimension the piece thickness runs along (D = flat, L or W = on edge);
+  // the face (W x L of the piece) can be rotated 90 deg on the other two axes.
+  function tryAllOrientations(cW, cL, cD, pw, pl, pd, fitCount) {
+    const axes = [
+      { axis: 'D', label: 'Flat', u: cW, v: cL, s: cD },
+      { axis: 'L', label: 'On edge, stacked along L', u: cW, v: cD, s: cL },
+      { axis: 'W', label: 'On edge, stacked along W', u: cL, v: cD, s: cW },
+    ];
+    const out = [];
+    for (const ax of axes) {
+      for (const [fa, fb, rot] of [[pw, pl, false], [pl, pw, true]]) {
+        const nA = Math.floor((ax.u + 1e-9) / fa);
+        const nB = Math.floor((ax.v + 1e-9) / fb);
+        const nC = fitCount ? fitCount(ax.s) : Math.floor((ax.s + 1e-9) / pd);
+        out.push({ ...ax, label: ax.label + (rot ? ' (rotated)' : ''), fa, fb, nA, nB, nC, total: nA * nB * nC });
+      }
+    }
+    out.sort((x, y) => y.total - x.total);
+    return out;
+  }
+
+
+  // ============ PACKAGING: PRODUCT / BINDING MODEL ============
+  // Densities for board components (lb per cubic inch):
+  //   chipboard (padding back) ~0.70 g/cc, binder's board ~0.83 g/cc
+  // Chipboard density calibrated to TEAM's stock: 22pt chipboard = 622 lb/M on 28 x 40
+  const PKG_CHIPBOARD_LB_IN3 = 622 / (1000 * 28 * 40 * 0.022);   // ≈ 0.02524 lb / cu in
+  const PKG_BINDERBOARD_LB_IN3 = 0.030;
+  // Per-binding "detail" field: label, default, step, help
+  const PKG_BIND_DETAIL = {
+    perfect: null,
+    saddle:  { lbl: 'Bulge %',  def: 10,   step: 1,     tip: 'Extra thickness at the folded spine, as a % of book thickness. Saddle-stitched stacks run thicker at the fold; set 0 if you reverse-stack (alternate spines) every book or pack.' },
+    brochure:{ lbl: 'Bulge %',        def: 10,   step: 1,     tip: 'Extra thickness at a folded edge, as a % of the piece thickness. Folds spring open, so folded edges stack thicker than the open edge.' },
+    notepad: { lbl: 'Chipboard (pt)', def: 22,   step: 1,     tip: 'Chipboard backer caliper in points. Type any value; common sizes are suggested. Default 22pt.', list: 'pkgChipList' },
+  };
+  // Dropdown details. Values: points for chipboard/board, inches for coil/wire.
+  const MM = 1 / 25.4;
+  const PKG_COIL_CLEARANCE = 0.125;   // coil / wire must clear the book's total thickness by 1/8"
+  const PKG_DETAIL_SELECT = {
+    spiral:  { lbl: 'Coil size', def: 'auto', tip: 'Plastic spiral coil diameter. Auto picks the smallest standard coil that clears the book by 1/8".',
+               opts: [['auto', 'Auto']].concat([6, 8, 10, 12, 14, 16, 18, 20, 22, 25, 28, 32].map(mm => [(mm * MM).toFixed(4), mm + ' mm'])) },
+    wireo:   { lbl: 'Wire-O size', def: 'auto', tip: 'Double Wire-O diameter. Auto picks the smallest standard wire that clears the book by 1/8".',
+               opts: [['auto', 'Auto']].concat([['0.1875','3/16"'],['0.25','1/4"'],['0.3125','5/16"'],['0.375','3/8"'],['0.4375','7/16"'],['0.5','1/2"'],['0.5625','9/16"'],['0.625','5/8"'],['0.75','3/4"'],['0.875','7/8"'],['1','1"'],['1.25','1-1/4"']]) },
+    brochure:{ lbl: 'Fold', def: 'bifold', tip: 'Fold style. Bifold and French fold put the folds on one edge (rotating packs evens the stack); tri-fold, Z, gate, double parallel and accordion put folds on both edges.',
+               opts: [['bifold','Bifold'],['trifold','Tri-fold'],['zfold','Z-fold'],['gate','Gate'],['dblpar','Dbl parallel'],['accordion','Accordion'],['french','French']] },
+    case:    { lbl: 'Board', def: '98', tip: 'Binder board caliper. Boards overhang the text block about 1/8" on head, foot and fore edge.',
+               opts: [['98', '98 pt'], ['80', '80 pt']] },
+  };
+  const pkgSelMemory = {};
+  const pkgDetailMemory = {};   // remembers the detail value typed for each binding
+  let pkgLastProduct = 'flat';
+  const PKG_CAL_DEFAULTS = { flat: 9.9, book: 4.7, pad: 4.2 };   // default text / sheet caliper (pt)
+  const PKG_CASE_WRAP_PT = 4.2;      // default case wrap caliper (pt)
+  const PKG_CASE_LAM_MIL = '1.2gs';  // default case wrap lam film: 1.2 mil G/S
+  const pkgCaseSwap = {};            // case vs other: cover pt, lam film, lam sides
+  const PKG_COVER_DEFAULT = 9.9;                                  // default cover / case wrap caliper (pt)
+  const PKG_M_TEXT = { m: 200, w: 25, l: 38 };    // default text M wt
+  const PKG_M_COVER = { m: 431, w: 28, l: 40 };   // default cover M wt
+  const pkgMMemory = {};
+  const pkgCalMemory = {};     // text caliper memory: flat / book / pad
+  const pkgPagesMemory = {};
+  const pkgBundleMemory = {};   // pack size: saddle/brochure (25) vs others (1)   // last page count for books / sheet count for pads
+
+  function syncPkgProductUI() {
+    const prod = $('pkgProduct').value;
+    const aside = document.querySelector('#tab-packaging aside');
+    const bound = prod !== 'flat';
+    aside.classList.toggle('pkg-flat', !bound);
+    aside.classList.toggle('pkg-is-pad', prod === 'notepad');
+    aside.classList.toggle('pkg-is-case', prod === 'case');
+    aside.classList.toggle('pkg-is-brochure', prod === 'brochure');
+    // remember the detail value of the binding we're leaving
+    if (PKG_BIND_DETAIL[pkgLastProduct]) pkgDetailMemory[pkgLastProduct] = $('pkgExtra').value;
+    if (PKG_DETAIL_SELECT[pkgLastProduct]) pkgSelMemory[pkgLastProduct] = $('pkgDetailSel').value;
+    // Text caliper defaults by group (each group remembers its last value):
+    //   flat sheet 9.9pt · book body pages 4.7pt · notepad 4.2pt
+    if (prod !== pkgLastProduct) {
+      const g = (p) => p === 'flat' ? 'flat' : (p === 'notepad' ? 'pad' : 'book');
+      const from = g(pkgLastProduct), to = g(prod);
+      if (from !== to) {
+        pkgCalMemory[from] = $('pkgPaperCaliper').value;
+        $('pkgPaperCaliper').value = pkgCalMemory[to] ?? PKG_CAL_DEFAULTS[to];
+      }
+    }
+    // Case bound has its own wrap caliper (4.2pt) and lam film (1.2 mil) defaults.
+    // Entering/leaving case bound swaps those (and lam sides) with the other
+    // products' last values so neither overwrites the other.
+    if (prod !== pkgLastProduct && (prod === 'case' || pkgLastProduct === 'case')) {
+      const fromKey = pkgLastProduct === 'case' ? 'case' : 'other';
+      const toKey = prod === 'case' ? 'case' : 'other';
+      pkgCaseSwap[fromKey] = { cover: $('pkgCoverCaliper').value, film: $('pkgLamFilm').value, sides: $('pkgLamSides').value,
+        m: $('pkgCoverMWeight').value, mw: $('pkgCoverMSheetW').value, ml: $('pkgCoverMSheetL').value };
+      const saved = pkgCaseSwap[toKey];
+      const setCoverM = (m, w, l) => { $('pkgCoverMWeight').value = m; $('pkgCoverMSheetW').value = w; $('pkgCoverMSheetL').value = l; };
+      if (saved) {
+        $('pkgCoverCaliper').value = saved.cover; $('pkgLamFilm').value = saved.film;
+        setCoverM(saved.m, saved.mw, saved.ml);
+        if (toKey === 'other') $('pkgLamSides').value = saved.sides;
+      } else if (toKey === 'case') {
+        $('pkgCoverCaliper').value = PKG_CASE_WRAP_PT; $('pkgLamFilm').value = PKG_CASE_LAM_MIL;
+        setCoverM(PKG_M_TEXT.m, PKG_M_TEXT.w, PKG_M_TEXT.l);   // 4.2pt wrap is a text-weight sheet
+      }
+    }
+    // Paper / text M weight: flat sheets default to cover (431 lb @ 28 × 40);
+    // every bound product's text defaults to text weight (200 lb @ 25 × 38).
+    // Each group remembers its last values.
+    if (prod !== pkgLastProduct) {
+      const mg = (p) => p === 'flat' ? 'flat' : 'text';
+      const from = mg(pkgLastProduct), to = mg(prod);
+      if (from !== to) {
+        pkgMMemory[from] = { m: $('pkgMWeight').value, w: $('pkgMSheetW').value, l: $('pkgMSheetL').value };
+        const v = pkgMMemory[to] ?? (to === 'text' ? PKG_M_TEXT : PKG_M_COVER);
+        $('pkgMWeight').value = v.m; $('pkgMSheetW').value = v.w; $('pkgMSheetL').value = v.l;
+      }
+    }
+    // Pages field: notepads count sheets (default 50), brochures 4pp, saddle stitch 24pp,
+    // perfect / spiral / Wire-O 32pp, case bound 64pp.
+    // Each group keeps its own last value when switching between them.
+    if (prod !== pkgLastProduct) {
+      const pg = (p) => p === 'flat' ? null : (p === 'notepad' ? 'pad' : (p === 'brochure' ? 'brochure' : (p === 'saddle' ? 'saddle' : (p === 'case' ? 'case' : 'book'))));
+      const from = pg(pkgLastProduct), to = pg(prod);
+      if (from !== to) {
+        if (from) pkgPagesMemory[from] = $('pkgPages').value;
+        if (to) $('pkgPages').value = pkgPagesMemory[to] ?? { pad: 50, brochure: 4, saddle: 24, book: 32, case: 64 }[to];
+      }
+      // Pack size: saddle stitch and brochures default to packs of 25
+      const bg = (p) => (p === 'saddle' || p === 'brochure') ? 'packs' : 'other';
+      if (bg(pkgLastProduct) !== bg(prod)) {
+        pkgBundleMemory[bg(pkgLastProduct)] = $('pkgBundle').value;
+        $('pkgBundle').value = pkgBundleMemory[bg(prod)] ?? (bg(prod) === 'packs' ? 25 : 1);
+      }
+    }
+    // notepads usually have no cover; other bindings usually do
+    if (prod !== pkgLastProduct) {
+      if (prod === 'notepad') $('pkgCoverCaliper').value = 0;
+      else if (pkgLastProduct === 'notepad' && (+$('pkgCoverCaliper').value || 0) === 0) $('pkgCoverCaliper').value = PKG_COVER_DEFAULT;
+    }
+    aside.classList.toggle('pkg-nocover', bound && (+$('pkgCoverCaliper').value || 0) === 0);
+    $('pkgProductLbl').textContent = !bound ? 'Product' : (prod === 'notepad' ? 'Product · Sheets / pad' : 'Product · Pages');
+    if (prod === 'brochure') $('pkgProductLbl').textContent = 'Product · Pages (2 per panel)';
+    $('pkgCalLbl').textContent = bound ? 'Text pt · Cover pt × Bundle' : 'Caliper (pt) × Bundle (pcs)';
+    $('pkgMWtLbl').textContent = bound ? 'Text M wt (lbs) @ sheet W × L' : 'Paper M wt (lbs) @ sheet W × L';
+    $('pkgCoverMWtLbl').textContent = prod === 'case' ? 'Wrap M wt (lbs) @ sheet W × L' : 'Cover M wt (lbs) @ sheet W × L';
+    const d = PKG_BIND_DETAIL[prod];
+    const ex = $('pkgExtra');
+    if (d) {
+      ex.disabled = false; ex.classList.remove('pkg-na');
+      ex.type = 'number'; ex.step = d.step; ex.title = d.tip;
+      if (d.list) ex.setAttribute('list', d.list); else ex.removeAttribute('list');
+      if (prod !== pkgLastProduct) ex.value = pkgDetailMemory[prod] ?? d.def;
+      $('pkgExtraLbl').textContent = d.lbl + ' · Spine (in)';
+    } else {
+      ex.removeAttribute('list');
+      ex.type = 'text'; ex.value = 'n/a'; ex.disabled = true; ex.classList.add('pkg-na');
+      ex.title = 'No binding detail needed for perfect bound.';
+      $('pkgExtraLbl').textContent = 'Binding detail · Spine (in)';
+    }
+    // Case wrap is always laminated (outside, 1 side): lock the sides selector
+    const lamSel = $('pkgLamSides');
+    const noneOpt = lamSel.querySelector('option[value="0"]');
+    const twoOpt = lamSel.querySelector('option[value="2"]');
+    if (prod === 'case') {
+      lamSel.value = '1';
+      noneOpt.disabled = true; twoOpt.disabled = true;
+      lamSel.title = 'Case wraps are always laminated on the outside (1 side). Choose the film at right.';
+    } else {
+      noneOpt.disabled = false; twoOpt.disabled = false;
+      lamSel.title = 'Flat: sides of each piece. Bound: sides of each cover (front and back covers both count).';
+    }
+    $('pkgCalLbl').textContent = prod === 'case' ? 'Text pt · Wrap pt × Bundle'
+      : (prod === 'brochure' ? 'Caliper (pt) × Pack (pcs)'
+      : (bound ? 'Text pt · Cover pt × Bundle' : 'Caliper (pt) × Bundle (pcs)'));
+    const ds = PKG_DETAIL_SELECT[prod];
+    const sel = $('pkgDetailSel');
+    if (ds) {
+      if (prod !== pkgLastProduct || !sel.options.length) {
+        sel.innerHTML = ds.opts.map(([v, t]) => `<option value="${v}">${t}</option>`).join('');
+        sel.value = pkgSelMemory[prod] ?? ds.def;
+      }
+      sel.title = ds.tip;
+      $('pkgExtraLbl').textContent = ds.lbl + ' · Spine (in)';
+    }
+    // Saddle: bulge % + wire gauge. Brochure: fold style + bulge %. Others: one control.
+    const twoCtl = prod === 'saddle' || prod === 'brochure';
+    sel.style.display = ds ? '' : 'none';
+    ex.style.display = (ds && !twoCtl) ? 'none' : '';
+    $('pkgWireSel').style.display = prod === 'saddle' ? '' : 'none';
+    $('pkgExtraRow').classList.toggle('pkg-row4', twoCtl);
+    $('pkgExtraRow').classList.toggle('pkg-pct', prod === 'saddle' || prod === 'brochure');
+    if (prod === 'saddle') $('pkgExtraLbl').textContent = 'Bulge % · Wire · Spine (in)';
+    if (prod === 'brochure') $('pkgExtraLbl').textContent = 'Fold · Bulge % · Fold edge (in)';
+
+    $('pkgNestWrap').classList.toggle('pkg-hide', !(prod === 'spiral' || prod === 'wireo'));
+    pkgLastProduct = prod;
+    syncPkgFilmRules();
+  }
+
+
+  // ---- Case bound (hardcover) ----
+  // Spine runs along L. Boards overhang the text block 1/8" at head, foot and
+  // fore edge. The case wrap (cover stock, laminated outside) covers both
+  // boards and the spine, with hinge gaps and turn-ins all around.
+  const PKG_CASE_TURNIN = 0.625;    // 5/8" turn-in on every edge of the wrap
+  const PKG_CASE_HINGE = 0.375;     // 3/8" hinge (joint) gap each side of the spine
+  const PKG_CASE_ENDSHEET_LEAVES = 4;   // always 2 endsheets (front + back), each folded = 2 leaves
+  const PKG_CASE_TRIM_FACE = 0.125;     // book block trimmed 1/8" at face
+  const PKG_CASE_TRIM_HF = 0.125;       // and 1/8" at head and at foot
+  function pkgCaseBound({ trimW, trimL, area, leaves, pages, textPt, coverPt, lamMil, lamCoef,
+                          textPsi, coverPsi, endPsi, boardPt, overrideIn }) {
+    const boardIn = boardPt * 0.001;
+    const wrapIn = coverPt * 0.001, lamIn = lamMil * 0.001;
+    const boardW = trimW + 0.125, boardL = trimL + 0.25;
+    // Text block includes endsheets
+    const blockLeaves = leaves + PKG_CASE_ENDSHEET_LEAVES;
+    const blockIn = blockLeaves * textPt * 0.001;
+    // Finished thickness: block + 2 boards + wrap and lam on each board face
+    const calcIn = blockIn + 2 * boardIn + 2 * (wrapIn + lamIn);
+    // Case wrap flat size
+    const spineW = blockIn + 2 * boardIn;
+    const wrapW = 2 * boardW + spineW + 2 * PKG_CASE_HINGE + 2 * PKG_CASE_TURNIN;
+    const wrapH = boardL + 2 * PKG_CASE_TURNIN;
+    const wrapArea = wrapW * wrapH;
+
+    const useOverride = overrideIn > 0;
+    const pd = useOverride ? overrideIn : calcIn;
+    $('pkgSpineOverride').placeholder = calcIn > 0 ? `≈${calcIn.toFixed(3)}` : 'auto';
+
+    const bodyLb = leaves * area * textPsi;
+    // Each endsheet folds at the spine: finished flat = 2 × trim W by trim L.
+    // Ordered / printed flat adds the block trim (face, head, foot) on each leaf.
+    const endFinW = 2 * trimW, endFinL = trimL;
+    const endCutW = 2 * (trimW + PKG_CASE_TRIM_FACE), endCutL = trimL + 2 * PKG_CASE_TRIM_HF;
+    const endLb = 2 * endFinW * endFinL * endPsi;   // 2 endsheets at finished size (trim falls away)
+    const textLb = bodyLb + endLb;
+    const wrapLb = wrapArea * coverPsi;
+    const lamLb = wrapArea * lamCoef;                         // 1 side, outside of wrap
+    const boardLb = 2 * boardW * boardL * boardIn * PKG_BINDERBOARD_LB_IN3;
+    const unitLb = textLb + wrapLb + lamLb + boardLb;
+
+    const readout =
+      `<b>Case bound</b> · ${pages} pp = ${leaves} leaves + ${PKG_CASE_ENDSHEET_LEAVES} endsheet leaves × <b>${textPt.toFixed(1)}pt</b>` +
+      ` + 2 × ${boardPt}pt boards + wrap ${coverPt}pt & ${pkgFilmTxt()} lam per side = <b>${calcIn.toFixed(3)}"</b> per book` +
+      (useOverride ? ` · <b>override ${pd.toFixed(3)}"</b> in use` : '') +
+      `<br>Case wrap flat <b>${wrapW.toFixed(3)} × ${wrapH.toFixed(3)}"</b> (${wrapArea.toFixed(0)} sq in, laminated 1 side) · boards ${boardW.toFixed(3)} × ${boardL.toFixed(3)}"` +
+      `<br>Endsheets: 2 per book · flat <b>${endCutW.toFixed(3)} × ${endCutL.toFixed(3)}"</b> before trim (finished ${endFinW.toFixed(3)} × ${endFinL.toFixed(3)}", folds to the trim size)` +
+      (unitLb > 0
+        ? `<br>Weight: text <b>${bodyLb.toFixed(3)}</b> + endsheets <b>${endLb.toFixed(3)}</b> + wrap <b>${wrapLb.toFixed(3)}</b> + lam <b>${lamLb.toFixed(3)}</b> + boards <b>${boardLb.toFixed(3)}</b> = <b>${unitLb.toFixed(3)} lb per book</b> (${(unitLb * 16).toFixed(1)} oz)`
+        : '<br>Weight: enter text and cover (wrap) M weights to see book and carton weight');
+
+    return {
+      bound: true, pw: boardW, pl: boardL, pd, pieceLb: unitLb, readout,
+      depthSub: useOverride ? 'manual override' : `${leaves} leaves + endsheets + boards`,
+    };
+  }
+
+
+  // ---- Saddle stitch & folded brochures ----
+  // Two thicknesses per piece: the open "face" edge (just paper) and the
+  // thicker fold / spine edge (fold bulge, plus stitching wire on saddle stitch).
+  // Packs are stacked alternating 180°, so each side of the stack carries half
+  // spine packs and half face packs. The stack count comes from the real height.
+  const PKG_FOLD_EXPECT = { bifold: [2], trifold: [3], zfold: [3], gate: [3, 4], dblpar: [4], french: [4], accordion: null };
+  function pkgFolded({ prod, area, pages, leaves, textPt, coverPt, covers, lamSides, lamMil, lamCoef, textPsi, coverPsi, overrideIn }) {
+    const bundle = Math.max(1, Math.floor(+$('pkgBundle').value || 1));
+    const rotate = true;   // TEAM always rotates packs 180° for saddle stitch and brochures
+    const bulgePct = Math.max(0, +$('pkgExtra').value || 0);
+    let face, spineExtra, oneEdge, head, foldTxt, warn = '', wLines, unitLb;
+    if (prod === 'saddle') {
+      const lamLayers = covers * lamSides;
+      face = leaves * textPt * 0.001 + covers * coverPt * 0.001 + lamLayers * lamMil * 0.001;
+      const wire = +$('pkgWireSel').value || 0.0204;
+      const gauge = $('pkgWireSel').selectedOptions[0].textContent;
+      const bulge = face * bulgePct / 100;
+      spineExtra = bulge + 2 * wire;
+      oneEdge = true;
+      head = `<b>Saddle stitch</b> · ${pages} pp = ${leaves} leaves × <b>${textPt}pt</b>` +
+        (covers ? ` + 2 covers × <b>${coverPt}pt</b>` : ' · self-cover') +
+        (lamLayers ? ` + lam ${lamLayers} × ${pkgFilmTxt()}` : '') + ` = face <b>${face.toFixed(3)}"</b>`;
+      foldTxt = `spine = face + ${bulgePct}% fold bulge (${bulge.toFixed(4)}") + 2 × ${gauge} wire (${(2 * wire).toFixed(4)}")`;
+      const textLb = leaves * area * textPsi, coverLb = covers * area * coverPsi, lamLb = lamLayers * area * lamCoef;
+      unitLb = textLb + coverLb + lamLb;
+      wLines = `text <b>${textLb.toFixed(3)}</b> + cover <b>${coverLb.toFixed(3)}</b>` + (lamLb ? ` + lam <b>${lamLb.toFixed(3)}</b>` : '');
+    } else {
+      // Folded brochure: piece size = folded size; panels = pages / 2.
+      const panels = Math.max(1, Math.round(pages / 2));
+      const style = $('pkgDetailSel').value;
+      const styleName = $('pkgDetailSel').selectedOptions[0]?.textContent || style;
+      oneEdge = style === 'bifold' || style === 'french';
+      face = panels * textPt * 0.001 + panels * lamSides * lamMil * 0.001;
+      spineExtra = face * bulgePct / 100;
+      const exp = PKG_FOLD_EXPECT[style];
+      if (exp && !exp.includes(panels)) warn = ` <b style="color:var(--accent)">⚠ ${styleName} is usually ${exp.map(p => p * 2).join(' or ')}pp</b>`;
+      if (style === 'accordion' && panels < 3) warn = ` <b style="color:var(--accent)">⚠ accordion needs 6pp or more</b>`;
+      head = `<b>${styleName} brochure</b> · ${pages} pp = ${panels} panels × <b>${textPt}pt</b>` +
+        (lamSides ? ` + lam ${panels * lamSides} × ${pkgFilmTxt()}` : '') + ` = face <b>${face.toFixed(3)}"</b>` + warn;
+      foldTxt = oneEdge ? `fold edge = face + ${bulgePct}% bulge` : `folds on both edges = face + ${bulgePct}% bulge`;
+      const paperLb = panels * area * textPsi, lamLb = panels * lamSides * area * lamCoef;
+      unitLb = paperLb + lamLb;
+      wLines = `paper (flat sheet ${panels} panels) <b>${paperLb.toFixed(3)}</b>` + (lamLb ? ` + lam <b>${lamLb.toFixed(3)}</b>` : '');
+    }
+    const calcSpine = face + spineExtra;
+    $('pkgSpineOverride').placeholder = calcSpine > 0 ? `≈${calcSpine.toFixed(3)}` : 'auto';
+    const useOverride = overrideIn > 0;
+    const spine = useOverride ? overrideIn : calcSpine;
+    const thin = oneEdge ? face : spine;     // both-edge folds: thick on both sides
+
+    // Height of a stack of n pieces in packs of `bundle`
+    const stackHeight = (n) => {
+      if (!rotate) return n * spine;
+      let left = 0, right = 0, i = 0, rem = n;
+      while (rem > 0) {
+        const k = Math.min(bundle, rem);
+        if (i % 2 === 0) { left += k * spine; right += k * thin; } else { left += k * thin; right += k * spine; }
+        rem -= k; i++;
+      }
+      return Math.max(left, right);
+    };
+    // Most pieces whose stack fits in `len`
+    const fitCount = (len) => {
+      if (!(thin > 0)) return 0;
+      let lo = 0, hi = Math.floor(len / thin) + 1;
+      while (lo < hi) { const mid = Math.ceil((lo + hi) / 2); if (stackHeight(mid) <= len + 1e-9) lo = mid; else hi = mid - 1; }
+      return lo;
+    };
+
+    const unitWord = prod === 'saddle' ? 'book' : 'piece';
+    const pair = bundle * (spine + thin), pairFlat = 2 * bundle * spine;
+    const stackTxt = !rotate ? `Packs of ${bundle} stacked same direction: every pack stands at the ${prod === 'saddle' ? 'spine' : 'fold'} thickness`
+      : (!oneEdge ? `Folds on both edges: rotating packs doesn't change the stack (${bundle} × ${spine.toFixed(3)}" per pack)`
+        : `Packs of ${bundle} rotated 180°: two packs stack to <b>${pair.toFixed(3)}"</b> vs ${pairFlat.toFixed(3)}" same direction`);
+    const readout = head + ` · ${foldTxt} = <b>${calcSpine.toFixed(3)}"</b>` +
+      (useOverride ? ` · <b>measured ${spine.toFixed(3)}"</b> in use` : '') +
+      `<br>${stackTxt}` +
+      (unitLb > 0 ? `<br>Weight: ${wLines} = <b>${unitLb.toFixed(3)} lb per ${unitWord}</b> (${(unitLb * 16).toFixed(2)} oz)`
+                  : `<br>Weight: enter the M weight to see ${unitWord} and carton weight`);
+    return {
+      bound: true, pw: +$('pkgPieceW').value || 0, pl: +$('pkgPieceL').value || 0,
+      pd: rotate ? (spine + thin) / 2 : spine, displayDepth: spine, pieceLb: unitLb, readout,
+      stackHeight, fitCount,
+      depthSub: `face ${face.toFixed(3)}" · ${prod === 'saddle' ? 'spine' : 'fold'} ${spine.toFixed(3)}"${useOverride ? ' (measured)' : ''}`,
+    };
+  }
+
+  function pkgUnitModel({ lamSides, lamMil, mWt, mSheetArea }) {
+    const prod = $('pkgProduct').value;
+    const trimW = Math.max(0, +$('pkgPieceW').value || 0);
+    const trimL = Math.max(0, +$('pkgPieceL').value || 0);
+    const textPt = Math.max(0, +$('pkgPaperCaliper').value || 0);
+    const lamCoef = pkgFilmCoef();   // lb / sq in / layer (G/S uses its own coefficient)
+    const textPsi = (mWt > 0 && mSheetArea > 0) ? (mWt / 1000) / mSheetArea : 0;   // lb / sq in
+    const area = trimW * trimL;
+    const f = (v, n = 4) => v.toFixed(n);
+
+    // ---------- FLAT SHEET (original model) ----------
+    if (prod === 'flat') {
+      const totalPt = textPt + lamSides * lamMil;
+      const pd = totalPt * 0.001;
+      const paperLb = area * textPsi, lamLb = area * lamSides * lamCoef;
+      const pieceLb = paperLb + lamLb;
+      return {
+        bound: false, pw: trimW, pl: trimL, pd, pieceLb,
+        depthSub: pd > 0 ? totalPt.toFixed(1) + ' pt total' : '—',
+        readout:
+          `Paper <b>${textPt.toFixed(1)}pt</b> + Lam <b>${lamSides > 0 ? lamSides + ' × ' + pkgFilmTxt() : 'none'}</b>` +
+          ` = <b>${totalPt.toFixed(1)}pt</b> per piece (${f(pd)}") · <b>${pd > 0 ? Math.floor(1 / pd) : 0}</b> pieces per inch of stack` +
+          (pieceLb > 0
+            ? `<br>Weight: paper <b>${(paperLb * 1000).toFixed(2)}</b> + lam <b>${(lamLb * 1000).toFixed(2)}</b> = <b>${(pieceLb * 1000).toFixed(2)} lb / M pieces</b> (${(pieceLb * 16).toFixed(3)} oz each)`
+            : '<br>Weight: enter a paper M weight to see piece and carton weight'),
+      };
+    }
+
+    // ---------- BOUND PRODUCTS ----------
+    const pages = Math.max(0, Math.floor(+$('pkgPages').value || 0));
+    const coverPt = Math.max(0, +$('pkgCoverCaliper').value || 0);
+    const selVal = PKG_DETAIL_SELECT[prod] ? $('pkgDetailSel').value : null;
+    const detail = selVal !== null ? (selVal === 'auto' ? 0 : (+selVal || 0)) : Math.max(0, +$('pkgExtra').value || 0);
+    const overrideIn = parseFloat($('pkgSpineOverride').value);
+    const cMWt = Math.max(0, +$('pkgCoverMWeight').value || 0);
+    const cArea = (+$('pkgCoverMSheetW').value || 0) * (+$('pkgCoverMSheetL').value || 0);
+    const coverPsi = (cMWt > 0 && cArea > 0) ? (cMWt / 1000) / cArea : 0;
+    const eMWt = Math.max(0, +$('pkgEndMWeight').value || 0);
+    const eArea = (+$('pkgEndMSheetW').value || 0) * (+$('pkgEndMSheetL').value || 0);
+    const endPsi = (eMWt > 0 && eArea > 0) ? (eMWt / 1000) / eArea : 0;
+
+    const isPad = prod === 'notepad';
+    const leaves = isPad ? pages : Math.ceil(pages / 2);
+    const covers = coverPt > 0 ? (isPad ? 1 : 2) : 0;      // notepads: front cover only
+    const lamLayers = covers * lamSides;
+
+    if (prod === 'saddle' || prod === 'brochure')
+      return pkgFolded({ prod, area, pages, leaves, textPt, coverPt, covers, lamSides, lamMil, lamCoef, textPsi, coverPsi, overrideIn });
+
+    const blockIn = leaves * textPt * 0.001;
+    const coverIn = covers * coverPt * 0.001 + lamLayers * lamMil * 0.001;
+    let calcIn = blockIn + coverIn;
+    let pw = trimW, pl = trimL;
+    let extraLb = 0, extraTxt = '', chipNote = '';
+    const names = { perfect: 'Perfect bound', saddle: 'Saddle stitch', brochure: 'Folded brochure', notepad: 'Notepad', spiral: 'Spiral coil', wireo: 'Double Wire-O', case: 'Case bound' };
+
+    if (prod === 'notepad') {
+      const chipIn = detail * 0.001;
+      calcIn += chipIn;
+      // Chipboard weight: supplier M wt if typed, else estimated from caliper
+      const chipSheetArea = (+$('pkgChipSheetW').value || 0) * (+$('pkgChipSheetL').value || 0);
+      const autoChipM = chipSheetArea * chipIn * PKG_CHIPBOARD_LB_IN3 * 1000;
+      // Auto-fill the field from the caliper unless the user has typed their own
+      if (!pkgChipManual) $('pkgChipMWeight').value = autoChipM > 0 ? autoChipM.toFixed(0) : '';
+      const typedChipM = parseFloat($('pkgChipMWeight').value);
+      const chipM = pkgChipManual && typedChipM > 0 ? typedChipM : autoChipM;
+      extraLb = chipSheetArea > 0 ? (chipM / 1000) * area / chipSheetArea : area * chipIn * PKG_CHIPBOARD_LB_IN3;
+      chipNote = pkgChipManual && typedChipM > 0 ? `${typedChipM} lb/M, entered` : `${autoChipM.toFixed(0)} lb/M`;
+      extraTxt = ` + ${detail}pt chipboard backer`;
+    } else if (prod === 'spiral' || prod === 'wireo') {
+      // Coil / wire diameter: chosen size, or Auto = smallest standard size that
+      // clears the book's total thickness by PKG_COIL_CLEARANCE (1/8").
+      const sizes = PKG_DETAIL_SELECT[prod].opts.filter(o => o[0] !== 'auto').map(o => +o[0]);
+      let coil = detail;
+      const auto = selVal === 'auto';
+      const minCoil = calcIn + PKG_COIL_CLEARANCE;
+      if (auto) coil = sizes.find(v => v >= minCoil - 1e-6) ?? sizes[sizes.length - 1];
+      const tooSmall = coil < minCoil - 1e-6;
+      const label = prod === 'spiral' ? `${Math.round(coil * 25.4)} mm coil` : `${coil}" Wire-O`;
+      const block = calcIn;
+      // Holes sit ~3/16" in from the spine edge, so the coil projects (dia - 3/16")
+      // past the trim on the bound edge (spine runs along L, so it widens W).
+      const protrude = Math.max(0, coil - 0.1875);
+      const nest = $('pkgNest').checked;
+      if (nest) {
+        // Every other book turned 180°: each edge alternates coil / pages, so a
+        // pair stacks to (coil + book) instead of 2 x coil.
+        calcIn = Math.max(block, (block + coil) / 2);
+        pw = trimW + 2 * protrude;     // coils stick out on both edges
+        extraTxt = ` · ${label}${auto ? ' (auto)' : ''}, nested: (coil + book) ÷ 2`;
+      } else {
+        calcIn = Math.max(block, coil);
+        pw = trimW + protrude;
+        extraTxt = ` · ${label}${auto ? ' (auto)' : ''} sets thickness`;
+      }
+      if (tooSmall) extraTxt += ` <b style="color:var(--accent)">⚠ too small: needs ≥ ${minCoil.toFixed(3)}" (book ${block.toFixed(3)}" + 1/8")</b>`;
+    } else if (prod === 'case') {
+      return pkgCaseBound({ trimW, trimL, area, leaves, pages, textPt, coverPt, lamMil, lamCoef,
+                            textPsi, coverPsi, endPsi, boardPt: detail, overrideIn });
+    }
+
+    const useOverride = overrideIn > 0;
+    const pd = useOverride ? overrideIn : calcIn;
+    $('pkgSpineOverride').placeholder = calcIn > 0 ? `≈${calcIn.toFixed(3)}` : 'auto';
+
+    const textLb = leaves * area * textPsi;
+    const coverLb = covers * area * coverPsi;
+    const lamLb = lamLayers * area * lamCoef;
+    const unitLb = textLb + coverLb + lamLb + extraLb;
+    const unitWord = isPad ? 'pad' : 'book';
+
+    const footTxt = (pw !== trimW || pl !== trimL) ? ` · footprint ${pw.toFixed(3)} × ${pl.toFixed(3)}"` : '';
+    const readout =
+      `<b>${names[prod]}</b> · ${isPad ? pages + ' sheets' : pages + ' pp = ' + leaves + ' leaves'} × <b>${textPt.toFixed(1)}pt</b>` +
+      (covers ? ` + ${covers} cover${covers > 1 ? 's' : ''} × <b>${coverPt}pt</b>` : ' · no cover') +
+      (lamLayers ? ` + lam ${lamLayers} × ${pkgFilmTxt()}` : '') + extraTxt +
+      ` = <b>${calcIn.toFixed(3)}"</b> per ${unitWord}${(prod === 'spiral' || prod === 'wireo') && $('pkgNest').checked ? ' (avg, nested)' : ''}` +
+      (useOverride ? ` · <b>override ${pd.toFixed(3)}"</b> in use` : '') + footTxt +
+      (unitLb > 0
+        ? `<br>Weight: text <b>${textLb.toFixed(3)}</b> + cover <b>${coverLb.toFixed(3)}</b>` +
+          (lamLb ? ` + lam <b>${lamLb.toFixed(3)}</b>` : '') +
+          (extraLb ? ` + ${prod === 'case' ? 'boards' : 'chipboard'} <b>${extraLb.toFixed(3)}</b>${chipNote ? ' (' + chipNote + ')' : ''}` : '') +
+          ` = <b>${unitLb.toFixed(3)} lb per ${unitWord}</b> (${(unitLb * 16).toFixed(1)} oz)`
+        : '<br>Weight: enter text (and cover) M weights to see book and carton weight');
+
+    return {
+      bound: true, pw, pl, pd, pieceLb: unitLb, readout,
+      depthSub: useOverride ? 'manual override' : `${leaves} leaves${covers ? ' + cover' : ''}`,
+    };
+  }
+  $('pkgProduct').addEventListener('change', () => { syncPkgProductUI(); computePackaging(); });
+  // Chipboard M wt: typing a value makes it manual; clearing it goes back to automatic
+  let pkgChipManual = false;
+  $('pkgChipMWeight').addEventListener('input', () => { pkgChipManual = $('pkgChipMWeight').value.trim() !== ''; });
+  $('pkgCoverCaliper').addEventListener('input', () => {
+    document.querySelector('#tab-packaging aside').classList.toggle('pkg-nocover',
+      $('pkgProduct').value !== 'flat' && (+$('pkgCoverCaliper').value || 0) === 0);
+  });
+
+  function computePackaging() {
+    const cW = Math.max(0, +$('pkgCartonW').value || 0);
+    const cL = Math.max(0, +$('pkgCartonL').value || 0);
+    const cD = Math.max(0, +$('pkgCartonD').value || 0);
+    const lamSides = +$('pkgLamSides').value || 0;
+    const lamMil = pkgFilmMil();
+    const bundle = Math.max(1, Math.floor(+$('pkgBundle').value || 1));
+    const flatOnly = $('pkgFlatOnly').checked;
+    const mWt = Math.max(0, +$('pkgMWeight').value || 0);
+    const mSheetArea = (+$('pkgMSheetW').value || 0) * (+$('pkgMSheetL').value || 0);
+    const maxWt = Math.max(0, +$('pkgMaxWt').value || 0);
+    const boxStyle = $('pkgBoxStyle').value;
+    let boxLb;
+    if (boxStyle === 'custom') {
+      boxLb = Math.max(0, parseFloat($('pkgBoxCustomLb').value) || 0);
+      $('pkgBoxWtInfo').innerHTML = `Empty box: <b>${boxLb.toFixed(2)} lb</b> · entered`;
+    } else {
+      const box = estCartonLb(cW, cL, cD, boxStyle);
+      boxLb = box.lb;
+      const styleName = boxStyle === 'easyfold' ? 'Easy-Fold' : 'RSC';
+      $('pkgBoxWtInfo').innerHTML = boxLb > 0
+        ? `Box ≈ <b>${boxLb.toFixed(2)} lb</b> · 200# ${styleName} · ${box.sqft.toFixed(1)} sq ft`
+        : 'Est. empty box: —';
+    }
+
+    // ---- Unit model: footprint, thickness and weight of one piece / book ----
+    const unit = pkgUnitModel({ lamSides, lamMil, mWt, mSheetArea });
+    const { pw, pl, pd, pieceLb } = unit;
+    $('pkgCaliperReadout').innerHTML = unit.readout;
+
+    const reset = (sub) => {
+      $('pkgTotal').textContent = '—';
+      $('pkgTotalSub').textContent = sub;
+      $('pkgBestFit').textContent = '—'; $('pkgBestFitSub').textContent = '—';
+      $('pkgStackHeight').textContent = '—'; $('pkgStackHeightSub').textContent = '—';
+      $('pkgFill').textContent = '—';
+      $('pkgWeight').textContent = '—'; $('pkgWeightSub').textContent = '—';
+      $('pkgWeight').style.color = '';
+      $('pkgCartons').textContent = '—'; $('pkgCartonsSub').textContent = '—';
+      $('pkgTotalWt').textContent = '—'; $('pkgTotalWtSub').textContent = '—';
+      $('pkgOrientTable').innerHTML = '';
+      renderPkgSvg(cW, cL, cD, null);
+    };
+    const showDepth = unit.displayDepth ?? pd;
+    $('pkgPieceDepth').textContent = showDepth > 0 ? showDepth.toFixed(4) + '"' : '—';
+    $('pkgPieceDepthSub').textContent = unit.depthSub;
+    document.querySelector('#pkgPieceDepth').previousElementSibling.textContent = unit.bound ? 'Spine / Unit' : 'Piece Depth';
+
+    if (!(cW > 0 && cL > 0 && cD > 0 && pw > 0 && pl > 0 && pd > 0)) { reset('enter dimensions'); return; }
+
+    let orients = tryAllOrientations(cW, cL, cD, pw, pl, pd, unit.fitCount);
+    if (flatOnly) orients = orients.filter(o => o.axis === 'D');
+    const best = orients[0];
+    if (!best || best.total === 0) { reset('piece does not fit carton'); renderPkgTable(orients, best); return; }
+
+    // Whole bundles only: bundles stack in the stacking direction, so cap each
+    // stack column at a multiple of the bundle count.
+    const spacePerStack = Math.floor(best.nC / bundle) * bundle;
+    const columns = best.nA * best.nB;
+    const spaceCount = spacePerStack * columns;
+
+    // Weight cap: trim every stack evenly (whole bundles) until the packed
+    // carton, including the empty box, is at or under the max weight.
+    let perStack = spacePerStack;
+    let weightLimited = false;
+    let usedColumns = columns, overOne = false;
+    if (pieceLb > 0 && maxWt > 0) {
+      const allowPcs = Math.max(0, Math.floor((maxWt - boxLb) / pieceLb));   // max covers pieces + empty box
+      const allowPerStack = Math.floor(allowPcs / columns / bundle) * bundle;
+      if (allowPerStack < perStack) { perStack = allowPerStack; weightLimited = true; }
+      // Too heavy for even one bundle in every stack: use fewer stacks of one bundle each
+      if (perStack === 0 && allowPcs >= bundle) { perStack = bundle; usedColumns = Math.min(columns, Math.floor(allowPcs / bundle)); }
+      if (perStack === 0) overOne = true;
+    }
+    const count = perStack * usedColumns;
+
+    $('pkgTotal').textContent = count.toLocaleString();
+    $('pkgTotalSub').textContent = overOne
+      ? `one ${bundle > 1 ? 'pack of ' + bundle : 'piece'} = ${(Math.max(1, bundle) * pieceLb + boxLb).toFixed(1)} lb with box, over the ${maxWt} lb max`
+      : (bundle > 1
+        ? `${usedColumns} stack${usedColumns !== 1 ? 's' : ''} × ${perStack / bundle} bundle${perStack / bundle !== 1 ? 's' : ''} of ${bundle}`
+        : `${usedColumns} stack${usedColumns !== 1 ? 's' : ''} × ${perStack} pcs`)
+      + (weightLimited ? ` · weight-limited (space for ${spaceCount.toLocaleString()})` : '');
+
+    // Carton weight tile
+    if (pieceLb > 0) {
+      const productLb = count * pieceLb;
+      const cartonLb = productLb + boxLb;          // what the scale reads
+      $('pkgWeight').textContent = cartonLb.toFixed(1) + ' lb';
+      $('pkgWeight').style.color = weightLimited ? 'var(--accent)' : '';
+      $('pkgWeightSub').textContent = weightLimited
+        ? `capped at ${maxWt} lb · pcs ${productLb.toFixed(1)} + box ${boxLb.toFixed(1)}`
+        : `pcs ${productLb.toFixed(1)} + box ${boxLb.toFixed(1)}` + (maxWt > 0 ? ` · ${(maxWt - cartonLb).toFixed(1)} under max` : '');
+    } else {
+      $('pkgWeight').textContent = '—';
+      $('pkgWeight').style.color = '';
+      $('pkgWeightSub').textContent = 'enter M weight';
+    }
+
+    // ---- Job totals: cartons needed and total shipping weight ----
+    const qty = Math.max(0, Math.floor(+$('pkgQty').value || 0));
+    if (qty > 0 && count > 0) {
+      const cartons = Math.ceil(qty / count);
+      const lastPcs = qty - (cartons - 1) * count;
+      $('pkgCartons').textContent = cartons.toLocaleString();
+      $('pkgCartonsSub').textContent = lastPcs === count
+        ? `all full @ ${count.toLocaleString()}`
+        : (cartons === 1 ? `1 partial (${lastPcs.toLocaleString()} pcs)`
+          : `${cartons - 1} full + 1 @ ${lastPcs.toLocaleString()} pcs`);
+      if (pieceLb > 0) {
+        const piecesLb = qty * pieceLb;
+        const boxesLb = cartons * boxLb;
+        const totalLb = piecesLb + boxesLb;
+        const fmt = (v) => v.toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+        $('pkgTotalWt').textContent = fmt(totalLb) + ' lb';
+        $('pkgTotalWtSub').textContent = `pcs ${fmt(piecesLb)} + ${cartons} box${cartons !== 1 ? 'es' : ''} ${fmt(boxesLb)} lb`;
+      } else {
+        $('pkgTotalWt').textContent = '—';
+        $('pkgTotalWtSub').textContent = 'enter M weight';
+      }
+    } else {
+      $('pkgCartons').textContent = '—';
+      $('pkgCartonsSub').textContent = qty > 0 ? '—' : 'enter quantity';
+      $('pkgTotalWt').textContent = '—';
+      $('pkgTotalWtSub').textContent = qty > 0 ? '—' : 'enter quantity';
+    }
+
+    $('pkgBestFit').textContent = `${best.nA} × ${best.nB} × ${perStack}`;
+    $('pkgBestFitSub').textContent = best.label + (usedColumns < columns ? ` · ${usedColumns} of ${columns} stacks used` : '');
+
+    const stackH = unit.stackHeight ? unit.stackHeight(perStack) : perStack * pd;
+    const stackAxisLen = best.s;
+    $('pkgStackHeight').textContent = stackH.toFixed(2) + '"';
+    $('pkgStackHeightSub').textContent = `${(stackAxisLen - stackH).toFixed(2)}" headspace`;
+
+    const fill = (count * pw * pl * pd) / (cW * cL * cD) * 100;
+    $('pkgFill').textContent = fill.toFixed(1) + '%';
+
+    renderPkgTable(orients, best);
+    renderPkgSvg(cW, cL, cD, { ...best, nC: perStack, used: usedColumns, pd: perStack > 0 ? stackH / perStack : pd });
+  }
+
+  function renderPkgTable(orients, best) {
+    let tbl = '<tr><th>Orientation</th><th>Across × Deep × Stack</th><th>Pieces</th></tr>';
+    for (const o of orients) {
+      tbl += `<tr${o === best && o.total > 0 ? ' class="best"' : ''}><td>${o.label}</td><td>${o.nA} × ${o.nB} × ${o.nC}</td><td>${o.total.toLocaleString()}</td></tr>`;
+    }
+    $('pkgOrientTable').innerHTML = tbl;
+  }
+
+  // Isometric carton with piece stacks drawn as solid blocks (one block per
+  // stack column — drawing every sheet would be thousands of polygons).
+  function renderPkgSvg(cW, cL, cD, fit) {
+    const svg = $('pkgSvg');
+    if (!(cW > 0 && cL > 0 && cD > 0)) {
+      svg.innerHTML = '<text x="200" y="160" text-anchor="middle" font-family="DM Mono, monospace" font-size="12" fill="currentColor" opacity="0.5">Enter carton dimensions</text>';
+      return;
+    }
+    const vbW = 400, vbH = 320, margin = 34;
+    const c30 = Math.cos(Math.PI / 6), s30 = 0.5;
+    const proj = (x, y, z) => [(x - y) * c30, (x + y) * s30 - z];
+    const corners = [];
+    for (const x of [0, cW]) for (const y of [0, cL]) for (const z of [0, cD]) corners.push(proj(x, y, z));
+    const xs = corners.map(c => c[0]), ys = corners.map(c => c[1]);
+    const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+    const scale = Math.min((vbW - 2 * margin) / (maxX - minX), (vbH - 2 * margin) / (maxY - minY));
+    const ox = (vbW - (maxX - minX) * scale) / 2 - minX * scale;
+    const oy = (vbH - (maxY - minY) * scale) / 2 - minY * scale;
+    const P = (x, y, z) => { const [a, b] = proj(x, y, z); return [a * scale + ox, b * scale + oy]; };
+    const pts = (...arr) => arr.map(v => P(...v).join(',')).join(' ');
+
+    let out = '';
+    // Back faces of carton (behind the product)
+    out += `<polygon points="${pts([0,0,0],[cW,0,0],[cW,cL,0],[0,cL,0])}" fill="#c9a57a" opacity="0.25" stroke="#8a6a44" stroke-width="1" />`;
+    out += `<polygon points="${pts([0,0,0],[0,cL,0],[0,cL,cD],[0,0,cD])}" fill="#c9a57a" opacity="0.18" stroke="#8a6a44" stroke-width="1" />`;
+    out += `<polygon points="${pts([0,0,0],[cW,0,0],[cW,0,cD],[0,0,cD])}" fill="#c9a57a" opacity="0.18" stroke="#8a6a44" stroke-width="1" />`;
+
+    if (fit && fit.nA > 0 && fit.nB > 0 && fit.nC > 0) {
+      // Each stack column occupies a×b footprint and extends c*nC along the stack axis.
+      const blocks = [];
+      const len = fit.pd * fit.nC;
+      // Center the product on the carton floor (W and L); it rests on the bottom.
+      let ox, oy;
+      if (fit.axis === 'D')      { ox = (cW - fit.nA * fit.fa) / 2; oy = (cL - fit.nB * fit.fb) / 2; }
+      else if (fit.axis === 'L') { ox = (cW - fit.nA * fit.fa) / 2; oy = (cL - len) / 2; }
+      else                       { ox = (cW - len) / 2;             oy = (cL - fit.nA * fit.fa) / 2; }
+      ox = Math.max(0, ox); oy = Math.max(0, oy);
+      for (let i = 0; i < fit.nA; i++) for (let j = 0; j < fit.nB; j++) {
+        let b;
+        if (fit.axis === 'D')      b = { x0: ox + i*fit.fa, dx: fit.fa, y0: oy + j*fit.fb, dy: fit.fb, z0: 0, dz: len };
+        else if (fit.axis === 'L') b = { x0: ox + i*fit.fa, dx: fit.fa, z0: j*fit.fb, dz: fit.fb, y0: oy, dy: len };
+        else                       b = { y0: oy + i*fit.fa, dy: fit.fa, z0: j*fit.fb, dz: fit.fb, x0: ox, dx: len };
+        blocks.push(b);
+      }
+      if (fit.used != null && fit.used < blocks.length) {
+        blocks.length = fit.used;
+        // re-center the stacks that remain on the carton floor
+        const x0 = Math.min(...blocks.map(b => b.x0)), x1 = Math.max(...blocks.map(b => b.x0 + b.dx));
+        const y0 = Math.min(...blocks.map(b => b.y0)), y1 = Math.max(...blocks.map(b => b.y0 + b.dy));
+        const sx = (cW - (x1 - x0)) / 2 - x0, sy = (cL - (y1 - y0)) / 2 - y0;
+        for (const b of blocks) { b.x0 += sx; b.y0 += sy; }
+      }
+      // Painter's order: far (low x+y) first, bottom first
+      blocks.sort((p, q) => (p.x0 + p.y0 + p.z0) - (q.x0 + q.y0 + q.z0));
+      for (const b of blocks) {
+        const x1 = b.x0 + b.dx, y1 = b.y0 + b.dy, z1 = b.z0 + b.dz;
+        out += `<polygon points="${pts([b.x0,b.y0,z1],[x1,b.y0,z1],[x1,y1,z1],[b.x0,y1,z1])}" fill="#dfe8f4" stroke="#2e5d8b" stroke-width="0.8" />`;
+        out += `<polygon points="${pts([x1,b.y0,b.z0],[x1,y1,b.z0],[x1,y1,z1],[x1,b.y0,z1])}" fill="#b9cce4" stroke="#2e5d8b" stroke-width="0.8" />`;
+        out += `<polygon points="${pts([b.x0,y1,b.z0],[x1,y1,b.z0],[x1,y1,z1],[b.x0,y1,z1])}" fill="#9fb8d8" stroke="#2e5d8b" stroke-width="0.8" />`;
+        // Sheet lines on the visible side faces (cap at ~40 lines per face)
+        const n = Math.min(fit.nC, 40);
+        for (let s = 1; s < n; s++) {
+          const t = s / n;
+          if (fit.axis === 'L') {
+            const y = b.y0 + b.dy * t;
+            out += `<line x1="${P(x1,y,b.z0)[0]}" y1="${P(x1,y,b.z0)[1]}" x2="${P(x1,y,z1)[0]}" y2="${P(x1,y,z1)[1]}" stroke="#2e5d8b" stroke-width="0.3" opacity="0.5" />`;
+          } else if (fit.axis === 'W') {
+            const x = b.x0 + b.dx * t;
+            out += `<line x1="${P(x,y1,b.z0)[0]}" y1="${P(x,y1,b.z0)[1]}" x2="${P(x,y1,z1)[0]}" y2="${P(x,y1,z1)[1]}" stroke="#2e5d8b" stroke-width="0.3" opacity="0.5" />`;
+          } else {
+            const z = b.z0 + b.dz * t;
+            out += `<line x1="${P(x1,b.y0,z)[0]}" y1="${P(x1,b.y0,z)[1]}" x2="${P(x1,y1,z)[0]}" y2="${P(x1,y1,z)[1]}" stroke="#2e5d8b" stroke-width="0.3" opacity="0.5" />`;
+            out += `<line x1="${P(b.x0,y1,z)[0]}" y1="${P(b.x0,y1,z)[1]}" x2="${P(x1,y1,z)[0]}" y2="${P(x1,y1,z)[1]}" stroke="#2e5d8b" stroke-width="0.3" opacity="0.5" />`;
+          }
+        }
+      }
+    }
+
+    // Front carton edges (wireframe over product)
+    const front = [
+      [[cW,0,0],[cW,cL,0]], [[0,cL,0],[cW,cL,0]], [[cW,cL,0],[cW,cL,cD]],
+      [[0,0,cD],[cW,0,cD]], [[cW,0,cD],[cW,cL,cD]], [[cW,cL,cD],[0,cL,cD]], [[0,cL,cD],[0,0,cD]],
+      [[cW,0,0],[cW,0,cD]], [[0,cL,0],[0,cL,cD]],
+    ];
+    for (const [a, b] of front) {
+      const [x1, y1] = P(...a), [x2, y2] = P(...b);
+      out += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#8a6a44" stroke-width="1.4" stroke-dasharray="4 3" />`;
+    }
+
+    // Labels
+    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    const lbl = (xy, txt, dx, dy, anchor) =>
+      `<text x="${xy[0] + dx}" y="${xy[1] + dy}" text-anchor="${anchor}" font-family="DM Mono, monospace" font-size="11" fill="currentColor" opacity="0.75">${txt}</text>`;
+    out += lbl(mid(P(0,cL,0), P(cW,cL,0)), `W ${cW}"`, -6, 16, 'end');
+    out += lbl(mid(P(cW,0,0), P(cW,cL,0)), `L ${cL}"`, 8, 16, 'start');
+    out += lbl(mid(P(cW,0,0), P(cW,0,cD)), `D ${cD}"`, 8, 0, 'start');
+
+    svg.innerHTML = out;
+  }
+
+  document.querySelectorAll('#tab-packaging input, #tab-packaging select').forEach(el => {
+    el.addEventListener('input', () => { computePackaging(); scheduleFit(); });
+    el.addEventListener('change', () => { computePackaging(); scheduleFit(); });
+  });
+
+  // ============ WIRE UP (imposition) ============
+  document.querySelectorAll('#tab-imposition input, #tab-imposition select').forEach(el => {
+    el.addEventListener('input', () => { computeRouter(); scheduleFit(); });
+    el.addEventListener('change', () => { computeRouter(); scheduleFit(); });
+  });
+  // Imposition buttons (single/multi, add/remove piece rows) change the layout too
+  document.querySelector('#tab-imposition').addEventListener('click', scheduleFit);
   computeRouter();
+  pullFromImposition();
+  syncPkgProductUI();
+  computePackaging();
+  scheduleFit();
 </script>
 </body>
 </html>
