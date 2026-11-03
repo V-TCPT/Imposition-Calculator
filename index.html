@@ -420,7 +420,7 @@
   .pkg-prodrow { grid-template-columns: 1.7fr auto 1fr !important; }
   .pkg-sublabel { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; margin: 7px 0 4px; }
   .pkg-boxrow select { min-width: 0; padding-right: 22px; }
-  .pkg-viz-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+  .pkg-viz-head { display: flex; justify-content: space-between; align-items: center; gap: 6px 14px; flex-wrap: wrap; }
   .pkg-viz-head .pkg-viz-title { margin-right: auto; }
   .pkg-hide { display: none !important; }
   .pkg-flat-toggle { font-family: 'DM Mono', monospace; font-size: 10px !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; margin: 0; }
@@ -1570,6 +1570,9 @@
             <div class="pkg-viz-title">Carton Visualizer</div>
             <label class="pkg-check pkg-flat-toggle" title="Only consider pieces lying flat. Uncheck to also try packing on edge (standing up).">
               <input type="checkbox" id="pkgFlatOnly" checked /> Pack flat only
+            </label>
+            <label class="pkg-check pkg-flat-toggle" title="Dutch: mix the two face orientations on the carton floor. The main block runs one way and the leftover strip is filled with pieces turned 90°. Only used when it fits more than a straight layout.">
+              <input type="checkbox" id="pkgDutch" /> Dutch
             </label>
             <label class="pkg-check pkg-flat-toggle pkg-hide" id="pkgNestWrap" title="Turn every other book 180° so the coils alternate edges and each coil lies beside the next book's pages instead of on top of another coil.">
               <input type="checkbox" id="pkgNest" checked /> Nest coils
@@ -3257,7 +3260,7 @@
   // Try every way the piece can sit in the carton. The stacking axis is the
   // carton dimension the piece thickness runs along (D = flat, L or W = on edge);
   // the face (W x L of the piece) can be rotated 90 deg on the other two axes.
-  function tryAllOrientations(cW, cL, cD, pw, pl, pd, fitCount) {
+  function tryAllOrientations(cW, cL, cD, pw, pl, pd, fitCount, allowDutch) {
     const axes = [
       { axis: 'D', label: 'Flat', u: cW, v: cL, s: cD },
       { axis: 'L', label: 'On edge, stacked along L', u: cW, v: cD, s: cL },
@@ -3269,11 +3272,47 @@
         const nA = Math.floor((ax.u + 1e-9) / fa);
         const nB = Math.floor((ax.v + 1e-9) / fb);
         const nC = fitCount ? fitCount(ax.s) : Math.floor((ax.s + 1e-9) / pd);
-        out.push({ ...ax, label: ax.label + (rot ? ' (rotated)' : ''), fa, fb, nA, nB, nC, total: nA * nB * nC });
+        out.push({ ...ax, label: ax.label + (rot ? ' (rotated)' : ''), fa, fb, nA, nB, nC,
+          stacks: nA * nB, grid: `${nA} × ${nB}`,
+          blocks: [{ u0: 0, v0: 0, nA, nB, fa, fb }], total: nA * nB * nC });
+      }
+      if (allowDutch) {
+        const d = bestDutch(ax.u, ax.v, pw, pl);
+        const straightMax = Math.max(...out.filter(o => o.axis === ax.axis).map(o => o.stacks));
+        if (d && d.stacks > straightMax) {
+          const nC = fitCount ? fitCount(ax.s) : Math.floor((ax.s + 1e-9) / pd);
+          out.push({ ...ax, label: ax.label + ' — Dutch', nC, stacks: d.stacks, blocks: d.blocks,
+            grid: d.blocks.map(b => `${b.nA}×${b.nB}`).join(' + '), total: d.stacks * nC });
+        }
       }
     }
     out.sort((x, y) => y.total - x.total);
     return out;
+  }
+
+  // Dutch layout on a carton floor (u × v): a main block one way, the leftover
+  // strip filled with the face turned 90°. Tries splits along both floor edges.
+  function bestDutch(u, v, p, q) {
+    const fl = (x) => Math.floor(x + 1e-9);
+    let best = null;
+    const consider = (blocks) => {
+      if (blocks.some(b => b.nA <= 0 || b.nB <= 0)) return;
+      const stacks = blocks.reduce((t, b) => t + b.nA * b.nB, 0);
+      if (!best || stacks > best.stacks) best = { stacks, blocks };
+    };
+    for (const [a, b] of [[p, q], [q, p]]) {
+      for (let n = 1; n * a <= u + 1e-9; n++) {          // split along u
+        const rem = u - n * a;
+        consider([{ u0: 0, v0: 0, nA: n, nB: fl(v / b), fa: a, fb: b },
+                  { u0: n * a, v0: 0, nA: fl(rem / b), nB: fl(v / a), fa: b, fb: a }]);
+      }
+      for (let m = 1; m * b <= v + 1e-9; m++) {          // split along v
+        const rem = v - m * b;
+        consider([{ u0: 0, v0: 0, nA: fl(u / a), nB: m, fa: a, fb: b },
+                  { u0: 0, v0: m * b, nA: fl(u / b), nB: fl(rem / a), fa: b, fb: a }]);
+      }
+    }
+    return best;
   }
 
 
@@ -3787,7 +3826,7 @@
 
     if (!(cW > 0 && cL > 0 && cD > 0 && pw > 0 && pl > 0 && pd > 0)) { reset('enter dimensions'); return; }
 
-    let orients = tryAllOrientations(cW, cL, cD, pw, pl, pd, unit.fitCount);
+    let orients = tryAllOrientations(cW, cL, cD, pw, pl, pd, unit.fitCount, $('pkgDutch').checked);
     if (flatOnly) orients = orients.filter(o => o.axis === 'D');
     const best = orients[0];
     if (!best || best.total === 0) { reset('piece does not fit carton'); renderPkgTable(orients, best); return; }
@@ -3795,7 +3834,7 @@
     // Whole bundles only: bundles stack in the stacking direction, so cap each
     // stack column at a multiple of the bundle count.
     const spacePerStack = Math.floor(best.nC / bundle) * bundle;
-    const columns = best.nA * best.nB;
+    const columns = best.stacks;
     const spaceCount = spacePerStack * columns;
 
     // Weight cap: trim every stack evenly (whole bundles) until the packed
@@ -3864,8 +3903,9 @@
       $('pkgTotalWtSub').textContent = qty > 0 ? '—' : 'enter quantity';
     }
 
-    $('pkgBestFit').textContent = `${best.nA} × ${best.nB} × ${perStack}`;
-    $('pkgBestFitSub').textContent = best.label + (usedColumns < columns ? ` · ${usedColumns} of ${columns} stacks used` : '');
+    const isDutch = best.blocks && best.blocks.length > 1;
+    $('pkgBestFit').textContent = isDutch ? best.grid : `${best.grid} × ${perStack}`;
+    $('pkgBestFitSub').textContent = (isDutch ? `× ${perStack} high · ` : '') + best.label + (usedColumns < columns ? ` · ${usedColumns} of ${columns} stacks used` : '');
 
     const stackH = unit.stackHeight ? unit.stackHeight(perStack) : perStack * pd;
     const stackAxisLen = best.s;
@@ -3882,7 +3922,7 @@
   function renderPkgTable(orients, best) {
     let tbl = '<tr><th>Orientation</th><th>Across × Deep × Stack</th><th>Pieces</th></tr>';
     for (const o of orients) {
-      tbl += `<tr${o === best && o.total > 0 ? ' class="best"' : ''}><td>${o.label}</td><td>${o.nA} × ${o.nB} × ${o.nC}</td><td>${o.total.toLocaleString()}</td></tr>`;
+      tbl += `<tr${o === best && o.total > 0 ? ' class="best"' : ''}><td>${o.label}</td><td>${o.grid} × ${o.nC}</td><td>${o.total.toLocaleString()}</td></tr>`;
     }
     $('pkgOrientTable').innerHTML = tbl;
   }
@@ -3914,21 +3954,25 @@
     out += `<polygon points="${pts([0,0,0],[0,cL,0],[0,cL,cD],[0,0,cD])}" fill="#c9a57a" opacity="0.18" stroke="#8a6a44" stroke-width="1" />`;
     out += `<polygon points="${pts([0,0,0],[cW,0,0],[cW,0,cD],[0,0,cD])}" fill="#c9a57a" opacity="0.18" stroke="#8a6a44" stroke-width="1" />`;
 
-    if (fit && fit.nA > 0 && fit.nB > 0 && fit.nC > 0) {
+    if (fit && fit.stacks > 0 && fit.nC > 0) {
       // Each stack column occupies a×b footprint and extends c*nC along the stack axis.
       const blocks = [];
       const len = fit.pd * fit.nC;
       // Center the product on the carton floor (W and L); it rests on the bottom.
       let ox, oy;
-      if (fit.axis === 'D')      { ox = (cW - fit.nA * fit.fa) / 2; oy = (cL - fit.nB * fit.fb) / 2; }
-      else if (fit.axis === 'L') { ox = (cW - fit.nA * fit.fa) / 2; oy = (cL - len) / 2; }
-      else                       { ox = (cW - len) / 2;             oy = (cL - fit.nA * fit.fa) / 2; }
+      // floor extent of all blocks (u along the first floor edge, v along the second)
+      const extU = Math.max(...fit.blocks.map(b => b.u0 + b.nA * b.fa));
+      const extV = Math.max(...fit.blocks.map(b => b.v0 + b.nB * b.fb));
+      if (fit.axis === 'D')      { ox = (cW - extU) / 2; oy = (cL - extV) / 2; }
+      else if (fit.axis === 'L') { ox = (cW - extU) / 2; oy = (cL - len) / 2; }
+      else                       { ox = (cW - len) / 2;  oy = (cL - extU) / 2; }
       ox = Math.max(0, ox); oy = Math.max(0, oy);
-      for (let i = 0; i < fit.nA; i++) for (let j = 0; j < fit.nB; j++) {
+      for (const bk of fit.blocks) for (let i = 0; i < bk.nA; i++) for (let j = 0; j < bk.nB; j++) {
+        const u0 = bk.u0 + i * bk.fa, v0 = bk.v0 + j * bk.fb;
         let b;
-        if (fit.axis === 'D')      b = { x0: ox + i*fit.fa, dx: fit.fa, y0: oy + j*fit.fb, dy: fit.fb, z0: 0, dz: len };
-        else if (fit.axis === 'L') b = { x0: ox + i*fit.fa, dx: fit.fa, z0: j*fit.fb, dz: fit.fb, y0: oy, dy: len };
-        else                       b = { y0: oy + i*fit.fa, dy: fit.fa, z0: j*fit.fb, dz: fit.fb, x0: ox, dx: len };
+        if (fit.axis === 'D')      b = { x0: ox + u0, dx: bk.fa, y0: oy + v0, dy: bk.fb, z0: 0, dz: len };
+        else if (fit.axis === 'L') b = { x0: ox + u0, dx: bk.fa, z0: v0, dz: bk.fb, y0: oy, dy: len };
+        else                       b = { y0: oy + u0, dy: bk.fa, z0: v0, dz: bk.fb, x0: ox, dx: len };
         blocks.push(b);
       }
       if (fit.used != null && fit.used < blocks.length) {
