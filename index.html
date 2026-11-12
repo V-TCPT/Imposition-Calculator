@@ -261,6 +261,10 @@
     #tab-packaging aside .field { margin-bottom: 6px; }
     #tab-packaging aside .field label { margin-bottom: 2px; }
     #tab-packaging .pkg-sublabel { margin: 5px 0 3px; }
+    #tab-skid aside input, #tab-skid aside select { padding-top: 4px; padding-bottom: 4px; }
+    #tab-skid aside .field { margin-bottom: 6px; }
+    #tab-skid aside .field label { margin-bottom: 2px; }
+    #tab-skid .pkg-sublabel { margin: 5px 0 3px; }
     .panel { padding-top: 12px; padding-bottom: 10px; }
   }
 
@@ -275,6 +279,15 @@
     align-items: center;
   }
   .row3 .x { text-align: center; opacity: 0.4; font-size: 12px; }
+  .row3.skid-row2 { grid-template-columns: 1fr auto 1fr; }
+  .skid-stack-ctl { display: flex; align-items: center; gap: 6px; }
+  .skid-stack-ctl select { font-family: 'DM Mono', monospace; font-size: 11px; padding: 3px 24px 3px 6px; text-transform: none; letter-spacing: 0; width: auto; }
+  #tab-skid .row3 input { min-width: 0; width: 100%; box-sizing: border-box; }
+  #skidMaxOverall { opacity: 0.7; }
+  .skid-layers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; min-height: 0; }
+  .skid-layer { display: flex; flex-direction: column; min-height: 0; }
+  .skid-layer-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; margin-bottom: 4px; }
+  .skid-layer svg { width: 100%; height: auto; max-height: 170px; display: block; }
   .row3 input { padding-left: 6px; padding-right: 4px; }
   .pkg-check {
     display: flex !important;
@@ -1145,6 +1158,7 @@
   <nav class="tabs">
     <button type="button" class="tab-btn active" data-tab="imposition">Imposition</button>
     <button type="button" class="tab-btn" data-tab="packaging">Packaging</button>
+    <button type="button" class="tab-btn" data-tab="skid">Skid</button>
   </nav>
 
   <!-- ============ IMPOSITION TAB ============ -->
@@ -1594,6 +1608,142 @@
   </div>
 
   </div> <!-- end #tab-packaging -->
+
+  <div id="tab-skid" class="tab-pane">
+
+  <div class="grid">
+
+    <!-- ============ SKID CONTROLS ============ -->
+    <aside class="pkg-aside">
+      <div class="panel" data-label="Skid">
+        <div class="field">
+          <label>Skid (L × W)</label>
+          <div class="row3 skid-row2">
+            <input type="number" id="skidL" value="48" min="1" step="0.5" title="Skid / pallet length (in). Standard GMA pallet is 48 × 40." />
+            <span class="x">×</span>
+            <input type="number" id="skidW" value="40" min="1" step="0.5" title="Skid / pallet width (in)" />
+          </div>
+          <div class="pkg-sublabel">Load ht · Pallet ht · Overall max</div>
+          <div class="row3">
+            <input type="number" id="skidLoadH" value="54" min="1" step="0.5" title="Max height of the cartons on the skid (in), not counting the pallet. Default 54&quot;." />
+            <span class="x">+</span>
+            <input type="number" id="skidPalletH" value="6" min="0" step="0.25" title="Pallet height (in). A standard 48 × 40 GMA wood pallet runs about 5½–6&quot;; measure yours and type it here. Default 6&quot;." />
+            <span class="x">=</span>
+            <input type="text" id="skidMaxOverall" value="60" disabled title="Max overall height = load height + pallet height" />
+          </div>
+          <div class="pkg-sublabel">Pallet lb · Max skid lb</div>
+          <div class="row3 skid-row2">
+            <input type="number" id="skidPalletLb" value="45" min="0" step="1" title="Empty pallet weight (lbs). A standard 48 × 40 wood pallet runs about 35–50 lb." />
+            <span class="x">·</span>
+            <input type="number" id="skidMaxLb" value="0" min="0" step="50" title="Max skid weight (lbs) including the pallet. 0 = no limit. Layers come off the top until the skid is under the max." />
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" data-label="Carton">
+        <div class="field">
+          <label class="pkg-label-flex">Carton (L × W × H) <span class="pkg-inherit" id="skidPullBtn" title="Copy the carton size, packed carton weight and number of cartons from the Packaging tab.">↶ Pull</span></label>
+          <div class="row3">
+            <input type="number" id="skidCtnL" value="17.25" min="0.1" step="0.125" title="Carton L (in)" />
+            <span class="x">×</span>
+            <input type="number" id="skidCtnW" value="11.25" min="0.1" step="0.125" title="Carton W (in)" />
+            <span class="x">×</span>
+            <input type="number" id="skidCtnH" value="8" min="0.1" step="0.125" title="Carton H (in) — cartons always ship right side up" />
+          </div>
+          <div class="pkg-sublabel">Carton lb · Total cartons</div>
+          <div class="row3 skid-row2">
+            <input type="number" id="skidCtnLb" value="32" min="0" step="0.1" title="Weight of one packed carton (lbs)" />
+            <span class="x">·</span>
+            <input type="number" id="skidCtnQty" value="0" min="0" step="1" title="Total cartons on the job (from the Packaging tab, or type it)" />
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============ SKID RESULTS ============ -->
+    <main class="pkg-main">
+      <div class="pkg-results">
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Cartons / Skid</div>
+          <div class="pkg-stat-value" id="skidPer">—</div>
+          <div class="pkg-stat-sub" id="skidPerSub">enter dimensions</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Layer Pattern</div>
+          <div class="pkg-stat-value ink" id="skidPattern">—</div>
+          <div class="pkg-stat-sub" id="skidPatternSub">—</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Layers</div>
+          <div class="pkg-stat-value ink" id="skidLayers">—</div>
+          <div class="pkg-stat-sub" id="skidLayersSub">—</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Overall Height</div>
+          <div class="pkg-stat-value ink" id="skidHeight">—</div>
+          <div class="pkg-stat-sub" id="skidHeightSub">—</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Footprint</div>
+          <div class="pkg-stat-value ink" id="skidFoot">—</div>
+          <div class="pkg-stat-sub" id="skidFootSub">of the skid deck</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Skid Weight</div>
+          <div class="pkg-stat-value ink" id="skidWt">—</div>
+          <div class="pkg-stat-sub" id="skidWtSub">—</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Skids</div>
+          <div class="pkg-stat-value" id="skidCount">—</div>
+          <div class="pkg-stat-sub" id="skidCountSub">enter total cartons</div>
+        </div>
+        <div class="pkg-stat">
+          <div class="pkg-stat-label">Total Weight</div>
+          <div class="pkg-stat-value ink" id="skidTotalWt">—</div>
+          <div class="pkg-stat-sub" id="skidTotalWtSub">enter total cartons</div>
+        </div>
+      </div>
+
+      <div class="pkg-viz">
+        <div class="pkg-viz-left">
+          <div class="pkg-viz-head">
+            <div class="pkg-viz-title">Skid Visualizer</div>
+            <label class="pkg-flat-toggle skid-stack-ctl" title="Column: every layer the same, corners line up, strongest (about 12–20% compression loss). Interlock: every other layer offset, most stable but about 50% weaker. Column + interlocked top: column stack with the top layers interlocked to tie the load together.">
+              Stacking
+              <select id="skidStack">
+                <option value="column">Column</option>
+                <option value="interlock">Interlock</option>
+                <option value="hybrid" selected>Column + interlocked top</option>
+              </select>
+            </label>
+            <label class="pkg-flat-toggle skid-stack-ctl" id="skidTopWrap" title="How many layers at the top are interlocked. The rest of the skid is column stacked.">
+              Top
+              <select id="skidTopN">
+                <option value="1">1 layer</option>
+                <option value="2" selected>2 layers</option>
+              </select>
+            </label>
+          </div>
+          <svg id="skidSvg" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div class="pkg-viz-right">
+          <div class="pkg-caliper-readout" id="skidReadout"></div>
+          <div class="skid-layers">
+            <div class="skid-layer"><div class="skid-layer-title" id="skidLayerATitle">Odd layers</div><svg id="skidSvgA" viewBox="0 0 200 170" preserveAspectRatio="xMidYMid meet"></svg></div>
+            <div class="skid-layer"><div class="skid-layer-title" id="skidLayerBTitle">Even layers</div><svg id="skidSvgB" viewBox="0 0 200 170" preserveAspectRatio="xMidYMid meet"></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        Cartons ship right side up and stay on the deck (no overhang). Each layer is the best straight or Dutch (two-block) pattern on the skid. Column stacking lines the corners up for the most strength; interlocked layers use an offset pattern so the seams cross and tie the load together, at roughly half the compression strength. Either way, stretch wrap tied into the pallet, corner boards and tie sheets do most of the work against tipping. Layers = load height ÷ carton height; the pallet (about 5½–6" for a GMA 48 × 40) adds its height on top.
+      </div>
+    </main>
+
+  </div>
+
+  </div> <!-- end #tab-skid -->
 
 </div>
 
@@ -3148,11 +3298,13 @@
         p.classList.toggle('active', p.id === 'tab-' + tab);
       });
       if (tab === 'packaging') computePackaging();
+      if (tab === 'skid') computeSkid();
       scheduleFit();
     });
   });
 
   // ============ PACKAGING ============
+  const pkgOut = { cartonLb: 0, cartons: 0 };   // latest packed-carton results, read by the Skid tab
   // Single-wall 32 ECT / 200# C-flute combined board, ~125 lb per MSF.
   const PKG_BOARD_LB_PER_SQFT = 0.125;
   // Empty regular slotted carton (RSC) weight from inside dims.
@@ -3777,6 +3929,7 @@
   });
 
   function computePackaging() {
+    pkgOut.cartonLb = 0; pkgOut.cartons = 0;
     const cW = Math.max(0, +$('pkgCartonW').value || 0);
     const cL = Math.max(0, +$('pkgCartonL').value || 0);
     const cD = Math.max(0, +$('pkgCartonD').value || 0);
@@ -3864,6 +4017,7 @@
     if (pieceLb > 0) {
       const productLb = count * pieceLb;
       const cartonLb = productLb + boxLb;          // what the scale reads
+      pkgOut.cartonLb = cartonLb;
       $('pkgWeight').textContent = cartonLb.toFixed(1) + ' lb';
       $('pkgWeight').style.color = weightLimited ? 'var(--accent)' : '';
       $('pkgWeightSub').textContent = weightLimited
@@ -3879,6 +4033,7 @@
     const qty = Math.max(0, Math.floor(+$('pkgQty').value || 0));
     if (qty > 0 && count > 0) {
       const cartons = Math.ceil(qty / count);
+      pkgOut.cartons = cartons;
       const lastPcs = qty - (cartons - 1) * count;
       $('pkgCartons').textContent = cartons.toLocaleString();
       $('pkgCartonsSub').textContent = lastPcs === count
@@ -4031,6 +4186,276 @@
     svg.innerHTML = out;
   }
 
+  // ============ SKID ============
+  const r3 = (v) => Math.round(v * 1000) / 1000;
+
+  function skidPull() {
+    const L = +$('pkgCartonL').value || 0, W = +$('pkgCartonW').value || 0, D = +$('pkgCartonD').value || 0;
+    if (L > 0 && W > 0 && D > 0) {
+      $('skidCtnL').value = r3(Math.max(L, W));
+      $('skidCtnW').value = r3(Math.min(L, W));
+      $('skidCtnH').value = r3(D);
+    }
+    if (pkgOut.cartonLb > 0) $('skidCtnLb').value = Math.round(pkgOut.cartonLb * 10) / 10;
+    if (pkgOut.cartons > 0) $('skidCtnQty').value = pkgOut.cartons;
+  }
+
+  // Every layer pattern worth trying on a U × V deck with an a × b carton footprint:
+  // straight grids both ways and two-block (Dutch) splits along either edge, each
+  // centered on the deck and mirrored four ways (mirrors give the offset layers).
+  function skidLayerCandidates(U, V, a, b) {
+    const fl = (x) => Math.floor(x + 1e-9);
+    const raw = [];
+    const add = (blocks) => {
+      blocks = blocks.filter(k => k.nA > 0 && k.nB > 0);
+      if (!blocks.length) return;
+      const rects = [];
+      for (const k of blocks) for (let i = 0; i < k.nA; i++) for (let j = 0; j < k.nB; j++)
+        rects.push({ x: k.u0 + i * k.fa, y: k.v0 + j * k.fb, w: k.fa, h: k.fb });
+      raw.push(rects);
+    };
+    for (const [p, q] of [[a, b], [b, a]]) {
+      add([{ u0: 0, v0: 0, nA: fl(U / p), nB: fl(V / q), fa: p, fb: q }]);
+      for (let n = 1; n * p <= U + 1e-9; n++) {
+        const rem = U - n * p;
+        add([{ u0: 0, v0: 0, nA: n, nB: fl(V / q), fa: p, fb: q },
+             { u0: n * p, v0: 0, nA: fl(rem / q), nB: fl(V / p), fa: q, fb: p }]);
+      }
+      for (let m = 1; m * q <= V + 1e-9; m++) {
+        const rem = V - m * q;
+        add([{ u0: 0, v0: 0, nA: fl(U / p), nB: m, fa: p, fb: q },
+             { u0: 0, v0: m * q, nA: fl(U / q), nB: fl(rem / p), fa: q, fb: p }]);
+      }
+    }
+    const out = [], seen = new Set();
+    for (const rects of raw) {
+      const ex = Math.max(...rects.map(r => r.x + r.w)), ey = Math.max(...rects.map(r => r.y + r.h));
+      const ox = (U - ex) / 2, oy = (V - ey) / 2;
+      for (const [mx, my] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+        const rr = rects.map(r => ({ x: ox + (mx ? ex - r.x - r.w : r.x), y: oy + (my ? ey - r.y - r.h : r.y), w: r.w, h: r.h }));
+        const key = rr.map(r => `${r.x.toFixed(2)},${r.y.toFixed(2)},${r.w},${r.h}`).sort().join('|');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const mixed = new Set(rr.map(r => r.w.toFixed(3))).size > 1;
+        out.push({ rects: rr, count: rr.length, mixed });
+      }
+    }
+    // Most cartons first; at equal count a straight grid beats a mixed (Dutch) pattern
+    out.sort((p, q) => (q.count - p.count) || (p.mixed - q.mixed));
+    return out;
+  }
+
+  // Length of carton seams two layers share (edges on the same line that overlap)
+  function skidSeamOverlap(A, B) {
+    const edges = (R) => {
+      const v = [], h = [];
+      for (const r of R) {
+        v.push([r.x, r.y, r.y + r.h], [r.x + r.w, r.y, r.y + r.h]);
+        h.push([r.y, r.x, r.x + r.w], [r.y + r.h, r.x, r.x + r.w]);
+      }
+      return { v, h };
+    };
+    const ea = edges(A), eb = edges(B);
+    let s = 0;
+    for (const k of ['v', 'h']) for (const p of ea[k]) for (const q of eb[k])
+      if (Math.abs(p[0] - q[0]) < 0.01) s += Math.max(0, Math.min(p[2], q[2]) - Math.max(p[1], q[1]));
+    return s;
+  }
+
+  function skidPatternText(pat, cL) {
+    const along = pat.rects.filter(r => Math.abs(r.w - cL) < 1e-6).length;
+    const turned = pat.count - along;
+    if (turned === 0 || along === 0) {
+      const cols = new Set(pat.rects.map(r => r.x.toFixed(2))).size;
+      const rows = new Set(pat.rects.map(r => r.y.toFixed(2))).size;
+      return `${cols} × ${rows}`;
+    }
+    return `${along} + ${turned}`;
+  }
+
+  function computeSkid() {
+    const U = +$('skidL').value || 0, V = +$('skidW').value || 0;
+    const loadH = +$('skidLoadH').value || 0, palH = Math.max(0, +$('skidPalletH').value || 0);
+    const palLb = Math.max(0, +$('skidPalletLb').value || 0), maxLb = Math.max(0, +$('skidMaxLb').value || 0);
+    const cL = +$('skidCtnL').value || 0, cW = +$('skidCtnW').value || 0, cH = +$('skidCtnH').value || 0;
+    const ctnLb = Math.max(0, +$('skidCtnLb').value || 0);
+    const qty = Math.max(0, Math.floor(+$('skidCtnQty').value || 0));
+    const mode = $('skidStack').value;
+    const topN = +$('skidTopN').value || 1;
+    $('skidTopWrap').style.display = mode === 'hybrid' ? '' : 'none';
+    const stagger = mode !== 'column';
+    $('skidMaxOverall').value = r3(loadH + palH);
+
+    const ids = ['skidPer', 'skidPattern', 'skidLayers', 'skidHeight', 'skidFoot', 'skidWt', 'skidCount', 'skidTotalWt'];
+    const reset = (msg) => {
+      ids.forEach(id => { $(id).textContent = '—'; $(id).style.color = ''; });
+      ['skidPatternSub', 'skidLayersSub', 'skidHeightSub', 'skidWtSub'].forEach(id => $(id).textContent = '—');
+      $('skidPerSub').textContent = msg; $('skidCountSub').textContent = '—'; $('skidTotalWtSub').textContent = '—';
+      $('skidReadout').innerHTML = msg; renderSkidSvg(U, V, palH, null);
+      renderSkidLayer('skidSvgA', U, V, null); renderSkidLayer('skidSvgB', U, V, null);
+    };
+    if (!(U > 0 && V > 0 && loadH > 0 && cL > 0 && cW > 0 && cH > 0)) return reset('enter dimensions');
+    if (cH > loadH) return reset('carton taller than load height');
+
+    const cands = skidLayerCandidates(U, V, cL, cW);
+    if (!cands.length) return reset('carton larger than skid');
+    const A = cands[0];
+    let B = A;
+    if (stagger) {
+      const self = skidSeamOverlap(A.rects, A.rects);
+      const offset = cands.filter(c => skidSeamOverlap(A.rects, c.rects) < self - 0.01);
+      if (offset.length) {
+        const top = Math.max(...offset.map(c => c.count));
+        B = offset.filter(c => c.count === top)
+          .sort((p, q) => skidSeamOverlap(A.rects, p.rects) - skidSeamOverlap(A.rects, q.rects))[0];
+      }
+    }
+    const staggered = B !== A;
+    // Which pattern each layer uses (i = 0 is the bottom layer of an n-layer skid)
+    const patternAt = (i, n) => {
+      if (!staggered) return A;
+      if (mode === 'interlock') return i % 2 === 0 ? A : B;
+      const first = Math.max(1, n - topN);              // hybrid: bottom layer always column
+      return i < first ? A : ((i - first) % 2 === 0 ? B : A);
+    };
+    const cartonsFor = (n) => { let t = 0; for (let i = 0; i < n; i++) t += patternAt(i, n).count; return t; };
+
+    const spaceLayers = Math.floor((loadH + 1e-9) / cH);
+    let layers = spaceLayers, weightLimited = false;
+    if (maxLb > 0 && ctnLb > 0) {
+      while (layers > 0 && cartonsFor(layers) * ctnLb + palLb > maxLb + 1e-9) { layers--; weightLimited = true; }
+    }
+    if (layers === 0) return reset(`one layer is over the ${maxLb} lb max`);
+    const per = cartonsFor(layers);
+    const loadHt = layers * cH, overall = loadHt + palH;
+    const skidLb = per * ctnLb + palLb;
+    const fmt1 = (v) => v.toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+
+    $('skidPer').textContent = per.toLocaleString();
+    const topEff = Math.min(topN, layers - 1);   // hybrid: interlocked layers at the top
+    $('skidPerSub').textContent = `${layers} layers × ${staggered && B.count !== A.count ? A.count + ' / ' + B.count : A.count} per layer`
+      + (weightLimited ? ` · weight-limited (space for ${cartonsFor(spaceLayers)})` : '');
+    $('skidPattern').textContent = staggered ? `${skidPatternText(A, cL)} / ${skidPatternText(B, cL)}` : skidPatternText(A, cL);
+    const loss = staggered && B.count < A.count ? ` · interlock layers −${A.count - B.count}` : '';
+    $('skidPatternSub').textContent = !staggered
+      ? (stagger ? 'column (no offset pattern fits)' : 'column · strongest')
+      : (mode === 'interlock' ? 'interlock every layer · ~50% weaker' : `column + top ${topEff === 1 ? 'layer' : topEff + ' layers'} interlocked`) + loss;
+    $('skidLayers').textContent = layers;
+    $('skidLayersSub').textContent = `${cH}" each · load ${r3(loadHt)}"` + (weightLimited ? ' · weight-limited' : ` · ${r3(loadH - loadHt)}" under max`);
+    $('skidHeight').textContent = r3(overall) + '"';
+    $('skidHeightSub').textContent = `load ${r3(loadHt)}" + pallet ${palH}" · max ${r3(loadH + palH)}"`;
+    $('skidFoot').textContent = (A.count * cL * cW / (U * V) * 100).toFixed(1) + '%';
+    $('skidFootSub').textContent = `${A.count} cartons on ${U} × ${V}`;
+    if (ctnLb > 0) {
+      $('skidWt').textContent = fmt1(skidLb) + ' lb';
+      $('skidWt').style.color = weightLimited ? 'var(--accent)' : '';
+      $('skidWtSub').textContent = `ctns ${fmt1(per * ctnLb)} + pallet ${palLb}` + (maxLb > 0 ? ` · ${fmt1(maxLb - skidLb)} under max` : '');
+    } else { $('skidWt').textContent = '—'; $('skidWtSub').textContent = 'enter carton lb'; }
+
+    if (qty > 0) {
+      const skids = Math.ceil(qty / per), last = qty - (skids - 1) * per;
+      $('skidCount').textContent = skids.toLocaleString();
+      $('skidCountSub').textContent = last === per ? `all full @ ${per}` :
+        (skids === 1 ? `1 partial (${last} ctns)` : `${skids - 1} full + 1 @ ${last} ctns`);
+      if (ctnLb > 0) {
+        const tot = qty * ctnLb + skids * palLb;
+        $('skidTotalWt').textContent = fmt1(tot) + ' lb';
+        $('skidTotalWtSub').textContent = `${qty} ctns ${fmt1(qty * ctnLb)} + ${skids} pallet${skids !== 1 ? 's' : ''} ${fmt1(skids * palLb)}`;
+      } else { $('skidTotalWt').textContent = '—'; $('skidTotalWtSub').textContent = 'enter carton lb'; }
+    } else {
+      $('skidCount').textContent = '—'; $('skidCountSub').textContent = 'enter total cartons';
+      $('skidTotalWt').textContent = '—'; $('skidTotalWtSub').textContent = 'enter total cartons';
+    }
+
+    $('skidReadout').innerHTML =
+      `Carton <b>${cL} × ${cW} × ${cH}"</b> on a <b>${U} × ${V}</b> skid · ` +
+      `<b>${A.count}</b> per layer${staggered && B.count !== A.count ? `, <b>${B.count}</b> on interlocked layers` : ''} × <b>${layers}</b> layers = <b>${per}</b> cartons<br>` +
+      `Height: ${layers} × ${cH}" = ${r3(loadHt)}" + ${palH}" pallet = <b>${r3(overall)}"</b> overall` +
+      (!staggered
+        ? (stagger ? '<br>No offset pattern fits this carton on this skid, so every layer is column stacked.'
+                   : '<br>Column stack: corners line up for the most compression strength. Wrap it tied into the pallet and use corner boards to keep it from leaning.')
+        : mode === 'interlock'
+          ? '<br>Interlock: every other layer is offset so the seams cross. Most stable, but roughly half the compression strength of a column stack — avoid if skids get double-stacked.'
+          : `<br>Column + interlocked top: the bottom ${layers - topEff} layer${layers - topEff !== 1 ? 's' : ''} keep full column strength; the top ${topEff} interlock${topEff === 1 ? 's' : ''} to tie the load together where it carries little weight.`);
+    $('skidLayerATitle').textContent = staggered ? (mode === 'interlock' ? `Odd layers · ${A.count}` : `Column layers · ${A.count}`) : `Every layer · ${A.count}`;
+    $('skidLayerBTitle').textContent = staggered ? (mode === 'interlock' ? `Even layers · ${B.count}` : `Interlock layers · ${B.count}`) : '';
+    $('skidSvgB').parentElement.style.visibility = staggered ? '' : 'hidden';
+    renderSkidSvg(U, V, palH, { A, B, layers, cH, patternAt });
+    renderSkidLayer('skidSvgA', U, V, A, '#d9b98c');
+    renderSkidLayer('skidSvgB', U, V, staggered ? B : null, '#c4975f');
+  }
+
+  // Top-down view of one layer on the deck
+  function renderSkidLayer(id, U, V, pat, fill) {
+    const svg = $(id);
+    if (!pat || !(U > 0 && V > 0)) { svg.innerHTML = ''; return; }
+    const m = 12, s = Math.min((200 - 2 * m) / U, (170 - 2 * m) / V);
+    const ox = (200 - U * s) / 2, oy = (170 - V * s) / 2;
+    let out = `<rect x="${ox}" y="${oy}" width="${U * s}" height="${V * s}" fill="#e9dcc6" stroke="#8a6a44" stroke-width="1" stroke-dasharray="3 2" />`;
+    for (const r of pat.rects)
+      out += `<rect x="${ox + r.x * s}" y="${oy + r.y * s}" width="${r.w * s}" height="${r.h * s}" fill="${fill}" stroke="#6e4f2c" stroke-width="1" />`;
+    svg.innerHTML = out;
+  }
+
+  // Isometric skid: pallet plus every layer of cartons
+  function renderSkidSvg(U, V, palH, fit) {
+    const svg = $('skidSvg');
+    if (!(U > 0 && V > 0)) { svg.innerHTML = ''; return; }
+    const loadTop = fit ? fit.layers * fit.cH : 0;
+    const H = palH + Math.max(loadTop, 1);
+    const vbW = 400, vbH = 320, margin = 30;
+    const c30 = Math.cos(Math.PI / 6), s30 = 0.5;
+    const proj = (x, y, z) => [(x - y) * c30, (x + y) * s30 - z];
+    const corners = [];
+    for (const x of [0, U]) for (const y of [0, V]) for (const z of [0, H]) corners.push(proj(x, y, z));
+    const xs = corners.map(c => c[0]), ys = corners.map(c => c[1]);
+    const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+    const scale = Math.min((vbW - 2 * margin) / (maxX - minX), (vbH - 2 * margin) / (maxY - minY));
+    const ox = (vbW - (maxX - minX) * scale) / 2 - minX * scale;
+    const oy = (vbH - (maxY - minY) * scale) / 2 - minY * scale;
+    const P = (x, y, z) => { const [a, b] = proj(x, y, z); return [a * scale + ox, b * scale + oy]; };
+    const pts = (...arr) => arr.map(v => P(...v).join(',')).join(' ');
+    const box = (x0, y0, z0, x1, y1, z1, top, right, front, stroke) =>
+      `<polygon points="${pts([x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1])}" fill="${top}" stroke="${stroke}" stroke-width="0.8" />` +
+      `<polygon points="${pts([x1,y0,z0],[x1,y1,z0],[x1,y1,z1],[x1,y0,z1])}" fill="${right}" stroke="${stroke}" stroke-width="0.8" />` +
+      `<polygon points="${pts([x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1])}" fill="${front}" stroke="${stroke}" stroke-width="0.8" />`;
+
+    let out = '';
+    // Pallet: top deck, plus stringer blocks with fork openings on the visible faces
+    if (palH > 0) {
+      const deck = Math.min(1, palH * 0.2);
+      out += box(0, 0, palH - deck, U, V, palH, '#c9a46e', '#a57f4c', '#b48d58', '#6b4a24');
+      const blk = Math.min(6, U / 8), blkV = Math.min(6, V / 8);
+      for (const bx of [0, (U - blk) / 2, U - blk]) for (const by of [0, (V - blkV) / 2, V - blkV])
+        out += box(bx, by, 0, bx + blk, by + blkV, palH - deck, '#c9a46e', '#a57f4c', '#b48d58', '#6b4a24');
+    }
+    if (fit) {
+      const items = [];
+      for (let i = 0; i < fit.layers; i++) {
+        const pat = fit.patternAt(i, fit.layers);
+        const z0 = palH + i * fit.cH;
+        for (const r of pat.rects) items.push({ x0: r.x, y0: r.y, x1: r.x + r.w, y1: r.y + r.h, z0, z1: z0 + fit.cH, even: pat === fit.B && fit.B !== fit.A });
+      }
+      items.sort((p, q) => (p.z0 - q.z0) || ((p.x0 + p.x1 + p.y0 + p.y1) - (q.x0 + q.x1 + q.y0 + q.y1)));
+      for (const b of items)
+        out += b.even ? box(b.x0, b.y0, b.z0, b.x1, b.y1, b.z1, '#e2c49a', '#b98d58', '#c79d68', '#6e4f2c')
+                      : box(b.x0, b.y0, b.z0, b.x1, b.y1, b.z1, '#ecd3ad', '#c9a06a', '#d6b07c', '#6e4f2c');
+    }
+    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    const lbl = (xy, txt, dx, dy, anchor) =>
+      `<text x="${xy[0] + dx}" y="${xy[1] + dy}" text-anchor="${anchor}" font-family="DM Mono, monospace" font-size="11" fill="currentColor" opacity="0.75">${txt}</text>`;
+    out += lbl(mid(P(0, V, 0), P(U, V, 0)), `W ${V}"`, -6, 16, 'end');
+    out += lbl(mid(P(U, 0, 0), P(U, V, 0)), `L ${U}"`, 8, 16, 'start');
+    if (fit) out += lbl(mid(P(U, 0, 0), P(U, 0, palH + loadTop)), `H ${r3(palH + loadTop)}"`, 8, 0, 'start');
+    svg.innerHTML = out;
+  }
+
+  $('skidPullBtn').addEventListener('click', () => { skidPull(); computeSkid(); });
+  document.querySelectorAll('#tab-skid input, #tab-skid select').forEach(el => {
+    el.addEventListener('input', () => { computeSkid(); scheduleFit(); });
+    el.addEventListener('change', () => { computeSkid(); scheduleFit(); });
+  });
+
   document.querySelectorAll('#tab-packaging input, #tab-packaging select').forEach(el => {
     el.addEventListener('input', () => { computePackaging(); scheduleFit(); });
     el.addEventListener('change', () => { computePackaging(); scheduleFit(); });
@@ -4047,6 +4472,7 @@
   pullFromImposition();
   syncPkgProductUI();
   computePackaging();
+  computeSkid();
   scheduleFit();
 </script>
 </body>
